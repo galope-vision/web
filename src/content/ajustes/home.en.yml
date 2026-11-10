@@ -1,4 +1,4 @@
 images:
-  - { image: ./home-1.jpg, alt: Sample image 1 }
-  - { image: ./home-2.jpg, alt: Sample image 2 }
-  - { image: ./home-3.jpg, alt: Sample image 3 }
+  - { image: home-1.jpg, alt: Sample image 1 }
+  - { image: home-2.jpg, alt: Sample image 2 }
+  - { image: home-3.jpg, alt: Sample image 3 }

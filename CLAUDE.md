@@ -17,7 +17,9 @@ The client must be able to publish content on their own, with no developer invol
 
 - **Astro** (latest stable), TypeScript `strict`, static output only (`output: 'static'`).
 - **Sveltia CMS** (Decap-compatible, Git-based) at `/admin`, loaded from CDN. GitHub backend,
-  `editorial_workflow` (drafts live in `cms/*` branches).
+  `publish_mode: editorial_workflow` (drafts live in `cms/*` branches). Publishing merges the
+  draft's PR; when CI is still running, the CMS turns on auto-merge and waits, so the
+  repository needs "Allow auto-merge" enabled.
 - **Auth**: Cloudflare Worker running `sveltia-cms-auth` (GitHub OAuth App owned by Galope).
 - **i18n**: Spanish (default, no prefix) and English (`/en/`). English content is machine-translated
   in the CMS (Sveltia + Google Gemini free tier, key owned by Galope, stored in the editor's browser,
@@ -141,7 +143,7 @@ margins, 18 px gutters. Red on black is 3.65:1, below AA for 13–16 px text (op
 ## Commands
 
 ```
-npm run dev       # local dev server
+npm run dev       # local dev server (the CMS is at /admin/index.html, not /admin/)
 npm run build     # static build to dist/ (also validates content)
 npm run preview   # serve dist/
 npm run check     # astro check + eslint + prettier --check
@@ -163,6 +165,5 @@ Status: phase 0 closed (v0.1.0, 2026-11-10). Next: phase 1.
 - Whether real photos keep the 70% opacity of the placeholder.
 - Search page and contact form: in or out. Whether the dice excludes the current project.
 - Mobile design (default: our own adaptation).
-- Whether the required CI check blocks Sveltia's "Publish" (validate in phase 1).
-- Sveltia support for full custom preview templates (validate in phase 1).
-- Sveltia + Gemini machine translation setup and limits (validate in phase 1).
+- Whether the editor pane needs custom preview templates (Sveltia supports them through
+  `registerPreviewTemplate`; none are registered yet).

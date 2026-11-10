@@ -13,14 +13,14 @@ credits:
   - { role: Design, name: Persona Apellido }
   - { role: Color, name: Persona Apellido }
   - { role: Editing, name: Persona Apellido, url: 'https://example.com' }
-cover: ./portada.jpg
+cover: portada.jpg
 gallery:
-  - { image: ./foto-1.jpg, part: fotos, focus: top, alt: Sample photo 1 }
-  - { image: ./foto-2.jpg, part: fotos, alt: Sample photo 2 }
-  - { image: ./foto-3.jpg, part: fotos, alt: Sample photo 3 }
-  - { image: ./foto-4.jpg, part: fotos, alt: Sample photo 4 }
-  - { image: ./foto-5.jpg, part: fotos, alt: Sample photo 5 }
-  - { image: ./proceso-1.jpg, part: proceso, alt: Sample process photo }
+  - { image: foto-1.jpg, part: fotos, focus: top, alt: Sample photo 1 }
+  - { image: foto-2.jpg, part: fotos, alt: Sample photo 2 }
+  - { image: foto-3.jpg, part: fotos, alt: Sample photo 3 }
+  - { image: foto-4.jpg, part: fotos, alt: Sample photo 4 }
+  - { image: foto-5.jpg, part: fotos, alt: Sample photo 5 }
+  - { image: proceso-1.jpg, part: proceso, alt: Sample process photo }
 videos:
   - https://vimeo.com/76979871
 collageSeed: 0

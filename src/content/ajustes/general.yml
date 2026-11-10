@@ -5,9 +5,9 @@ info:
     distintas búsquedas en cuanto al audiovisual y lo gráfico por lo que cuentan con un catálogo
     de todo tipo de propuestas.
   highlights:
-    - { phrase: dupla creativa, image: ./info-dupla.jpg, alt: Imagen de muestra }
-    - { phrase: Buenos Aires, image: ./info-buenos-aires.jpg, alt: Imagen de muestra }
-    - { phrase: todo tipo de propuestas, image: ./info-propuestas.jpg, alt: Imagen de muestra }
+    - { phrase: dupla creativa, image: info-dupla.jpg, alt: Imagen de muestra }
+    - { phrase: Buenos Aires, image: info-buenos-aires.jpg, alt: Imagen de muestra }
+    - { phrase: todo tipo de propuestas, image: info-propuestas.jpg, alt: Imagen de muestra }
 email: hola@example.com
 socials:
   - { label: Instagram, url: 'https://www.instagram.com/ga.lo.pe' }
@@ -16,4 +16,4 @@ seo:
   description: >-
     Dupla creativa de Buenos Aires: videoclips, documentales, visualizers, sesiones en vivo y
     diseño gráfico.
-shareImage: ./compartir.jpg
+shareImage: compartir.jpg
