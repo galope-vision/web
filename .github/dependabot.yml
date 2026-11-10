@@ -10,6 +10,15 @@ updates:
     groups:
       npm-minor-and-patch:
         update-types: [minor, patch]
+    # eslint-plugin-jsx-a11y 6.x does not support ESLint 10 yet, and eslint-plugin-astro 2+
+    # requires ESLint 10. Remove these once jsx-a11y supports ESLint 10.
+    ignore:
+      - dependency-name: eslint
+        update-types: [version-update:semver-major]
+      - dependency-name: '@eslint/js'
+        update-types: [version-update:semver-major]
+      - dependency-name: eslint-plugin-astro
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: github-actions
     directory: /
