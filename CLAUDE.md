@@ -20,8 +20,8 @@ The client must be able to publish content on their own, with no developer invol
   `editorial_workflow` (drafts live in `cms/*` branches).
 - **Auth**: Cloudflare Worker running `sveltia-cms-auth` (GitHub OAuth App owned by Galope).
 - **i18n**: Spanish (default, no prefix) and English (`/en/`). English content is machine-translated
-  in the CMS (Sveltia + DeepL API Free, key owned by Galope, stored in the editor's browser, never in
-  the repo) and saved as editable text. Never translate at build time. UI strings live in a code
+  in the CMS (Sveltia + Google Gemini free tier, key owned by Galope, stored in the editor's browser,
+  never in the repo) and saved as editable text. Never translate at build time. UI strings live in a code
   dictionary. Missing English falls back to Spanish (build warns, does not fail).
 - **Hosting**: DonWeb shared hosting (Apache, static files only). Deployed by GitHub Actions via
   FTPS (`SamKirkland/FTP-Deploy-Action`). Domain DNS stays at GoDaddy.
@@ -163,4 +163,4 @@ Status: phase 0 closed (v0.1.0, 2026-11-10). Next: phase 1.
 - Mobile design (default: our own adaptation).
 - Whether the required CI check blocks Sveltia's "Publish" (validate in phase 1).
 - Sveltia support for full custom preview templates (validate in phase 1).
-- Sveltia + DeepL machine translation setup and limits (validate in phase 1).
+- Sveltia + Gemini machine translation setup and limits (validate in phase 1).

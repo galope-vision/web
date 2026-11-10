@@ -44,7 +44,7 @@ Objetivos:
 | Framework | Astro (última estable), TypeScript `strict` | `output: 'static'` |
 | CMS | Sveltia CMS (compatible con Decap, basado en Git) | Se carga por CDN en `/admin`. Backend GitHub, `editorial_workflow`, i18n |
 | Auth del CMS | Cloudflare Worker con `sveltia-cms-auth` | OAuth App de GitHub a nombre de Galope |
-| Traducción | Traducción automática del CMS con DeepL API Free | La API key es de Galope y se carga en el navegador de quien edita, no en el repo. Validar en la fase 1 |
+| Traducción | Traducción automática del CMS con Google Gemini (plan gratis) | La API key es de Galope y se carga en el navegador de quien edita, no en el repo. Validar en la fase 1 |
 | Hosting | DonWeb, hosting compartido (Apache) | Solo archivos estáticos |
 | Deploy | GitHub Actions → FTPS (`SamKirkland/FTP-Deploy-Action`) | En cada push a `main` |
 | DNS | GoDaddy | No se mueve |
@@ -52,7 +52,7 @@ Objetivos:
 | Analítica | Cloudflare Web Analytics | Solo en producción, sin cookies |
 | Animación | Motion (motion.dev): `animate`, `inView`, `stagger` | La deriva va en CSS y el parallax en `src/scripts/motion.ts` |
 
-Las cuentas de GitHub, Cloudflare, DonWeb, GoDaddy y DeepL son de Galope. Caro administra el
+Las cuentas de GitHub, Cloudflare, DonWeb, GoDaddy y Google (Gemini) son de Galope. Caro administra el
 repo. Las decisiones de infraestructura quedan en `docs/adr/`.
 
 ## 4. Flujo editorial
@@ -72,7 +72,7 @@ Hay que validar en la fase 1 si el check obligatorio de CI bloquea el «Publicar
 ### 4.1 Traducciones
 
 - El español es el idioma por defecto y el que se carga primero. El inglés se genera con
-  DeepL desde el CMS y queda guardado en el repo como texto normal, así que se puede editar.
+  Gemini desde el CMS y queda guardado en el repo como texto normal, así que se puede editar.
 - La traducción **no** se genera en el build: así el build no depende de una API externa y los
   textos en inglés no cambian solos.
 - Si falta el inglés de un campo, se muestra el español. El build avisa pero no falla.
@@ -341,12 +341,12 @@ Licencia web de Baskerville: **A definir**. Si no hay, queda Libre Baskerville (
 - Fotos, videos, créditos (con sus URLs) y textos reales de cada proyecto.
 - Email y redes reales.
 - Licencia web de Baskerville.
-- Cuenta de DeepL API Free de Galope.
+- API key de Google Gemini (plan gratis) en una cuenta de Google de Galope.
 
 **De infraestructura (validar en la fase 1)**
 - Si el check obligatorio de CI bloquea el «Publicar» de Sveltia.
 - Si Sveltia soporta templates de preview custom completos.
-- La traducción automática de Sveltia con DeepL: cómo se configura y sus límites.
+- La traducción automática de Sveltia con Gemini: cómo se configura y sus límites.
 - Dominio final y datos de DonWeb.
 - Cuenta de GitHub de quienes van a editar (el backend GitHub la exige).
 
