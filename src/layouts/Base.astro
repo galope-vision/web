@@ -1,16 +1,23 @@
 ---
 import '../styles/global.css';
+import { DEFAULT_LOCALE, LOCALES, localeVariants, type Locale } from '../lib/i18n';
 
 interface Props {
+  locale: Locale;
   title: string;
   description: string;
 }
 
-const { title, description } = Astro.props;
+const { locale, title, description } = Astro.props;
+
+/** The same page in the other locale, for `hreflang` (docs/spec.md § 10). */
+const variants = localeVariants(Astro.url.pathname);
+/** Absolute once `site` is configured; the final domain is still open (docs/spec.md § 13). */
+const absolute = (path: string): string => (Astro.site ? new URL(path, Astro.site).href : path);
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang={locale}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -18,6 +25,10 @@ const { title, description } = Astro.props;
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <meta name="generator" content={Astro.generator} />
+    {LOCALES.map((item) => (
+      <link rel="alternate" hreflang={item} href={absolute(variants[item])} />
+    ))}
+    <link rel="alternate" hreflang="x-default" href={absolute(variants[DEFAULT_LOCALE])} />
     <title>{title}</title>
   </head>
   <body>

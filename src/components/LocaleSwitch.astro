@@ -1,0 +1,53 @@
+---
+/**
+ * The `ES/EN` item of the nav: the current locale is marked, the other one links to the same
+ * page (docs/spec.md § 5.0). Phase 2 folds it into the real nav row.
+ */
+import { LOCALES, LOCALE_LABELS, localeVariants, t, type Locale } from '../lib/i18n';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const variants = localeVariants(Astro.url.pathname);
+const s = t(locale);
+---
+
+<nav class="locales" aria-label={s('nav.language')}>
+  {LOCALES.map((item, index) => (
+    <Fragment>
+      {index > 0 && (
+        <span class="separator" aria-hidden="true">
+          /
+        </span>
+      )}
+      {item === locale ? (
+        <span class="current" aria-current="true">
+          {LOCALE_LABELS[item]}
+        </span>
+      ) : (
+        <a href={variants[item]} hreflang={item}>
+          {LOCALE_LABELS[item]}
+        </a>
+      )}
+    </Fragment>
+  ))}
+</nav>
+
+<style>
+  .locales {
+    display: flex;
+    gap: var(--space-1);
+    font-size: var(--fs-xs);
+  }
+
+  .current {
+    color: var(--color-accent);
+    text-decoration: underline;
+  }
+
+  .separator {
+    color: var(--color-media);
+  }
+</style>

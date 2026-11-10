@@ -13,19 +13,7 @@ import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
-/* Options: PROVISIONAL until the client confirms them (docs/spec.md § 13). */
-export const GROUPS = ['2023', '2024', '2025'] as const;
-export const TYPES = [
-  'videoclip',
-  'documental',
-  'visualizer',
-  'sesion-en-vivo',
-  'diseno-grafico',
-] as const;
-export const CATEGORIES = TYPES;
-export const GALLERY_PARTS = ['fotos', 'proceso'] as const;
-export const FOCUS = ['center', 'top', 'bottom', 'left', 'right'] as const;
-export const DESCRIPTION_MAX = 600;
+import { CATEGORIES, DESCRIPTION_MAX, FOCUS, GALLERY_PARTS, GROUPS, TYPES } from './lib/options';
 
 const VIDEO_URL =
   /^https:\/\/(?:(?:www\.)?youtube\.com\/(?:watch\?v=|embed\/|shorts\/)[\w-]{11}|youtu\.be\/[\w-]{11}|(?:www\.)?vimeo\.com\/\d+|player\.vimeo\.com\/video\/\d+)(?:[?&#].*)?$/;

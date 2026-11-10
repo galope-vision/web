@@ -43,9 +43,11 @@ src/content/         proyectos/<slug>/index.md + images · ajustes/general.yml, 
 src/content.config.ts  Zod schemas mirroring every CMS field
 src/styles/          tokens.css (ONLY place for colors/type/spacing/motion values), global.css
 src/components/      Header, Collage, ProjectList, ProjectPanel, Dado, VideoEmbed
-src/lib/             collage.ts (seeded layout), i18n.ts
+src/lib/             collage.ts (seeded layout), i18n.ts (locales, routes, dictionaries),
+                     content.ts (content per locale, Spanish fallback), options.ts (option keys)
 src/scripts/         motion.ts
 src/pages/           index, proyectos/index, proyectos/[slug], info, contacto, estilos, 404
+                     en/ mirrors them in English (index, projects, info, contact)
 docs/                spec.md, adr/, guia-carga.md (client guide, Spanish)
 ```
 
@@ -124,7 +126,7 @@ margins, 18 px gutters. Red on black is 3.65:1, below AA for 13–16 px text (op
 - **Branches**: `type/short-kebab-description` (e.g. `feat/collage-template-b`).
   Types: feat, fix, refactor, perf, style, docs, test, build, ci, chore. `cms/*` belongs to the CMS: never touch it.
 - **Commits**: Conventional Commits 1.0, imperative, subject ≤ 72 chars, e.g. `feat(collage): add template B layout`.
-  Scopes: cms, content, collage, motion, layout, design, a11y, seo, deploy, deps. Extra type `content` is reserved for CMS commits.
+  Scopes: cms, content, collage, motion, layout, design, i18n, a11y, seo, deploy, deps. Extra type `content` is reserved for CMS commits.
 - **PRs**: title = squash commit message (Conventional Commits). Squash and merge only.
   Keep PRs small (< ~400 changed lines). Fill the PR template: What / Why / How to test /
   Screenshots or video (required for visual changes) / Checklist. Add `Closes #<issue>`.
