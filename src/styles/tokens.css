@@ -1,0 +1,48 @@
+/*
+ * Design tokens — the ONLY place for color, type, spacing and motion values.
+ * PROVISIONAL: final colors, fonts and logo are still pending (see docs/spec.md § 9).
+ */
+:root {
+  /* Color */
+  --color-bg: #0b0b0b;
+  --color-text: #ffffff;
+  --color-accent: #c42626;
+  --color-surface: #e6e3de;
+  --color-media: #77776a;
+
+  /* Type families (system stacks until the final web fonts arrive) */
+  --font-display:
+    'Rockwell Extra Bold', Rockwell, 'Rockwell Nova', 'Roboto Slab', 'Sitka Small', 'DejaVu Serif',
+    serif;
+  --font-display-weight: 800;
+  --font-body:
+    'Iowan Old Style', 'Palatino Linotype', Palatino, 'URW Palladio L', P052, Georgia, serif;
+
+  /* Type scale: 12 / 14 / 16 / 24 / 48 / 96 px */
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.875rem;
+  --fs-md: 1rem;
+  --fs-lg: 1.5rem;
+  --fs-xl: 3rem;
+  --fs-2xl: 6rem;
+  --fs-wordmark: clamp(var(--fs-xl), 18vw, var(--fs-2xl));
+
+  --lh-tight: 1;
+  --lh-body: 1.5;
+  --tracking-display: 0.02em;
+
+  /* Spacing: multiples of 8 px */
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2rem;
+  --space-6: 3rem;
+  --space-8: 4rem;
+  --space-12: 6rem;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 250ms;
+  --dur-base: 600ms;
+  --dur-stagger: 80ms;
+}

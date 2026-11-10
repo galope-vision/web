@@ -1,0 +1,35 @@
+name: Bug
+description: Report something that does not work as expected.
+title: 'fix: '
+labels: ['type: bug']
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: And what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to ...
+        2. Click ...
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: URL
+      description: Production, preview or local.
+  - type: input
+    id: environment
+    attributes:
+      label: Device and browser
+      placeholder: 'e.g. iPhone 13, Safari 19'
+  - type: textarea
+    id: media
+    attributes:
+      label: Screenshots or video

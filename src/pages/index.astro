@@ -1,0 +1,35 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="GALOPE"
+  description="GALOPE es una dupla creativa de Buenos Aires: videoclips, documentales, visualizers, sesiones en vivo y diseño gráfico."
+>
+  <main class="placeholder">
+    <h1 class="wordmark">GALOPE</h1>
+    <p class="note">Sitio en construcción.</p>
+  </main>
+</Base>
+
+<style>
+  .placeholder {
+    display: grid;
+    place-content: center;
+    gap: var(--space-2);
+    min-height: 100svh;
+    padding: var(--space-2);
+    text-align: center;
+  }
+
+  .wordmark {
+    font-size: var(--fs-wordmark);
+    color: var(--color-accent);
+    letter-spacing: var(--tracking-display);
+  }
+
+  .note {
+    font-size: var(--fs-sm);
+    color: var(--color-surface);
+  }
+</style>
