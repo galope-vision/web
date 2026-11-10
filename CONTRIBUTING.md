@@ -18,8 +18,8 @@ ADRs. Client-facing text (site copy, CMS labels and hints, `docs/guia-carga.md`)
 
 - [Conventional Commits 1.0](https://www.conventionalcommits.org/), imperative mood, subject
   ≤ 72 characters, e.g. `feat(collage): add template B layout`.
-- Scopes: `cms`, `content`, `collage`, `motion`, `layout`, `design`, `a11y`, `seo`, `deploy`,
-  `deps`.
+- Scopes: `cms`, `content`, `collage`, `motion`, `layout`, `design`, `i18n`, `a11y`, `seo`,
+  `deploy`, `deps`.
 - The extra type `content` is reserved for commits made by the CMS.
 - commitlint enforces the format on every commit.
 
