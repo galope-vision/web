@@ -1,0 +1,4 @@
+images:
+  - { image: ./home-1.jpg, alt: Imagen de muestra 1 }
+  - { image: ./home-2.jpg, alt: Imagen de muestra 2 }
+  - { image: ./home-3.jpg, alt: Imagen de muestra 3 }
