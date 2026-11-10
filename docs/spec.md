@@ -168,9 +168,9 @@ Marcados con 🌐: se traducen (i18n de Sveltia). El resto es igual en los dos i
 | Campo | Tipo | Regla |
 |---|---|---|
 | `title` | string | Obligatorio. No se traduce |
-| `group` | select | Obligatorio. Opciones: **A definir** |
-| `type` 🌐 | select | Obligatorio. Opciones: **A definir** |
-| `categories` | multi-select | Opcional. Opciones: **A definir** |
+| `group` | select | Obligatorio. Guarda una clave; la etiqueta ES/EN sale del diccionario. Opciones: **A definir** |
+| `type` | select | Obligatorio. Guarda una clave; la etiqueta ES/EN sale del diccionario. Opciones: **A definir** |
+| `categories` | multi-select | Opcional. Claves, como `type`. Opciones: **A definir** |
 | `quote` 🌐 | string | Opcional |
 | `description` 🌐 | texto | ≤ ~600 caracteres |
 | `credits` | lista de `{ role 🌐, name, url? }` | `url` es opcional. Si está, tiene que ser una URL válida |
@@ -185,9 +185,9 @@ Marcados con 🌐: se traducen (i18n de Sveltia). El resto es igual en los dos i
 
 ### 6.2 `ajustes/general.yml`
 
-- Texto de info 🌐, con las palabras destacadas marcadas. La sintaxis exacta se define en la
-  fase 1.
-- Una imagen por palabra destacada (`{ key, image, alt 🌐 }`).
+- Texto de info 🌐, escrito normal, sin marcas.
+- Las frases destacadas: `{ phrase 🌐, image, alt 🌐 }`. Cada frase tiene que aparecer tal cual
+  en el texto, o el build falla.
 - Email, redes, SEO por defecto (título 🌐 y descripción 🌐) e imagen para compartir por
   defecto.
 

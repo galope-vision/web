@@ -57,9 +57,11 @@ description (≤ ~600 chars) · credits (list of {role, name, url (optional)}) �
 gallery (list of {image, part: fotos|proceso, focus: center|top|bottom|left|right, alt (required)}) ·
 videos (list of YouTube/Vimeo URLs, validated) · collageSeed (number, default 0) · order (number) ·
 inDice (bool) · visible (bool, default true) · date.
-Translated fields: type, quote, description, credit roles, alt texts. Titles and names are not translated.
+Translated fields: quote, description, credit roles, alt texts. `group`, `type` and `categories` store
+keys whose ES/EN labels live in the code dictionary. Titles and names are not translated.
 
-`ajustes/general.yml`: info text with highlighted words + one image per highlight, email, socials,
+`ajustes/general.yml`: info text + highlights ({phrase, image, alt}; each phrase must appear verbatim
+in the text), email, socials,
 SEO defaults, default share image.
 `ajustes/home.yml`: random home images, optional featured video.
 
