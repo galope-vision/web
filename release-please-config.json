@@ -6,6 +6,7 @@
   "include-component-in-tag": false,
   "packages": {
     ".": {
+      "release-as": "0.1.0",
       "package-name": "galope-web",
       "changelog-sections": [
         { "type": "feat", "section": "Features" },
