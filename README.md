@@ -47,6 +47,8 @@ commit-msg.
 - CI (`.github/workflows/ci.yml`) runs check and build, and validates the PR title, on every PR.
 - Releases: release-please opens a release PR from the Conventional Commits on `main`. Merging
   it tags the version (`vX.Y.Z`) and updates `CHANGELOG.md`.
+  Release PRs are opened with `GITHUB_TOKEN`, which doesn't trigger workflows, so their required
+  checks never start on their own. Close and reopen the release PR to run CI before merging it.
 - The preview and deploy workflows arrive in later phases (see the phases in `CLAUDE.md`).
 
 See [ADR 0002](docs/adr/0002-cloudflare-pages-previews.md) and

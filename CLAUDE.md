@@ -150,6 +150,8 @@ npm run format    # prettier --write
 3 Projects & collage v0.4.0 · 4 Motion v0.5.0 · 5 Previews & extras v0.6.0 ·
 6 Production on DonWeb v0.9.0 · 7 Final content & handoff v1.0.0.
 
+Status: phase 0 closed (v0.1.0, 2026-11-10). Next: phase 1.
+
 ## Open decisions (do not assume — ask Caro)
 
 - Red text contrast (3.65:1): lighter text-only accent token, or accepted exception.
