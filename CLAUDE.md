@@ -50,7 +50,7 @@ src/lib/             collage.ts (seeded layout), i18n.ts (locales, routes, dicti
 src/scripts/         motion.ts
 src/pages/           index, proyectos/index, proyectos/[slug], info, contacto, estilos, 404
                      en/ mirrors them in English (index, projects, info, contact)
-docs/                spec.md, adr/, guia-carga.md (client guide, Spanish)
+docs/                spec.md, adr/, cms-auth-setup.md, guia-carga.md (client guide, Spanish)
 ```
 
 ## Content model (summary)
