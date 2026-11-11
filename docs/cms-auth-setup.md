@@ -15,12 +15,12 @@ account that owns `galope-vision/web`. Both stay on their free tiers.
 
 Set up on 2026-11-11, in Galope's accounts:
 
-| Piece      | Where                                                                                                            |
-| ---------- | ---------------------------------------------------------------------------------------------------------------- |
-| Worker     | Cloudflare (`Galope.admin@gmail.com`) → `sveltia-cms-auth` → <https://sveltia-cms-auth.galope-admin.workers.dev> |
-| Its source | `galope-vision/sveltia-cms-auth`, private, redeployed on every push to `main`                                    |
-| OAuth App  | `galope-vision` → Settings → Developer settings → **GALOPE CMS**, callback at `<worker>/callback`                |
-| `base_url` | already in [`public/admin/config.yml`](../public/admin/config.yml)                                               |
+| Piece      | Where                                                                                                  |
+| ---------- | ------------------------------------------------------------------------------------------------------ |
+| Worker     | Galope's Cloudflare account → `sveltia-cms-auth` → <https://sveltia-cms-auth.galope-admin.workers.dev> |
+| Its source | `galope-vision/sveltia-cms-auth`, private, redeployed on every push to `main`                          |
+| OAuth App  | `galope-vision` → Settings → Developer settings → **GALOPE CMS**, callback at `<worker>/callback`      |
+| `base_url` | already in [`public/admin/config.yml`](../public/admin/config.yml)                                     |
 
 What is still missing: `GITHUB_CLIENT_SECRET` on the Worker, and `ALLOWED_DOMAINS` once the
 domain is decided. The steps below are the ones to follow again if any of it has to be redone.
