@@ -11,9 +11,11 @@ interface Props {
   description: string;
   /** The page being shown, marked as active in the nav. */
   current?: Page;
+  /** Keeps the page out of search engines: the styles page, the 404, the previews. */
+  noindex?: boolean;
 }
 
-const { locale, title, description, current } = Astro.props;
+const { locale, title, description, current, noindex = false } = Astro.props;
 
 /** The same page in the other locale, for `hreflang` (docs/spec.md § 10). */
 const variants = localeVariants(Astro.url.pathname);
@@ -30,6 +32,7 @@ const absolute = (path: string): string => (Astro.site ? new URL(path, Astro.sit
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <meta name="generator" content={Astro.generator} />
+    {noindex && <meta name="robots" content="noindex" />}
     {LOCALES.map((item) => (
       <link rel="alternate" hreflang={item} href={absolute(variants[item])} />
     ))}

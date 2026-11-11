@@ -49,7 +49,8 @@ src/styles/          tokens.css (ONLY place for colors/type/spacing/motion value
 src/components/      Header, LocaleSwitch, Dice, Logo, Placeholder · still to come: Collage,
                      ProjectList, ProjectPanel, VideoEmbed
 src/lib/             collage.ts (seeded layout), i18n.ts (locales, routes, dictionaries),
-                     content.ts (content per locale, Spanish fallback), options.ts (option keys)
+                     content.ts (content per locale, Spanish fallback), options.ts (option keys),
+                     tokens.ts (reads tokens.css for /estilos)
 src/scripts/         motion.ts
 src/pages/           index, proyectos/index, proyectos/[slug], info, contacto, estilos, 404
                      en/ mirrors them in English (index, projects, info, contact)
