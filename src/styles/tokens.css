@@ -8,6 +8,12 @@
   --color-bg: #000000;
   --color-text: #e6e6e6;
   --color-accent: #c42626;
+  /*
+   * The same red, lighter, for text and for the focus ring. The brand red on black is 3.65:1,
+   * which doesn't reach AA at 13 or 16 px; this one is 4.62:1 with the same hue and saturation
+   * (docs/adr/0006-lighter-red-for-text.md).
+   */
+  --color-accent-text: #d93a3a;
   /* Image placeholder in the design: shown at 70% over the background. */
   --color-placeholder: #786e5b;
   --opacity-placeholder: 0.7;

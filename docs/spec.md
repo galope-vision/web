@@ -263,7 +263,8 @@ valores del Figma [actualizado] son:
 | | Valor |
 |---|---|
 | `color/negro` | `#000000` (fondo) |
-| `color/rojo` | `#C42626` (acento, logo, dado, activo) |
+| `color/rojo` | `#C42626` (logo, dado y todo lo que no es texto) |
+| `color/rojo-texto` | `#D93A3A` (todo texto en rojo y el foco; 4,62:1 sobre negro, ADR 0006) |
 | `color/claro` | `#E6E6E6` (texto) |
 | `color/placeholder-imagen` | `#786E5B` al 70% |
 | Tipografía | Baskerville Bold y Regular. En Figma se usa Libre Baskerville como reemplazo |
@@ -291,11 +292,10 @@ Licencia web de Baskerville: **A definir**. Si no hay, queda Libre Baskerville (
 - Foco visible. La lista, el dado, el toggle de info, las palabras destacadas de Info y las
   secciones del proyecto se pueden usar con teclado. Todo lo que pasa con hover también pasa
   con foco.
-- Contraste: el texto claro `#E6E6E6` sobre negro da 16.8:1 y cumple AA. El rojo `#C42626`
-  sobre negro da **3.65:1**: alcanza para el logo y el dado, pero **no llega a AA (4.5:1)**
-  para texto de 13 o 16 px, ni siquiera en Bold. El diseño usa el rojo justo en ese tipo de
-  texto (título del proyecto, fila activa, link activo del nav). Cómo se resuelve: **A definir**
-  (§ 13). Si el texto queda encima de imágenes del collage, también se revisa el contraste.
+- Contraste: el texto claro `#E6E6E6` sobre negro da 16,8:1 y cumple AA. El rojo de marca
+  `#C42626` da 3,65:1: alcanza para el logo y el dado, pero no para texto de 13 o 16 px. Por
+  eso todo texto en rojo usa `#D93A3A` (4,62:1), que mantiene el tono (ADR 0006). Si el texto
+  queda encima de imágenes del collage, hay que revisar el contraste de nuevo.
 - Lighthouse Performance ≥ 90 en mobile con el collage animado.
 - Las imágenes se optimizan en el build (`astro:assets`).
 - Metadatos SEO y OG desde `ajustes/general.yml`, con override por proyecto. `hreflang` entre
@@ -330,9 +330,6 @@ Licencia web de Baskerville: **A definir**. Si no hay, queda Libre Baskerville (
 - Diseño mobile (por defecto, adaptación propia).
 - Si las fotos reales van al 70% de opacidad, como el placeholder.
 - Cómo se ven las secciones Fotos, Vídeos y Proceso debajo del collage.
-- Contraste del rojo en texto (3.65:1, no llega a AA). Opciones: aclarar el rojo solo para
-  texto (por ejemplo, un token `--color-accent-text` con ≥ 4.5:1), o aceptarlo como excepción
-  dejando el subrayado como indicador que no depende del color.
 
 **De alcance**
 - Página de búsqueda y formulario de contacto: si entran o no.

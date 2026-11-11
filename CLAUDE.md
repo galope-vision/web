@@ -121,7 +121,8 @@ All visual values come from `src/styles/tokens.css` (`--color-*`, `--font-*`, `-
 Target values (Figma [actualizado], applied in phase 2): black `#000000` background, red `#C42626`
 accent, light `#E6E6E6` text, image placeholder `#786E5B` at 70%; Baskerville Bold/Regular at
 13 and 16 px (Libre Baskerville fallback); logo is a vectorized SVG; grid of 4 columns, 9 px
-margins, 18 px gutters. Red on black is 3.65:1, below AA for 13–16 px text (open decision).
+margins, 18 px gutters. Red text uses `--color-accent-text` (`#D93A3A`, 4.62:1); the brand
+red `#C42626` is for the logo, the dice and other non-text (ADR 0006).
 
 ## Working rules (mandatory)
 
@@ -163,7 +164,6 @@ Status: phase 0 closed (v0.1.0, 2026-11-10). Next: phase 1.
 
 ## Open decisions (do not assume — ask Caro)
 
-- Red text contrast (3.65:1): lighter text-only accent token, or accepted exception.
 - Home layout of the random images/video. Contacto design. Fotos/Vídeos/Proceso section design.
 - Whether real photos keep the 70% opacity of the placeholder.
 - Search page and contact form: in or out. Whether the dice excludes the current project.
