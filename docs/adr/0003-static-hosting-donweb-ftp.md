@@ -1,12 +1,17 @@
 # 0003 · Static hosting on DonWeb, deployed over FTPS
 
-- Status: Accepted
+- Status: Accepted (the DNS part superseded by [ADR 0007](0007-nameservers-at-donweb.md))
 - Date: 2026-11-10
 
 ## Context
 
 Galope already has a DonWeb shared hosting plan (Apache, no Node runtime) and wants to keep it
-for production. The domain's DNS stays at GoDaddy. The budget is zero.
+for production. The budget is zero.
+
+> **Superseded in part.** This ADR assumed the domain's DNS would stay at GoDaddy. It does not:
+> DonWeb refuses to issue its free certificate unless the nameservers are theirs, so the zone
+> moved to DonWeb on 2026-11-11. See [ADR 0007](0007-nameservers-at-donweb.md). Everything else
+> here — static output, FTPS deploy, `public/.htaccess` — is unchanged.
 
 ## Decision
 

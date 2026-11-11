@@ -26,7 +26,9 @@ The client must be able to publish content on their own, with no developer invol
   never in the repo) and saved as editable text. Never translate at build time. UI strings live in a code
   dictionary. Missing English falls back to Spanish (build warns, does not fail).
 - **Hosting**: DonWeb shared hosting (Apache, static files only). Deployed by GitHub Actions via
-  FTPS (`SamKirkland/FTP-Deploy-Action`). Domain DNS stays at GoDaddy.
+  FTPS (`SamKirkland/FTP-Deploy-Action`). The domain is registered at GoDaddy, but its DNS is
+  delegated to DonWeb (`ns1`/`ns2.donweb.com`), because DonWeb only issues its free certificate
+  for domains whose nameservers are theirs (ADR 0007).
 - **Previews**: Cloudflare Pages — one preview per CMS draft branch and per code PR. `noindex`.
 - **Analytics**: Cloudflare Web Analytics (production only, no cookies).
 - **Motion**: Motion (motion.dev) — only `animate`, `inView`, `stagger`. Idle drift in pure CSS.
