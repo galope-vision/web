@@ -40,11 +40,14 @@ Never add a server runtime, database, SSR adapter or paid service.
 .github/workflows/   ci.yml (PRs), preview.yml (cms/* + PRs), deploy.yml (main → DonWeb)
 public/admin/        index.html, config.yml (Sveltia), preview styles
 public/fonts/        final web fonts (woff2)
+public/img/          images served as they are (logo-galope.svg)
 public/.htaccess     https, caching, 404
+src/assets/          images Astro optimizes (dado.png)
 src/content/         proyectos/<slug>/index.md + images · ajustes/general.yml, home.yml
 src/content.config.ts  Zod schemas mirroring every CMS field
 src/styles/          tokens.css (ONLY place for colors/type/spacing/motion values), global.css
-src/components/      Header, Collage, ProjectList, ProjectPanel, Dado, VideoEmbed
+src/components/      Header, LocaleSwitch, Dice, Logo, Placeholder · still to come: Collage,
+                     ProjectList, ProjectPanel, VideoEmbed
 src/lib/             collage.ts (seeded layout), i18n.ts (locales, routes, dictionaries),
                      content.ts (content per locale, Spanish fallback), options.ts (option keys)
 src/scripts/         motion.ts

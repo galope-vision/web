@@ -1,0 +1,27 @@
+---
+/** Stands in for a page that phase 2 and 3 still have to build. */
+import { t, type Locale } from '../lib/i18n';
+
+interface Props {
+  locale: Locale;
+  title: string;
+}
+
+const { locale, title } = Astro.props;
+const s = t(locale);
+---
+
+<div class="placeholder">
+  <h1>{title}</h1>
+  <p>{s('placeholder.soon')}</p>
+</div>
+
+<style>
+  .placeholder {
+    display: grid;
+    place-content: center;
+    gap: var(--space-1);
+    height: 100%;
+    text-align: center;
+  }
+</style>

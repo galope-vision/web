@@ -1,0 +1,19 @@
+---
+import Placeholder from '../components/Placeholder.astro';
+import Base from '../layouts/Base.astro';
+import { getGeneral } from '../lib/content';
+import { t, type Locale } from '../lib/i18n';
+
+const locale: Locale = 'es';
+const { seo } = await getGeneral(locale);
+const title = t(locale)('page.contact');
+---
+
+<Base
+  locale={locale}
+  current="contact"
+  title={`${title} · ${seo.title}`}
+  description={seo.description}
+>
+  <Placeholder locale={locale} title={title} />
+</Base>

@@ -1,5 +1,4 @@
 ---
-import HomePlaceholder from '../../components/HomePlaceholder.astro';
 import Base from '../../layouts/Base.astro';
 import { getGeneral } from '../../lib/content';
 import type { Locale } from '../../lib/i18n';
@@ -9,5 +8,6 @@ const { seo } = await getGeneral(locale);
 ---
 
 <Base locale={locale} title={seo.title} description={seo.description}>
-  <HomePlaceholder locale={locale} />
+  {/* The random images or video of the home are still an open design decision (spec § 5.1). */}
+  <h1 class="visually-hidden">GALOPE</h1>
 </Base>

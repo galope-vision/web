@@ -1,0 +1,78 @@
+---
+/**
+ * The nav row at the top of every page: one item per grid column, the active one red and
+ * underlined (docs/spec.md § 5.0).
+ */
+import LocaleSwitch from './LocaleSwitch.astro';
+import { localePath, t, type Locale, type Page } from '../lib/i18n';
+
+interface Props {
+  locale: Locale;
+  /** The page being shown, marked as active in the nav. */
+  current?: Page;
+}
+
+const { locale, current } = Astro.props;
+const s = t(locale);
+
+const items = [
+  { page: 'projects', label: s('nav.projects') },
+  { page: 'info', label: s('nav.info') },
+  { page: 'contact', label: s('nav.contact') },
+] as const satisfies readonly { page: Page; label: string }[];
+---
+
+<header class="header">
+  <nav aria-label={s('nav.main')}>
+    <ul class="columns">
+      {items.map(({ page, label }) => (
+        <li class="column">
+          <a
+            href={localePath(locale, page)}
+            class="link"
+            aria-current={current === page ? 'page' : undefined}
+          >
+            {label}
+          </a>
+        </li>
+      ))}
+      <li class="column">
+        <LocaleSwitch locale={locale} />
+      </li>
+    </ul>
+  </nav>
+</header>
+
+<style>
+  .header {
+    padding: 6px var(--space-margin);
+    font-size: var(--fs-nav);
+    line-height: var(--lh-nav);
+  }
+
+  .columns {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-columns), 1fr);
+    gap: var(--space-gutter);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .column {
+    display: flex;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .link {
+    font-weight: var(--fw-bold);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .link[aria-current='page'] {
+    color: var(--color-accent);
+    text-decoration: underline;
+  }
+</style>

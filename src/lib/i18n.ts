@@ -27,6 +27,10 @@ const ES_UI = {
   'nav.info': 'INFO',
   'nav.contact': 'CONTACTO',
   'nav.language': 'Idioma',
+  'nav.main': 'Navegación principal',
+  'page.projects': 'Proyectos',
+  'page.info': 'Info',
+  'page.contact': 'Contacto',
   'nav.home': 'Inicio',
   'dice.label': 'Ir a un proyecto al azar',
   'project.parts': 'Partes del proyecto',
@@ -39,7 +43,7 @@ const ES_UI = {
   'project.back': 'VOLVER',
   'notFound.title': 'Página no encontrada',
   'notFound.back': 'Ir al inicio',
-  'home.underConstruction': 'Sitio en construcción.',
+  'placeholder.soon': 'En construcción.',
 } as const;
 
 export type UiKey = keyof typeof ES_UI;
@@ -49,6 +53,10 @@ const EN_UI: Record<UiKey, string> = {
   'nav.info': 'INFO',
   'nav.contact': 'CONTACT',
   'nav.language': 'Language',
+  'nav.main': 'Main navigation',
+  'page.projects': 'Projects',
+  'page.info': 'Info',
+  'page.contact': 'Contact',
   'nav.home': 'Home',
   'dice.label': 'Go to a random project',
   'project.parts': 'Parts of the project',
@@ -61,7 +69,7 @@ const EN_UI: Record<UiKey, string> = {
   'project.back': 'BACK',
   'notFound.title': 'Page not found',
   'notFound.back': 'Go to the home page',
-  'home.underConstruction': 'Site under construction.',
+  'placeholder.soon': 'Under construction.',
 };
 
 const UI: Record<Locale, Record<UiKey, string>> = { es: ES_UI, en: EN_UI };
