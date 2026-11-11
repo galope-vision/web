@@ -1,0 +1,284 @@
+# yaml-language-server: $schema=https://unpkg.com/@sveltia/cms/schema/sveltia-cms.json
+#
+# Sveltia CMS configuration. Every field here must have a matching Zod rule in
+# src/content.config.ts, so bad content fails the build and the preview, never production.
+# Labels and hints are in Spanish because editors read them; comments are in English.
+
+backend:
+  name: github
+  repo: galope-vision/web
+  branch: main
+  # Phase 1, step 4: the Cloudflare Worker running sveltia-cms-auth signs editors in.
+  # Until it is deployed, sign in with a GitHub personal access token (Contents and Pull
+  # requests, read and write).
+  # base_url: https://<worker>.workers.dev
+
+# Each entry is saved to its own `cms/<collection>/<slug>` branch and published by merging its
+# pull request, which Cloudflare Pages builds as a preview. The repository needs "Allow
+# auto-merge" enabled, so the CMS can wait for the required CI check before merging.
+publish_mode: editorial_workflow
+
+# Spanish is the default locale and has no locale code in the file name; English is `*.en.*`.
+i18n:
+  structure: multiple_files
+  locales: [es, en]
+  default_locale: es
+  omit_default_locale_from_file_path: true
+
+# Astro's Zod schemas use `.optional()`, which rejects an empty value but accepts a missing one.
+output:
+  omit_empty_optional_fields: true
+
+# Fallback media folder, required by the CMS. The images of a project or of the settings are
+# saved next to their entry instead (see each collection), so Astro can optimize them; anything
+# uploaded here is served as is.
+media_folder: public/media
+public_folder: /media
+
+collections:
+  - name: proyectos
+    label: Proyectos
+    label_singular: Proyecto
+    folder: src/content/proyectos
+    # One folder per project, with its images next to the entry so Astro can optimize them.
+    path: '{{slug}}/index'
+    media_folder: ''
+    public_folder: ''
+    create: true
+    i18n: true
+    identifier_field: title
+    summary: '{{title}}'
+    sortable_fields: [order, title, date]
+    fields:
+      - name: title
+        label: Título
+        widget: string
+        i18n: duplicate
+        hint: El nombre del proyecto. No se traduce.
+      - name: group
+        label: Grupo
+        widget: select
+        i18n: duplicate
+        hint: Agrupa los proyectos en el listado.
+        options:
+          - { label: '2023', value: '2023' }
+          - { label: '2024', value: '2024' }
+          - { label: '2025', value: '2025' }
+      - name: type
+        label: Tipo
+        widget: select
+        i18n: duplicate
+        hint: Se muestra entre paréntesis al lado del título. Su nombre en inglés sale del código.
+        options:
+          - { label: Videoclip, value: videoclip }
+          - { label: Documental, value: documental }
+          - { label: Visualizer, value: visualizer }
+          - { label: Sesión en vivo, value: sesion-en-vivo }
+          - { label: Diseño gráfico, value: diseno-grafico }
+      - name: categories
+        label: Categorías
+        widget: select
+        multiple: true
+        required: false
+        i18n: duplicate
+        options:
+          - { label: Videoclip, value: videoclip }
+          - { label: Documental, value: documental }
+          - { label: Visualizer, value: visualizer }
+          - { label: Sesión en vivo, value: sesion-en-vivo }
+          - { label: Diseño gráfico, value: diseno-grafico }
+      - name: quote
+        label: Frase
+        widget: string
+        required: false
+        i18n: true
+      - name: description
+        label: Descripción
+        widget: text
+        maxlength: 600
+        i18n: true
+        hint: Hasta 600 caracteres.
+      - name: credits
+        label: Créditos
+        label_singular: Crédito
+        widget: list
+        required: false
+        i18n: duplicate
+        summary: '{{fields.role}}: {{fields.name}}'
+        fields:
+          - { name: role, label: Rol, widget: string, i18n: true }
+          - { name: name, label: Nombre, widget: string, hint: No se traduce. }
+          - { name: url, label: Link, widget: string, type: url, required: false }
+      - name: cover
+        label: Portada
+        widget: image
+        i18n: duplicate
+      - name: gallery
+        label: Imágenes
+        label_singular: Imagen
+        widget: list
+        required: false
+        i18n: duplicate
+        summary: '{{fields.alt}}'
+        fields:
+          - { name: image, label: Imagen, widget: image }
+          - name: part
+            label: Sección
+            widget: select
+            options:
+              - { label: Fotos, value: fotos }
+              - { label: Proceso, value: proceso }
+          - name: focus
+            label: Recorte
+            widget: select
+            default: center
+            hint: Qué parte de la imagen se mantiene cuando se recorta en el collage.
+            options:
+              - { label: Centro, value: center }
+              - { label: Arriba, value: top }
+              - { label: Abajo, value: bottom }
+              - { label: Izquierda, value: left }
+              - { label: Derecha, value: right }
+          - name: alt
+            label: Texto alternativo
+            widget: string
+            i18n: true
+            hint: Qué se ve en la imagen. Lo leen los lectores de pantalla.
+      - name: videos
+        label: Videos
+        label_singular: Video
+        widget: list
+        required: false
+        i18n: duplicate
+        # Same rule as VIDEO_URL in src/content.config.ts. Keep both in sync.
+        field:
+          name: url
+          label: Link
+          widget: string
+          type: url
+          pattern:
+            - '^https:\/\/(?:(?:www\.)?youtube\.com\/(?:watch\?v=|embed\/|shorts\/)[\w-]{11}|youtu\.be\/[\w-]{11}|(?:www\.)?vimeo\.com\/\d+|player\.vimeo\.com\/video\/\d+)(?:[?&#].*)?$'
+            - Tiene que ser un link de YouTube o de Vimeo.
+      - name: collageSeed
+        label: Semilla del collage
+        widget: number
+        value_type: int
+        min: 0
+        default: 0
+        required: false
+        i18n: duplicate
+        hint: Cambiá el número para mezclar la composición del collage.
+      - name: order
+        label: Orden
+        widget: number
+        value_type: int
+        i18n: duplicate
+        hint: Posición dentro del grupo, de menor a mayor.
+      - name: inDice
+        label: Entra en el dado
+        widget: boolean
+        default: true
+        i18n: duplicate
+      - name: visible
+        label: Visible en el sitio
+        widget: boolean
+        default: true
+        i18n: duplicate
+      - name: date
+        label: Fecha
+        widget: datetime
+        type: date
+        format: 'YYYY-MM-DD'
+        i18n: duplicate
+
+  - name: ajustes
+    label: Ajustes
+    i18n: true
+    # The images of these files live next to them, like a project's.
+    media_folder: ''
+    public_folder: ''
+    files:
+      - name: general
+        label: Información y contacto
+        file: src/content/ajustes/general.{{locale}}.yml
+        i18n: true
+        fields:
+          - name: info
+            label: Texto de Info
+            widget: object
+            i18n: duplicate
+            fields:
+              - name: text
+                label: Texto
+                widget: text
+                i18n: true
+              - name: highlights
+                label: Palabras destacadas
+                label_singular: Palabra destacada
+                widget: list
+                i18n: duplicate
+                summary: '{{fields.phrase}}'
+                fields:
+                  - name: phrase
+                    label: Frase
+                    widget: string
+                    i18n: true
+                    hint: Tiene que aparecer tal cual en el texto de arriba.
+                  - { name: image, label: Imagen, widget: image }
+                  - { name: alt, label: Texto alternativo, widget: string, i18n: true }
+          - name: email
+            label: Email
+            widget: string
+            type: email
+            i18n: duplicate
+          - name: socials
+            label: Redes
+            label_singular: Red
+            widget: list
+            required: false
+            i18n: duplicate
+            summary: '{{fields.label}}'
+            fields:
+              - { name: label, label: Nombre, widget: string }
+              - { name: url, label: Link, widget: string, type: url }
+          - name: seo
+            label: SEO por defecto
+            widget: object
+            i18n: true
+            fields:
+              - { name: title, label: Título, widget: string, i18n: true }
+              - name: description
+                label: Descripción
+                widget: text
+                maxlength: 160
+                i18n: true
+                hint: Hasta 160 caracteres. Es lo que se lee en Google.
+          - name: shareImage
+            label: Imagen para compartir
+            widget: image
+            i18n: duplicate
+            hint: Se ve cuando alguien comparte el sitio en redes.
+      - name: home
+        label: Home
+        file: src/content/ajustes/home.{{locale}}.yml
+        i18n: true
+        fields:
+          - name: images
+            label: Imágenes de la home
+            label_singular: Imagen
+            widget: list
+            min: 1
+            i18n: duplicate
+            summary: '{{fields.alt}}'
+            fields:
+              - { name: image, label: Imagen, widget: image }
+              - { name: alt, label: Texto alternativo, widget: string, i18n: true }
+          - name: featuredVideo
+            label: Video destacado
+            widget: string
+            type: url
+            required: false
+            i18n: duplicate
+            pattern:
+              - '^https:\/\/(?:(?:www\.)?youtube\.com\/(?:watch\?v=|embed\/|shorts\/)[\w-]{11}|youtu\.be\/[\w-]{11}|(?:www\.)?vimeo\.com\/\d+|player\.vimeo\.com\/video\/\d+)(?:[?&#].*)?$'
+              - Tiene que ser un link de YouTube o de Vimeo.

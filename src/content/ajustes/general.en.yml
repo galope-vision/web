@@ -4,9 +4,9 @@ info:
     all kinds of music projects. Each commission called for a different approach to the
     audiovisual and the graphic, so their catalog covers all kinds of proposals.
   highlights:
-    - { phrase: creative duo, image: ./info-dupla.jpg, alt: Sample image }
-    - { phrase: Buenos Aires, image: ./info-buenos-aires.jpg, alt: Sample image }
-    - { phrase: all kinds of proposals, image: ./info-propuestas.jpg, alt: Sample image }
+    - { phrase: creative duo, image: info-dupla.jpg, alt: Sample image }
+    - { phrase: Buenos Aires, image: info-buenos-aires.jpg, alt: Sample image }
+    - { phrase: all kinds of proposals, image: info-propuestas.jpg, alt: Sample image }
 email: hola@example.com
 socials:
   - { label: Instagram, url: 'https://www.instagram.com/ga.lo.pe' }
@@ -15,4 +15,4 @@ seo:
   description: >-
     Creative duo from Buenos Aires: music videos, documentaries, visualizers, live sessions and
     graphic design.
-shareImage: ./compartir.jpg
+shareImage: compartir.jpg

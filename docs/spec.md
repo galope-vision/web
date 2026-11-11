@@ -44,7 +44,7 @@ Objetivos:
 | Framework | Astro (última estable), TypeScript `strict` | `output: 'static'` |
 | CMS | Sveltia CMS (compatible con Decap, basado en Git) | Se carga por CDN en `/admin`. Backend GitHub, `editorial_workflow`, i18n |
 | Auth del CMS | Cloudflare Worker con `sveltia-cms-auth` | OAuth App de GitHub a nombre de Galope |
-| Traducción | Traducción automática del CMS con Google Gemini (plan gratis) | La API key es de Galope y se carga en el navegador de quien edita, no en el repo. Validar en la fase 1 |
+| Traducción | Traducción automática del CMS con Google Gemini (plan gratis) | La API key es de Galope y se carga una vez en Ajustes de Sveltia: queda en el navegador de quien edita, no en el repo |
 | Hosting | DonWeb, hosting compartido (Apache) | Solo archivos estáticos |
 | Deploy | GitHub Actions → FTPS (`SamKirkland/FTP-Deploy-Action`) | En cada push a `main` |
 | DNS | GoDaddy | No se mueve |
@@ -67,7 +67,9 @@ repo. Las decisiones de infraestructura quedan en `docs/adr/`.
 6. Galope aprieta «Publicar». El borrador se mergea a `main` y la Action despliega a DonWeb.
 
 Commits del CMS: tipo `content` (Conventional Commits). Nadie toca a mano las ramas `cms/*`.
-Hay que validar en la fase 1 si el check obligatorio de CI bloquea el «Publicar» de Sveltia.
+Al «Publicar», el CMS mergea el PR del borrador. Si el CI todavía está corriendo, activa el
+auto-merge y espera a que termine, así que el repo necesita «Allow auto-merge» prendido: un
+check en rojo no publica.
 
 ### 4.1 Traducciones
 
@@ -343,10 +345,9 @@ Licencia web de Baskerville: **A definir**. Si no hay, queda Libre Baskerville (
 - Licencia web de Baskerville.
 - API key de Google Gemini (plan gratis) en una cuenta de Google de Galope.
 
-**De infraestructura (validar en la fase 1)**
-- Si el check obligatorio de CI bloquea el «Publicar» de Sveltia.
-- Si Sveltia soporta templates de preview custom completos.
-- La traducción automática de Sveltia con Gemini: cómo se configura y sus límites.
+**De infraestructura**
+- Si el panel de preview del editor necesita templates propios. Sveltia los soporta con
+  `registerPreviewTemplate`, pero todavía no hay ninguno.
 - Dominio final y datos de DonWeb.
 - Cuenta de GitHub de quienes van a editar (el backend GitHub la exige).
 
