@@ -140,8 +140,14 @@ nothing here should touch them.
 Record the change here when it is made, so the next person does not have to reconstruct it:
 
 ```
-A @ → 200.58.111.133   (set on <date>)
+A @ → 200.58.111.133   TTL 1800   (set on 2026-11-11)
 ```
+
+Done on 2026-11-11. Both authoritative servers, Google and Cloudflare answered the new address
+within minutes, and `www` followed through its `CNAME`. The `_dmarc` record survived the edit,
+and GoDaddy raised no warning about the Website Builder site — so whether that attachment is
+really gone is still worth checking, since it is the one thing that could rewrite the record
+later.
 
 ## 4. Issue the certificate, in DonWeb
 
@@ -158,6 +164,11 @@ curl -sS -o /dev/null -w "%{http_code} %{remote_ip}\n" https://ga-lo-pe.com/
 
 The first two have to answer the DonWeb IP and nothing else. The third has to answer without a
 certificate warning.
+
+State on 2026-11-11, after step 3 and before step 4: the first two answer `200.58.111.133`,
+`http://ga-lo-pe.com` returns 200 from that address with an empty page — the hosting account
+has nothing in it yet — and `https://` fails with
+`no alternative certificate subject name matches target host name`, which is step 4's job.
 
 ## The order matters
 
@@ -177,7 +188,8 @@ cannot click past. The order is: `A` record → certificate in DonWeb → `.htac
 
 ## Still open
 
-- The date the `A` record was actually changed (step 3); the IP itself is now recorded.
+- The certificate (step 4). Until it exists, `https://ga-lo-pe.com` fails with a name mismatch,
+  and `public/.htaccess` must not be deployed.
 - Whether Galope wants mail at the domain. If they do, the DonWeb mail records have to be
   copied into the GoDaddy zone by hand — see the end of step 1.
 - Whether the GoDaddy Website Builder site is a paid subscription worth cancelling (step 2).
