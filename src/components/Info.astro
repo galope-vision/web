@@ -1,0 +1,170 @@
+---
+/**
+ * Info (docs/spec.md § 5.4): the text on the left with its highlighted phrases, and the image
+ * on the right that changes when a phrase is hovered or focused. The first image is the one
+ * shown at rest, and it stays that way without JavaScript.
+ */
+import { Image } from 'astro:assets';
+import Logo from './Logo.astro';
+import type { getGeneral } from '../lib/content';
+
+type General = Awaited<ReturnType<typeof getGeneral>>;
+
+interface Props {
+  info: General['info'];
+}
+
+const { info } = Astro.props;
+
+/** Splits a paragraph so each highlighted phrase can be its own element, in reading order. */
+function parts(text: string, phrases: string[]) {
+  const found = phrases
+    .map((phrase, index) => ({ phrase, index, at: text.indexOf(phrase) }))
+    .filter(({ at }) => at >= 0)
+    .sort((a, b) => a.at - b.at);
+
+  const pieces: ({ text: string } | { text: string; index: number })[] = [];
+  let cursor = 0;
+  for (const { phrase, index, at } of found) {
+    if (at < cursor) continue;
+    if (at > cursor) pieces.push({ text: text.slice(cursor, at) });
+    pieces.push({ text: phrase, index });
+    cursor = at + phrase.length;
+  }
+  if (cursor < text.length) pieces.push({ text: text.slice(cursor) });
+  return pieces;
+}
+
+const phrases = info.highlights.map(({ phrase }) => phrase);
+/** A blank line in the CMS field starts a new paragraph, as in the design. */
+const paragraphs = info.text
+  .split(/\n\s*\n/)
+  .map((paragraph) => parts(paragraph.trim(), phrases))
+  .filter((pieces) => pieces.length > 0);
+---
+
+<div class="info">
+  <div class="text">
+    <Logo width={138} />
+    {paragraphs.map((pieces) => (
+      <p>
+        {pieces.map((piece) =>
+          'index' in piece ? (
+            <button type="button" class="highlight" data-highlight={piece.index}>
+              {piece.text}
+            </button>
+          ) : (
+            piece.text
+          ),
+        )}
+      </p>
+    ))}
+  </div>
+
+  <div class="images" data-images>
+    {info.highlights.map(({ image, alt }, index) => (
+      <Image
+        class="image"
+        src={image}
+        alt={alt}
+        widths={[324, 648]}
+        sizes="(width < 48rem) 100vw, 324px"
+        loading="eager"
+        data-image={index}
+        data-current={index === 0 ? '' : undefined}
+        aria-hidden={index === 0 ? undefined : 'true'}
+      />
+    ))}
+  </div>
+</div>
+
+<script>
+  /** Shows the image of the phrase being hovered or focused; phase 4 adds the real motion. */
+  const images = document.querySelector<HTMLElement>('[data-images]');
+  const highlights = document.querySelectorAll<HTMLElement>('[data-highlight]');
+
+  function show(index: string): void {
+    images?.querySelectorAll<HTMLElement>('[data-image]').forEach((image) => {
+      const current = image.dataset.image === index;
+      image.toggleAttribute('data-current', current);
+      // Only the image on screen should be read out.
+      if (current) image.removeAttribute('aria-hidden');
+      else image.setAttribute('aria-hidden', 'true');
+    });
+  }
+
+  highlights.forEach((highlight) => {
+    const index = highlight.dataset.highlight;
+    if (index === undefined) return;
+    for (const event of ['pointerenter', 'focus'] as const) {
+      highlight.addEventListener(event, () => show(index));
+    }
+  });
+</script>
+
+<style>
+  .info {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-columns), 1fr);
+    gap: var(--space-gutter);
+    padding-top: var(--space-4);
+  }
+
+  .text {
+    display: grid;
+    gap: var(--space-1);
+    grid-column: 2;
+    align-content: start;
+  }
+
+  .images {
+    position: relative;
+    grid-column: 3;
+  }
+
+  .image {
+    width: 100%;
+    height: auto;
+  }
+
+  /* Every image sits in the same place; only the current one is visible. */
+  .image:not(:first-child) {
+    position: absolute;
+    inset: 0;
+  }
+
+  .image {
+    opacity: 0;
+    transition:
+      opacity var(--dur-fast) var(--ease-out),
+      transform var(--dur-fast) var(--ease-out);
+    transform: rotate(-1deg);
+  }
+
+  .image[data-current] {
+    opacity: 1;
+    transform: rotate(0deg);
+  }
+
+  .highlight {
+    font-weight: var(--fw-bold);
+    text-decoration: underline;
+  }
+
+  .highlight:hover,
+  .highlight:focus-visible {
+    color: var(--color-accent-text);
+  }
+
+  @media (width < 48rem) {
+    .info {
+      grid-template-columns: repeat(var(--grid-columns-narrow), 1fr);
+      padding-top: var(--space-2);
+    }
+
+    .text,
+    .images {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

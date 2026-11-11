@@ -43,7 +43,9 @@ const absolute = (path: string): string => (Astro.site ? new URL(path, Astro.sit
       <main class="main">
         <slot />
       </main>
-      <Logo />
+      <div class="footer">
+        <Logo />
+      </div>
     </div>
   </body>
 </html>
@@ -59,5 +61,21 @@ const absolute = (path: string): string => (Astro.site ? new URL(path, Astro.sit
   .main {
     min-width: 0;
     padding: 0 var(--space-margin);
+  }
+
+  /*
+   * On a wide screen the dice sits beside the content, as in the design. On a narrow one the
+   * content is full width, so the page leaves room for the dice above it.
+   */
+  @media (width < 48rem) {
+    .main {
+      padding-top: calc(var(--size-dice-height) + var(--space-1));
+    }
+  }
+
+  .footer {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-2) var(--space-margin);
   }
 </style>

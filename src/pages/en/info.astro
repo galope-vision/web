@@ -1,11 +1,11 @@
 ---
-import Placeholder from '../../components/Placeholder.astro';
+import Info from '../../components/Info.astro';
 import Base from '../../layouts/Base.astro';
 import { getGeneral } from '../../lib/content';
 import { t, type Locale } from '../../lib/i18n';
 
 const locale: Locale = 'en';
-const { seo } = await getGeneral(locale);
+const { info, seo } = await getGeneral(locale);
 const title = t(locale)('page.info');
 ---
 
@@ -15,5 +15,6 @@ const title = t(locale)('page.info');
   title={`${title} · ${seo.title}`}
   description={seo.description}
 >
-  <Placeholder locale={locale} title={title} />
+  <h1 class="visually-hidden">{title}</h1>
+  <Info info={info} />
 </Base>
