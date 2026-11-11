@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import Dice from '../components/Dice.astro';
 import Header from '../components/Header.astro';
+import LocaleSwitch from '../components/LocaleSwitch.astro';
 import Logo from '../components/Logo.astro';
 import { DEFAULT_LOCALE, LOCALES, localeVariants, type Locale, type Page } from '../lib/i18n';
 
@@ -13,9 +14,24 @@ interface Props {
   current?: Page;
   /** Keeps the page out of search engines: the styles page, the 404, the previews. */
   noindex?: boolean;
+  /**
+   * `full` is the nav row of every built page. `switch-only` drops it and keeps just `ES/EN`,
+   * for the holding page, where the pages the nav points at are not built yet.
+   */
+  chrome?: 'full' | 'switch-only';
+  /** Where the dice sits. The holding page is the one that wants it big and in the flow. */
+  dice?: 'nav' | 'hero';
 }
 
-const { locale, title, description, current, noindex = false } = Astro.props;
+const {
+  locale,
+  title,
+  description,
+  current,
+  noindex = false,
+  chrome = 'full',
+  dice = 'nav',
+} = Astro.props;
 
 /** The same page in the other locale, for `hreflang` (docs/spec.md § 10). */
 const variants = localeVariants(Astro.url.pathname);
@@ -40,9 +56,15 @@ const absolute = (path: string): string => (Astro.site ? new URL(path, Astro.sit
     <title>{title}</title>
   </head>
   <body>
-    <div class="shell">
-      <Header locale={locale} current={current} />
-      <Dice />
+    <div class:list={['shell', `dice-${dice}`]}>
+      {chrome === 'full' ? (
+        <Header locale={locale} current={current} />
+      ) : (
+        <div class="switch-only">
+          <LocaleSwitch locale={locale} />
+        </div>
+      )}
+      {dice === 'nav' && <Dice />}
       <main class="main">
         <slot />
       </main>
@@ -66,12 +88,22 @@ const absolute = (path: string): string => (Astro.site ? new URL(path, Astro.sit
     padding: 0 var(--space-margin);
   }
 
+  /* The `ES/EN`-only row stands in for the nav, on the same baseline as it (Header.astro). */
+  .switch-only {
+    display: flex;
+    justify-content: flex-end;
+    padding: 6px var(--space-margin);
+    font-size: var(--fs-nav);
+    line-height: var(--lh-nav);
+  }
+
   /*
    * On a wide screen the dice sits beside the content, as in the design. On a narrow one the
-   * content is full width, so the page leaves room for the dice above it.
+   * content is full width, so the page leaves room for the dice above it. Only needed when the
+   * dice is pinned over the content; the hero one is in the flow and makes its own room.
    */
   @media (width < 48rem) {
-    .main {
+    .dice-nav .main {
       padding-top: calc(var(--size-dice-height) + var(--space-1));
     }
   }
