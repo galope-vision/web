@@ -12,12 +12,12 @@ this workflow is also what puts Galope's own content live.
 In `galope-vision/web` → **Settings → Secrets and variables → Actions**. Three secrets and one
 variable; the workflow fails with a readable message if the variable is missing.
 
-| Name             | Kind     | Value                                                       |
-| ---------------- | -------- | ----------------------------------------------------------- |
-| `FTP_SERVER`     | secret   | The FTP host from the DonWeb panel, e.g. `ftp.ga-lo-pe.com` |
-| `FTP_USERNAME`   | secret   | The FTP user of the hosting account                         |
-| `FTP_PASSWORD`   | secret   | That user's password                                        |
-| `FTP_SERVER_DIR` | variable | The web directory, **with a trailing slash** (see below)    |
+| Name             | Kind     | Value                                                            |
+| ---------------- | -------- | ---------------------------------------------------------------- |
+| `FTP_SERVER`     | secret   | `200.58.111.133`, or whatever host FileZilla already connects to |
+| `FTP_USERNAME`   | secret   | The FTP user of the hosting account                              |
+| `FTP_PASSWORD`   | secret   | That user's password                                             |
+| `FTP_SERVER_DIR` | variable | The web directory, **with a trailing slash** (see below)         |
 
 `FTP_SERVER_DIR` is a _variable_, not a secret, so that it shows up in the logs when a deploy
 goes to the wrong place. It is the web root of the account, which depends on the panel:
@@ -27,8 +27,16 @@ goes to the wrong place. It is the web root of the account, which depends on the
 | Ferozo | `/httpdocs/`    |
 | cPanel | `/public_html/` |
 
+This account is on **Ferozo** — plan _Web Hosting Plan Full_, Linux, service `#6624915`, panel
+at <https://panel.ferozo.com> with its own user and password — so the value is almost certainly
+`/httpdocs/`.
+
 Confirm it in the DonWeb file manager before the first deploy. Getting it wrong uploads the site
 into the parent of the web directory, where nothing serves it.
+
+Do not use `ftp.ga-lo-pe.com` as the host. That name exists only in DonWeb's own copy of the
+zone, which is not the live one — the live zone is GoDaddy's and has no `ftp` record, so the
+name does not resolve. Use the address, or the host FileZilla is already connecting to.
 
 Create a **dedicated FTP user** for the deploy if the panel allows it, scoped to the web
 directory. The credentials live only in GitHub Actions secrets, never in the repo
