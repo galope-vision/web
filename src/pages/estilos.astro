@@ -1,0 +1,272 @@
+---
+/**
+ * Internal reference page (docs/spec.md § 5.6): every token as it is declared in
+ * src/styles/tokens.css, plus the text styles and the pieces of the interface. `noindex`.
+ */
+import Logo from '../components/Logo.astro';
+import Base from '../layouts/Base.astro';
+import { getGeneral } from '../lib/content';
+import { DEFAULT_LOCALE } from '../lib/i18n';
+import { contrast, tokensFor } from '../lib/tokens';
+
+const locale = DEFAULT_LOCALE;
+const { seo } = await getGeneral(locale);
+
+const background = tokensFor('--color-bg')[0]?.value ?? '#000000';
+const colors = tokensFor('--color-').map((token) => ({
+  ...token,
+  // The background has nothing to be compared against: it is what everything sits on.
+  ratio: token.name === '--color-bg' ? null : contrast(token.value, background),
+}));
+const type = tokensFor('--font', '--fw', '--fs', '--lh');
+const layout = tokensFor('--grid', '--space', '--size', '--bp');
+const motion = tokensFor('--ease', '--dur');
+
+/** What a ratio is good for, following docs/spec.md § 10. */
+function verdict(ratio: number | null): string {
+  if (ratio === null) return '';
+  if (ratio >= 4.5) return 'AA en texto';
+  if (ratio >= 3) return 'solo para formas, no para texto';
+  return 'no alcanza';
+}
+---
+
+<Base
+  locale={locale}
+  noindex
+  title={`Estilos · ${seo.title}`}
+  description="Página interna con los tokens y los componentes del sitio."
+>
+  <div class="styles">
+    <h1>Estilos y componentes</h1>
+    <p class="note">
+      Todo lo que está acá sale de <code>src/styles/tokens.css</code>. Si cambia un token, cambia
+      esta página. Es interna y no la indexan los buscadores.
+    </p>
+
+    <section>
+      <h2>Color</h2>
+      <ul class="swatches">
+        {colors.map(({ name, value, ratio }) => (
+          <li>
+            <span class="swatch" style={`background-color: var(${name})`} />
+            <code>{name}</code>
+            <span class="value">{value}</span>
+            <span class="value">
+              {ratio === null ? '' : `${ratio}:1 sobre el fondo · ${verdict(ratio)}`}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section>
+      <h2>Tipografía</h2>
+      <ul class="samples">
+        <li>
+          <span class="nav-sample">PROYECTOS</span>
+          <span class="value">Nav / Bold 13 — navegación</span>
+        </li>
+        <li>
+          <span class="nav-sample active">PROYECTOS</span>
+          <span class="value">Nav / Bold 13 subrayado — link activo, en rojo de texto</span>
+        </li>
+        <li>
+          <strong>Nombre del proyecto</strong>
+          <span class="value">Texto / Bold 16 — nombres y títulos</span>
+        </li>
+        <li>
+          <span>Cuerpo, (Tipo), roles de créditos</span>
+          <span class="value">Texto / Regular 16</span>
+        </li>
+        <li>
+          <span class="link-bold">VOLVER</span>
+          <span class="value">Link / Bold 16 — proyecto activo, VOLVER, destacados de Info</span>
+        </li>
+        <li>
+          <span class="link-regular">Fotos · Vídeos · Proceso</span>
+          <span class="value">Link / Regular 16 — secciones, créditos, Más/Menos Info</span>
+        </li>
+      </ul>
+      <table>
+        <tbody>
+          {type.map(({ name, value }) => (
+            <tr>
+              <th scope="row">
+                <code>{name}</code>
+              </th>
+              <td>{value}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Grilla y espacios</h2>
+      <div class="grid-demo" aria-hidden="true">
+        {[1, 2, 3, 4].map((column) => (
+          <span class="grid-column">{column}</span>
+        ))}
+      </div>
+      <table>
+        <tbody>
+          {layout.map(({ name, value }) => (
+            <tr>
+              <th scope="row">
+                <code>{name}</code>
+              </th>
+              <td>{value}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Componentes</h2>
+      <p class="value">
+        El nav, el dado y el logo grande están en esta misma página, arriba y abajo. El logo chico
+        es el de Info.
+      </p>
+      <Logo width={138} />
+    </section>
+
+    <section>
+      <h2>Movimiento</h2>
+      <table>
+        <tbody>
+          {motion.map(({ name, value }) => (
+            <tr>
+              <th scope="row">
+                <code>{name}</code>
+              </th>
+              <td>{value}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p class="value">
+        Se animan solo <code>transform</code> y <code>opacity</code>. Con
+        <code>prefers-reduced-motion</code> no hay deriva ni parallax y la entrada es solo un
+        fundido.
+      </p>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .styles {
+    display: grid;
+    gap: var(--space-3);
+    padding-top: var(--space-4);
+    padding-bottom: var(--space-4);
+  }
+
+  section {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  h2 {
+    padding-bottom: var(--space-1);
+    border-bottom: 1px solid var(--color-placeholder);
+  }
+
+  .note {
+    max-width: 60ch;
+  }
+
+  ul {
+    display: grid;
+    gap: var(--space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .swatches li {
+    display: grid;
+    grid-template-columns: var(--space-4) 14rem 8rem 1fr;
+    gap: var(--space-2);
+    align-items: center;
+  }
+
+  .swatch {
+    height: var(--space-3);
+    border: 1px solid var(--color-placeholder);
+  }
+
+  .samples li {
+    display: grid;
+    grid-template-columns: 22rem 1fr;
+    gap: var(--space-2);
+    align-items: baseline;
+  }
+
+  .value {
+    color: var(--color-placeholder);
+  }
+
+  .nav-sample {
+    font-size: var(--fs-nav);
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-nav);
+  }
+
+  .nav-sample.active,
+  .link-bold {
+    color: var(--color-accent-text);
+  }
+
+  .nav-sample.active,
+  .link-bold,
+  .link-regular {
+    text-decoration: underline;
+  }
+
+  .link-bold {
+    font-weight: var(--fw-bold);
+  }
+
+  .grid-demo {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-columns), 1fr);
+    gap: var(--space-gutter);
+  }
+
+  .grid-column {
+    padding: var(--space-1);
+    background-color: var(--color-placeholder);
+    opacity: var(--opacity-placeholder);
+    text-align: center;
+  }
+
+  table {
+    border-collapse: collapse;
+    text-align: left;
+  }
+
+  th,
+  td {
+    padding: 2px var(--space-2) 2px 0;
+    font-weight: var(--fw-regular);
+    vertical-align: top;
+  }
+
+  td {
+    color: var(--color-placeholder);
+  }
+
+  @media (width < 48rem) {
+    .swatches li,
+    .samples li {
+      grid-template-columns: 1fr;
+      gap: var(--space-1);
+    }
+
+    .grid-demo {
+      grid-template-columns: repeat(var(--grid-columns-narrow), 1fr);
+    }
+  }
+</style>
