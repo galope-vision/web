@@ -1,0 +1,28 @@
+---
+/**
+ * The GALOPE dice, under the nav (docs/spec.md § 5.0). It still does nothing: phase 3 makes it
+ * go to a random project and phase 4 adds the wobble and the spin.
+ */
+import { Image } from 'astro:assets';
+import dice from '../assets/dado.png';
+---
+
+<Image class="dice" src={dice} alt="" width={91} height={96} densities={[1, 2]} loading="eager" />
+
+<style>
+  .dice {
+    position: absolute;
+    top: var(--size-dice-top);
+    left: 50%;
+    width: var(--size-dice-width);
+    height: var(--size-dice-height);
+    transform: translateX(-50%);
+  }
+
+  /* On a narrow screen the nav fills the row, so the dice goes under it instead of over it. */
+  @media (width < 48rem) {
+    .dice {
+      top: calc(var(--size-header-height) + var(--space-1));
+    }
+  }
+</style>

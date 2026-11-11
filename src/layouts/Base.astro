@@ -1,14 +1,19 @@
 ---
 import '../styles/global.css';
-import { DEFAULT_LOCALE, LOCALES, localeVariants, type Locale } from '../lib/i18n';
+import Dice from '../components/Dice.astro';
+import Header from '../components/Header.astro';
+import Logo from '../components/Logo.astro';
+import { DEFAULT_LOCALE, LOCALES, localeVariants, type Locale, type Page } from '../lib/i18n';
 
 interface Props {
   locale: Locale;
   title: string;
   description: string;
+  /** The page being shown, marked as active in the nav. */
+  current?: Page;
 }
 
-const { locale, title, description } = Astro.props;
+const { locale, title, description, current } = Astro.props;
 
 /** The same page in the other locale, for `hreflang` (docs/spec.md § 10). */
 const variants = localeVariants(Astro.url.pathname);
@@ -32,6 +37,27 @@ const absolute = (path: string): string => (Astro.site ? new URL(path, Astro.sit
     <title>{title}</title>
   </head>
   <body>
-    <slot />
+    <div class="shell">
+      <Header locale={locale} current={current} />
+      <Dice />
+      <main class="main">
+        <slot />
+      </main>
+      <Logo />
+    </div>
   </body>
 </html>
+
+<style>
+  .shell {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: 100svh;
+  }
+
+  .main {
+    min-width: 0;
+    padding: 0 var(--space-margin);
+  }
+</style>

@@ -1,48 +1,67 @@
 /*
  * Design tokens — the ONLY place for color, type, spacing and motion values.
- * PROVISIONAL: final colors, fonts and logo are still pending (see docs/spec.md § 9).
+ * The values come from the Figma file `landing-web-2026`, pages [actualizado]
+ * (see docs/spec.md § 9). Screens were designed at 1366 × 768.
  */
 :root {
   /* Color */
-  --color-bg: #0b0b0b;
-  --color-text: #ffffff;
+  --color-bg: #000000;
+  --color-text: #e6e6e6;
   --color-accent: #c42626;
-  --color-surface: #e6e3de;
-  --color-media: #77776a;
+  /*
+   * The same red, lighter, for text and for the focus ring. The brand red on black is 3.65:1,
+   * which doesn't reach AA at 13 or 16 px; this one is 4.62:1 with the same hue and saturation
+   * (docs/adr/0006-lighter-red-for-text.md).
+   */
+  --color-accent-text: #d93a3a;
+  /* Image placeholder in the design: shown at 70% over the background. */
+  --color-placeholder: #786e5b;
+  --opacity-placeholder: 0.7;
 
-  /* Type families (system stacks until the final web fonts arrive) */
-  --font-display:
-    'Rockwell Extra Bold', Rockwell, 'Rockwell Nova', 'Roboto Slab', 'Sitka Small', 'DejaVu Serif',
-    serif;
-  --font-display-weight: 800;
-  --font-body:
-    'Iowan Old Style', 'Palatino Linotype', Palatino, 'URW Palladio L', P052, Georgia, serif;
+  /*
+   * Type. The design uses Baskerville Bold and Regular; Figma stands in Libre Baskerville,
+   * which is also our fallback until the web license is settled (docs/spec.md § 9).
+   */
+  --font-body: Baskerville, 'Libre Baskerville', 'Times New Roman', Times, serif;
+  --fw-regular: 400;
+  --fw-bold: 700;
 
-  /* Type scale: 12 / 14 / 16 / 24 / 48 / 96 px */
-  --fs-xs: 0.75rem;
-  --fs-sm: 0.875rem;
-  --fs-md: 1rem;
-  --fs-lg: 1.5rem;
-  --fs-xl: 3rem;
-  --fs-2xl: 6rem;
-  --fs-wordmark: clamp(var(--fs-xl), 18vw, var(--fs-2xl));
+  /* The design only uses two sizes: 13 px for the nav, 16 px for everything else. */
+  --fs-nav: 0.8125rem;
+  --fs-body: 1rem;
+  --lh-nav: 16px;
+  --lh-body: 17px;
+  /* Running text (the Info paragraph, a project description) needs room to breathe. */
+  --lh-prose: 1.5;
 
-  --lh-tight: 1;
-  --lh-body: 1.5;
-  --tracking-display: 0.02em;
+  /* Grid: 4 columns, 9 px margins, 18 px gutters. Two columns on narrow screens. */
+  --grid-columns: 4;
+  --grid-columns-narrow: 2;
+  --space-margin: 9px;
+  --space-gutter: 18px;
 
-  /* Spacing: multiples of 8 px */
-  --space-1: 0.5rem;
-  --space-2: 1rem;
-  --space-3: 1.5rem;
-  --space-4: 2rem;
-  --space-6: 3rem;
-  --space-8: 4rem;
-  --space-12: 6rem;
+  /* Spacing, on the same 9 px rhythm */
+  --space-1: 9px;
+  --space-2: 18px;
+  --space-3: 36px;
+  --space-4: 72px;
+
+  /* Sizes taken from the design */
+  --size-header-height: 28px;
+  --size-dice-width: 91px;
+  --size-dice-height: 96px;
+  --size-dice-top: 15px;
+  --size-logo-width: 321px;
+  --size-logo-height: 40px;
+
+  /* Breakpoint where the grid drops to two columns */
+  --bp-narrow: 48rem;
 
   /* Motion */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-swap: 200ms;
   --dur-fast: 250ms;
   --dur-base: 600ms;
   --dur-stagger: 80ms;
+  --dur-drift: 10s;
 }

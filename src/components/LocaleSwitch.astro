@@ -1,7 +1,7 @@
 ---
 /**
  * The `ES/EN` item of the nav: the current locale is marked, the other one links to the same
- * page (docs/spec.md § 5.0). Phase 2 folds it into the real nav row.
+ * page (docs/spec.md § 5.0).
  */
 import { LOCALES, LOCALE_LABELS, localeVariants, t, type Locale } from '../lib/i18n';
 
@@ -38,16 +38,15 @@ const s = t(locale);
 <style>
   .locales {
     display: flex;
-    gap: var(--space-1);
-    font-size: var(--fs-xs);
+    font-weight: var(--fw-bold);
   }
 
   .current {
-    color: var(--color-accent);
+    color: var(--color-accent-text);
     text-decoration: underline;
   }
 
-  .separator {
-    color: var(--color-media);
+  a {
+    text-decoration: none;
   }
 </style>
