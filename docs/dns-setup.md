@@ -56,16 +56,51 @@ Two things worth knowing, both learned the hard way:
 - `_domainconnect` is GoDaddy's own mechanism for letting a provider configure the zone. Leave
   it alone.
 
-## 1. Add the domain to the hosting, in DonWeb
+## 1. Add the domain to the hosting, in DonWeb — already done
 
-In the DonWeb panel, open the hosting plan → **Dominios** → add `ga-lo-pe.com`.
+Checked on 2026-11-11: `ga-lo-pe.com` is already attached to the hosting plan, tagged
+**DNS EXTERNO**. Nothing to do here. The path, for when it has to be found again:
 
-This goes **first**. Apache needs the domain mapped to a directory before any traffic arrives;
-if the DNS lands before the mapping exists, the server answers with another site on the same
-machine or with an error.
+> **Mi cuenta** (<https://micuenta.donweb.com>) → Mis servicios → **Web Hosting** → _Gestionar_
+> → **Dominios configurados**
 
-In the same screen, or under **Datos del servicio**, copy the **IP of the hosting**. Step 3
-needs it.
+The plan is **Web Hosting Plan Full**, Linux, service `#6624915`, on the **Ferozo** panel
+(<https://panel.ferozo.com>, its own user and password).
+
+That screen shows the domain in red: _"El dominio tiene asignados NS de otro proveedor"_.
+**That warning is expected and is not a problem.** It is DonWeb noticing that the nameservers
+are GoDaddy's, which is the whole point of the decision above. It goes away only if the
+nameservers are delegated, which is what we chose not to do.
+
+This step matters because Apache needs the domain mapped to a directory before any traffic
+arrives; if the DNS lands before the mapping exists, the server answers with another site on
+the same machine or with an error.
+
+### Where the IP comes from
+
+Same screen → **Ver Zona DNS** next to the domain. That view is the zone DonWeb _would_ serve
+if the nameservers pointed here. It does not serve it today, but the addresses in it are the
+real ones for this account:
+
+| What        | Value               |
+| ----------- | ------------------- |
+| IPv4        | `200.58.111.133`    |
+| IPv6        | `2800:6c0:2::a:21f` |
+| Reverse DNS | `a021.dattaweb.com` |
+
+Verified from outside: ports 80, 443 and 21 answer, and HTTP returns 200. DattaWeb is DonWeb's
+former name, so the reverse record is the expected one.
+
+### The mail records, for later
+
+That same DonWeb zone carries a full mail setup for the plan — `MX` to `mail.ga-lo-pe.com` and
+`mx1.ga-lo-pe.com`, `SPF`, `DKIM`, `DMARC`, and `SRV` records for IMAP, POP3 and submission.
+
+**None of it is in effect**, because the live zone is GoDaddy's. Keeping the zone at GoDaddy
+means that if Galope ever wants an address at the domain — `ajustes/general.yml` still has the
+placeholder `hola@example.com` — those records have to be copied into GoDaddy by hand. That is
+the real cost of this decision, and it is worth deciding before the site goes live rather than
+after.
 
 ## 2. Disconnect the Website Builder site, in GoDaddy
 
@@ -87,10 +122,13 @@ does not cancel it, and nobody wants to keep paying for a site that is no longer
 
 | Action      | Type    | Name             | Value                                 | TTL |
 | ----------- | ------- | ---------------- | ------------------------------------- | --- |
-| edit        | `A`     | `@`              | the DonWeb hosting IP                 | 600 |
+| edit        | `A`     | `@`              | `200.58.111.133`                      | 600 |
 | leave as is | `CNAME` | `www`            | `ga-lo-pe.com`                        | —   |
 | leave as is | `CNAME` | `_domainconnect` | `_domainconnect.gd.domaincontrol.com` | —   |
 | leave as is | `TXT`   | `_dmarc`         | the DMARC policy GoDaddy set up       | —   |
+
+Optionally also add `AAAA @ → 2800:6c0:2::a:21f`, so the site answers over IPv6. It is not
+required, and leaving it out changes nothing for visitors on IPv4.
 
 There is only **one** `A` record to change, even though the domain resolves to two addresses
 from outside: both come from the single Website Builder record of step 2.
@@ -99,10 +137,10 @@ from outside: both come from the single Website Builder record of step 2.
 corrections cheap. The `NS` and `SOA` rows cannot be edited from this panel, which is correct —
 nothing here should touch them.
 
-Write the IP down here once it is known, so the next person does not have to go and find it:
+Record the change here when it is made, so the next person does not have to reconstruct it:
 
 ```
-A @ → <DONWEB_IP>   (set on <date>)
+A @ → 200.58.111.133   (set on <date>)
 ```
 
 ## 4. Issue the certificate, in DonWeb
@@ -139,7 +177,10 @@ cannot click past. The order is: `A` record → certificate in DonWeb → `.htac
 
 ## Still open
 
-- The DonWeb hosting IP, and the date the `A` record was changed (step 3).
+- The date the `A` record was actually changed (step 3); the IP itself is now recorded.
+- Whether Galope wants mail at the domain. If they do, the DonWeb mail records have to be
+  copied into the GoDaddy zone by hand — see the end of step 1.
+- Whether the GoDaddy Website Builder site is a paid subscription worth cancelling (step 2).
 - `ALLOWED_DOMAINS` on the authenticator Worker and the OAuth App's homepage URL, which both
   want the domain now that it is known — see
   [cms-auth-setup.md](cms-auth-setup.md).
