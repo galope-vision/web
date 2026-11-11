@@ -1,0 +1,74 @@
+---
+/**
+ * Contacto (docs/spec.md § 5.5): the email and the social links from ajustes/general.yml.
+ * The design of this page is still open, so this is the plainest reading of it.
+ */
+import type { getGeneral } from '../lib/content';
+
+type General = Awaited<ReturnType<typeof getGeneral>>;
+
+interface Props {
+  email: General['email'];
+  socials: General['socials'];
+}
+
+const { email, socials } = Astro.props;
+---
+
+<div class="contact">
+  <div class="column">
+    <a class="email" href={`mailto:${email}`}>
+      {email}
+    </a>
+    {socials.length > 0 && (
+      <ul class="socials">
+        {socials.map(({ label, url }) => (
+          <li>
+            <a href={url} rel="me noreferrer" target="_blank">
+              {label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+</div>
+
+<style>
+  .contact {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-columns), 1fr);
+    gap: var(--space-gutter);
+    padding-top: var(--space-4);
+  }
+
+  .column {
+    display: grid;
+    gap: var(--space-2);
+    grid-column: 2;
+    align-content: start;
+  }
+
+  .email {
+    font-weight: var(--fw-bold);
+  }
+
+  .socials {
+    display: grid;
+    gap: var(--space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (width < 48rem) {
+    .contact {
+      grid-template-columns: repeat(var(--grid-columns-narrow), 1fr);
+      padding-top: var(--space-2);
+    }
+
+    .column {
+      grid-column: 1 / -1;
+    }
+  }
+</style>
