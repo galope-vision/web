@@ -63,7 +63,8 @@ certificate is issued in DonWeb**, or every visitor gets a certificate warning t
 past. The order is: `A` record → certificate → `.htaccess`. See the end of
 [dns-setup.md](dns-setup.md).
 
-That file does not exist yet, so deploying today is safe.
+The certificate is issued, and `public/.htaccess` arrives with the SEO work
+([seo-setup.md](seo-setup.md)), so the order has been respected and deploying is safe.
 
 ## If something fails
 
