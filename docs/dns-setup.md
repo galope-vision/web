@@ -196,5 +196,8 @@ cannot click past. The order is: `A` record → certificate in DonWeb → `.htac
 - `ALLOWED_DOMAINS` on the authenticator Worker and the OAuth App's homepage URL, which both
   want the domain now that it is known — see
   [cms-auth-setup.md](cms-auth-setup.md).
-- The deploy itself: `.github/workflows/deploy.yml` and `public/.htaccess` do not exist yet, so
-  until they do the domain resolves to an empty hosting account.
+- The deploy's credentials: `.github/workflows/deploy.yml` now exists, but the FTP secrets it
+  needs have not been set, so nothing has been uploaded yet and the domain still resolves to an
+  empty hosting account. See [deploy-setup.md](deploy-setup.md).
+- `public/.htaccess` does not exist yet, which is why deploying before the certificate is safe
+  for now.

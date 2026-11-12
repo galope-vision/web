@@ -1,0 +1,83 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  # Manual re-deploy, and the dry run used to check the configuration the first time.
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Build and list what would be uploaded, without touching the server'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+# One deploy at a time, and never cancel one halfway: the action keeps a state file on the
+# server, and an interrupted upload leaves the server out of sync with it.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+env:
+  # Google Tag Manager (ADR 0007). Not a secret: it ships in the HTML of every page. Only this
+  # workflow sets it, so dev, CI and the Cloudflare Pages previews build with no tag at all.
+  # Changing the container means editing this line.
+  PUBLIC_GTM_ID: GTM-W5Q3RH53
+
+jobs:
+  deploy:
+    name: Build and upload to DonWeb
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      # Fail here rather than halfway through an upload, with a message that says what is missing.
+      - name: Check the FTP configuration is there
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR }}
+        run: |
+          missing=''
+          for name in FTP_SERVER FTP_USERNAME FTP_PASSWORD FTP_SERVER_DIR; do
+            [ -n "${!name}" ] || missing="$missing $name"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Missing deploy configuration:$missing. See docs/deploy-setup.md." >&2
+            exit 1
+          fi
+          case "$FTP_SERVER_DIR" in
+            */) ;;
+            *) echo "::error::FTP_SERVER_DIR must end with a slash, got '$FTP_SERVER_DIR'." >&2; exit 1 ;;
+          esac
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build
+
+      # The tag is production-only, so this is the one build that must carry it. Without this
+      # check a typo in PUBLIC_GTM_ID above would ship a site with no analytics and no error.
+      - name: Check the Google Tag Manager container is in the build
+        run: |
+          grep -q "googletagmanager.com/gtm.js" dist/index.html \
+            || { echo "::error::PUBLIC_GTM_ID did not reach the build (ADR 0007)." >&2; exit 1; }
+
+      - name: Upload dist/ over FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          local-dir: ./dist/
+          server-dir: ${{ vars.FTP_SERVER_DIR }}
+          dry-run: ${{ inputs.dry_run || false }}
