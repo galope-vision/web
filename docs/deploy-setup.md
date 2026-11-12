@@ -26,12 +26,12 @@ leaves the server out of sync with that state file.
 
 In **Settings → Secrets and variables → Actions** of the GitHub repository:
 
-| Kind     | Name             | Value                                                       |
-| -------- | ---------------- | ----------------------------------------------------------- |
-| Secret   | `FTP_SERVER`     | The FTP host of the DonWeb account, e.g. `ftp.ga-lo-pe.com` |
-| Secret   | `FTP_USERNAME`   | The FTP user                                                |
-| Secret   | `FTP_PASSWORD`   | Its password                                                |
-| Variable | `FTP_SERVER_DIR` | The directory the domain serves, **with a trailing slash**  |
+| Kind     | Name             | Value                                                  |
+| -------- | ---------------- | ------------------------------------------------------ |
+| Secret   | `FTP_SERVER`     | The FTP host Ferozo shows for the account (see below)  |
+| Secret   | `FTP_USERNAME`   | The FTP user                                           |
+| Secret   | `FTP_PASSWORD`   | Its password                                           |
+| Variable | `FTP_SERVER_DIR` | `/httpdocs/` on this plan, **with the trailing slash** |
 
 `FTP_SERVER_DIR` is a variable, not a secret: it is a path, not a credential, and the workflow
 log is easier to read when it is visible. The workflow refuses to run if it does not end in `/`,
@@ -41,7 +41,12 @@ The three FTP values come from the Ferozo panel (<https://panel.ferozo.com>, its
 password, service `#6624915`): **FTP** → the account for `ga-lo-pe.com`. Ferozo shows the host
 and the user there; the password can be reset from the same screen if nobody has it. The
 directory the domain serves is shown next to the FTP account — on this plan it is the folder
-mapped to the domain, not the FTP root, which also holds other folders.
+mapped to the domain, not the FTP root, which also holds other folders: on this plan that is
+**`/httpdocs/`**.
+
+Do not guess the host as `ftp.ga-lo-pe.com`: that name does **not** resolve. It exists only in
+DonWeb's inactive copy of the zone, so it is a plausible-looking value that fails at connection
+time. Take the host from the panel, or use the account's address, `200.58.111.133`.
 
 `PUBLIC_GTM_ID` is **not** configured here. It is written into `deploy.yml` as a literal,
 because it is not a secret — it ships in the HTML of every page — and because a missing variable
