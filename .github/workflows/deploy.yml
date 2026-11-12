@@ -12,6 +12,12 @@ on:
 permissions:
   contents: read
 
+env:
+  # Google Tag Manager (docs/adr/0007-google-tag-manager.md). Not a secret: it ships in the HTML
+  # of every page. Only this workflow sets it, so dev, CI and the previews build with no tag at
+  # all. Changing the container means editing this line.
+  PUBLIC_GTM_ID: GTM-W5Q3RH53
+
 # Never two deploys at once against the same FTP account, and never cancel one half way: the
 # action syncs file by file, so an interrupted run leaves the site in a mixed state.
 concurrency:
@@ -35,6 +41,14 @@ jobs:
       # The build validates the content schemas, so bad content fails here and never reaches
       # production (CLAUDE.md, "Content model").
       - run: npm run build
+
+      # Production is the only build that carries the tag, so it is the only place a mistake in
+      # PUBLIC_GTM_ID shows up — as a live site with no analytics and no error anywhere. Fail
+      # the deploy instead.
+      - name: Check the Google Tag Manager container is in the build
+        run: |
+          grep -q "googletagmanager.com/gtm.js" dist/index.html \
+            || { echo "::error::PUBLIC_GTM_ID did not reach the build (ADR 0007)."; exit 1; }
 
       # Fail with a readable message instead of letting the action deploy into the FTP root,
       # which on shared hosting is the parent of the web directory.

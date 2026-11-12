@@ -34,13 +34,22 @@ at <https://panel.ferozo.com> with its own user and password — so the value is
 Confirm it in the DonWeb file manager before the first deploy. Getting it wrong uploads the site
 into the parent of the web directory, where nothing serves it.
 
-Do not use `ftp.ga-lo-pe.com` as the host. That name exists only in DonWeb's own copy of the
-zone, which is not the live one — the live zone is GoDaddy's and has no `ftp` record, so the
-name does not resolve. Use the address, or the host FileZilla is already connecting to.
+`ftp.ga-lo-pe.com` works as the host. It used to be a trap — the name lived only in DonWeb's
+copy of the zone, which was not the live one — but the nameservers were delegated to DonWeb on
+2026-11-11, so that zone is now authoritative and the name resolves to `200.58.111.133`
+(checked 2026-11-12). The address works just as well and does not depend on the zone.
 
 Create a **dedicated FTP user** for the deploy if the panel allows it, scoped to the web
 directory. The credentials live only in GitHub Actions secrets, never in the repo
 ([ADR 0003](adr/0003-static-hosting-donweb-ftp.md)).
+
+## What is not configured here
+
+`PUBLIC_GTM_ID` is a literal in `deploy.yml`, not a secret or a variable. It is not a secret —
+it ships in the HTML of every page — and as a repository variable a missing value would quietly
+produce a site with no analytics, which is exactly the failure that is hardest to notice. The
+workflow greps the build for the snippet so that a mistake is a red deploy instead
+([ADR 0007](adr/0007-google-tag-manager.md)).
 
 ## The order of the first deploy
 
