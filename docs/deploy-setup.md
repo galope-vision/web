@@ -49,7 +49,7 @@ directory. The credentials live only in GitHub Actions secrets, never in the rep
 it ships in the HTML of every page — and as a repository variable a missing value would quietly
 produce a site with no analytics, which is exactly the failure that is hardest to notice. The
 workflow greps the build for the snippet so that a mistake is a red deploy instead
-([ADR 0007](adr/0007-google-tag-manager.md)).
+([ADR 0008](adr/0008-google-tag-manager.md)).
 
 ## The order of the first deploy
 

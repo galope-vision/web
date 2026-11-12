@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 env:
-  # Google Tag Manager (docs/adr/0007-google-tag-manager.md). Not a secret: it ships in the HTML
+  # Google Tag Manager (docs/adr/0008-google-tag-manager.md). Not a secret: it ships in the HTML
   # of every page. Only this workflow sets it, so dev, CI and the previews build with no tag at
   # all. Changing the container means editing this line.
   PUBLIC_GTM_ID: GTM-W5Q3RH53
@@ -48,7 +48,7 @@ jobs:
       - name: Check the Google Tag Manager container is in the build
         run: |
           grep -q "googletagmanager.com/gtm.js" dist/index.html \
-            || { echo "::error::PUBLIC_GTM_ID did not reach the build (ADR 0007)."; exit 1; }
+            || { echo "::error::PUBLIC_GTM_ID did not reach the build (ADR 0008)."; exit 1; }
 
       # Fail with a readable message instead of letting the action deploy into the FTP root,
       # which on shared hosting is the parent of the web directory.
