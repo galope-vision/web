@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import Dice from '../components/Dice.astro';
+import GoogleTagManager from '../components/GoogleTagManager.astro';
 import Header from '../components/Header.astro';
 import LocaleSwitch from '../components/LocaleSwitch.astro';
 import Logo from '../components/Logo.astro';
@@ -43,6 +44,7 @@ const absolute = (path: string): string => (Astro.site ? new URL(path, Astro.sit
 <html lang={locale}>
   <head>
     <meta charset="utf-8" />
+    <GoogleTagManager part="head" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -56,6 +58,7 @@ const absolute = (path: string): string => (Astro.site ? new URL(path, Astro.sit
     <title>{title}</title>
   </head>
   <body>
+    <GoogleTagManager part="body" />
     <div class:list={['shell', `dice-${dice}`]}>
       {chrome === 'full' ? (
         <Header locale={locale} current={current} />
