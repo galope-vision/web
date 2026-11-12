@@ -154,6 +154,10 @@ later.
 Once the `A` record has propagated, enable **SSL (Let's Encrypt)** in the DonWeb panel. It
 validates over HTTP on port 80, so it only works after step 3 is live.
 
+Done. Checked on 2026-11-12: `https://ga-lo-pe.com` and `https://www.ga-lo-pe.com` both answer
+200 with no certificate warning, so the certificate covers the apex and `www`. That is what
+unblocks `public/.htaccess` below.
+
 ## 5. Check it
 
 ```bash
@@ -176,6 +180,9 @@ has nothing in it yet — and `https://` fails with
 redirects to an HTTPS URL that no certificate covers, and every visitor gets a warning they
 cannot click past. The order is: `A` record → certificate in DonWeb → `.htaccess`.
 
+All three are done: the certificate was issued (step 4) and `public/.htaccess` exists since the
+SEO work, which also makes it redirect `www` to the apex ([seo-setup.md](seo-setup.md)).
+
 ## If something fails
 
 | What you see                                    | Usually means                                                                  |
@@ -188,13 +195,11 @@ cannot click past. The order is: `A` record → certificate in DonWeb → `.htac
 
 ## Still open
 
-- The certificate (step 4). Until it exists, `https://ga-lo-pe.com` fails with a name mismatch,
-  and `public/.htaccess` must not be deployed.
 - Whether Galope wants mail at the domain. If they do, the DonWeb mail records have to be
   copied into the GoDaddy zone by hand — see the end of step 1.
 - Whether the GoDaddy Website Builder site is a paid subscription worth cancelling (step 2).
 - `ALLOWED_DOMAINS` on the authenticator Worker and the OAuth App's homepage URL, which both
   want the domain now that it is known — see
   [cms-auth-setup.md](cms-auth-setup.md).
-- The deploy itself: `.github/workflows/deploy.yml` and `public/.htaccess` do not exist yet, so
-  until they do the domain resolves to an empty hosting account.
+- The deploy itself: `.github/workflows/deploy.yml` does not exist on `main` yet, so every
+  upload so far has been made by hand. `public/.htaccess` now exists.

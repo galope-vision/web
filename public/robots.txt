@@ -1,0 +1,9 @@
+# ga-lo-pe.com
+
+# /admin/ is the CMS, not content. Everything else is open: the pages that should stay out of
+# search carry a `noindex` meta tag instead, which only works if crawlers are allowed to read
+# them (docs/seo-setup.md).
+User-agent: *
+Disallow: /admin/
+
+Sitemap: https://ga-lo-pe.com/sitemap.xml
