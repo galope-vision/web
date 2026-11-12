@@ -31,6 +31,14 @@
   --fs-body: 1rem;
   --lh-nav: 16px;
   --lh-body: 17px;
+  /*
+   * A third size, for the launch date on the holding page: it is the one thing that page says,
+   * so it is read from across the room. 28 px on a phone, 36 px from 514 px up — under the 40 px
+   * of the logo, which stays the loudest thing on the screen. Temporary: it goes away with
+   * src/components/ComingSoon.astro when phase 3 builds the real home.
+   */
+  --fs-display: clamp(1.75rem, 7vw, 2.25rem);
+  --lh-display: 1.1;
   /* Running text (the Info paragraph, a project description) needs room to breathe. */
   --lh-prose: 1.5;
 
