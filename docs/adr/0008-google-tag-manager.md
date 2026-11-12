@@ -1,4 +1,4 @@
-# 0007 · Google Tag Manager next to Cloudflare Web Analytics
+# 0008 · Google Tag Manager next to Cloudflare Web Analytics
 
 - Status: Accepted
 - Date: 2026-11-12

@@ -29,7 +29,7 @@ The client must be able to publish content on their own, with no developer invol
   FTPS (`SamKirkland/FTP-Deploy-Action`). Domain DNS stays at GoDaddy.
 - **Previews**: Cloudflare Pages — one preview per CMS draft branch and per code PR. `noindex`.
 - **Analytics**: Cloudflare Web Analytics (production only, no cookies) plus Google Tag Manager
-  (production only, `PUBLIC_GTM_ID` set by the deploy; its tags may set cookies, ADR 0007).
+  (production only, `PUBLIC_GTM_ID` set by the deploy; its tags may set cookies, ADR 0008).
 - **Motion**: Motion (motion.dev) — only `animate`, `inView`, `stagger`. Idle drift in pure CSS.
   Parallax in our own TS (`src/scripts/motion.ts`).
 
