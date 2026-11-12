@@ -42,8 +42,10 @@ indexed anyway, from a link somewhere else.
 
 1. **Verify the property.** A _domain_ property (`ga-lo-pe.com`) is the one to pick: it covers
    the apex, `www`, http and https in one go, which is exactly the thing the redirects above are
-   about. It is verified with a `TXT` record in the GoDaddy zone, next to the `_dmarc` that is
-   already there — see [dns-setup.md](dns-setup.md) for how that zone is managed.
+   about. It is verified with a `TXT` record in the zone. **Check where the zone is served
+   from before going looking for it**: the nameservers are `ns3`/`ns4.hostmar.com`, DonWeb's,
+   so the record goes in the Ferozo panel, not at GoDaddy, which only holds the registration
+   — see [dns-setup.md](dns-setup.md).
 
    The alternative, if the DNS record is a problem: the **Google Tag Manager** method, which
    works because the container is already installed and published
