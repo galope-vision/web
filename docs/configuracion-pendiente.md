@@ -9,20 +9,40 @@ técnicos de cada tema están linkeados al final de su sección.
 
 ---
 
-## Lo primero, porque destraba casi todo
+## Lo primero: no hay ningún rol "Admin" que dar
 
-> ### 0 · Darle rol **Admin** a Caro en `galope-vision/web`
+`galope-vision` es una **cuenta personal** de GitHub, no una organización. En los repositorios de
+una cuenta personal los colaboradores tienen un único nivel de acceso — **escritura** — y no
+existe el selector de roles (Read / Triage / Write / Maintain / Admin): eso solo aparece en
+repositorios de organización.
+
+Comprobado en el panel el 2026-11-12: en **Settings → Collaborators**, la fila de `CaroBilkis`
+tiene un botón para quitarla del repositorio y nada más. No hay menú de rol.
+
+**Consecuencia: el dueño de `galope-vision` es el único admin posible.** Todo lo que viva en
+_Settings_ — los puntos 1, 2 y 3 — lo tiene que hacer él. Desde una cuenta con escritura, la API
+de GitHub contesta `404` a esas escrituras (no `403`: GitHub no revela si el recurso existe
+cuando no tenés permiso sobre él).
+
+Hay dos caminos:
+
+> ### Opción A · Que los haga Galope
 >
-> - **Dónde:** <https://github.com/galope-vision/web/settings/access>
-> - **Quién:** Galope. `galope-vision` es una cuenta personal de GitHub (no una organización), así
->   que esto solo lo puede hacer su dueño.
-> - **Cómo:** en la fila de `CaroBilkis`, el menú **Role** → **Admin**. Hoy está en **Write**, que
->   alcanza para subir ramas y abrir PRs, pero no para tocar _Settings_.
-> - **Desbloquea:** los puntos 1, 2 y 3. Sin esto, cada uno de ellos necesita que Galope entre al
->   panel.
+> Sin cambiar nada de estructura. Son unos 15 minutos siguiendo los puntos 1 a 3 de este
+> documento, una sola vez.
 
-Si Galope prefiere no dar admin, no hay problema: los puntos 1 a 3 los puede hacer Galope
-siguiendo las mismas instrucciones. Son unos 15 minutos en total.
+> ### Opción B · Pasar el repositorio a una organización
+>
+> Crear una organización de GitHub (gratis, Galope queda como dueño), transferirle el
+> repositorio y recién ahí darle a Caro el rol **Admin**. Deja de aparecer este problema cada vez
+> que haya que tocar una configuración.
+>
+> **Lo que cuesta:** cambia el nombre del repositorio (`galope-vision/web` → `<org>/web`), así
+> que hay que actualizar `repo:` en [`public/admin/config.yml`](../public/admin/config.yml), la
+> OAuth App del CMS, el remote de git y estos documentos. GitHub redirige la URL vieja, pero el
+> backend del CMS quiere el nombre exacto.
+
+Mientras no se decida, vale la Opción A: los puntos 1 a 3 los hace Galope.
 
 ---
 
@@ -32,7 +52,7 @@ siguiendo las mismas instrucciones. Son unos 15 minutos en total.
 
 - **Dónde:** <https://github.com/galope-vision/web/settings> → sección **Pull Requests** →
   tildar **Allow auto-merge**
-- **Quién:** Galope, o Caro con admin (punto 0)
+- **Quién:** Galope (ver arriba: en un repo de cuenta personal no hay otro admin)
 - **Desbloquea:** **publicar desde el CMS.** Cuando Galope aprieta "Publicar", el CMS mergea el PR
   de esa entrada. Si CI todavía está corriendo, el CMS prende auto-merge y espera. Sin esta
   opción, publicar falla mientras corre el check y hay que reintentar a mano.
@@ -40,7 +60,7 @@ siguiendo las mismas instrucciones. Son unos 15 minutos en total.
 ### 2 · Cargar los secrets del deploy a DonWeb
 
 - **Dónde:** <https://github.com/galope-vision/web/settings/secrets/actions>
-- **Quién:** Galope, o Caro con admin (punto 0)
+- **Quién:** Galope (ver arriba: en un repo de cuenta personal no hay otro admin)
 - **Antes hace falta:** el punto 6 (confirmar el directorio y el usuario FTP en DonWeb)
 
 Pestaña **Secrets** → _New repository secret_, tres veces:
@@ -67,7 +87,7 @@ de una si un deploy fue a parar al lugar equivocado.
 ### 3 · Cargar los secrets de las previews
 
 - **Dónde:** <https://github.com/galope-vision/web/settings/secrets/actions>
-- **Quién:** Galope, o Caro con admin (punto 0)
+- **Quién:** Galope (ver arriba: en un repo de cuenta personal no hay otro admin)
 - **Antes hace falta:** el punto 5 (crear el proyecto y el token en Cloudflare)
 
 | Nombre                  | Valor                       |
