@@ -56,7 +56,7 @@ up indexed anyway from a link somewhere else.
 
    The alternative, if the DNS record is a problem: the **Google Tag Manager** method, which
    works because the container is installed and published
-   ([ADR 0007](adr/0007-google-tag-manager.md)). It needs publish rights on the container, and it
+   ([ADR 0008](adr/0008-google-tag-manager.md)). It needs publish rights on the container, and it
    verifies a single origin, so `https://ga-lo-pe.com` would be verified and `www` would not.
 
 2. **Submit the sitemap**: Sitemaps → `sitemap.xml`.
