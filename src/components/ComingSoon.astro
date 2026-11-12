@@ -1,7 +1,7 @@
 ---
 /**
- * The holding page the domain shows until the real home is built: the dice, the title, one line
- * and whatever socials `ajustes/general.yml` has.
+ * The holding page the domain shows until the real home is built: the dice, the date the site
+ * goes live and the Instagram link.
  *
  * Temporary by design. When phase 3 builds the real home (the random images or video of
  * docs/spec.md § 5.1), this component and its `soon.*` strings go away, and `src/pages/index.astro`
@@ -11,29 +11,45 @@
  * yet. Phase 3 is what makes it clickable.
  */
 import Dice from './Dice.astro';
-import { t, type Locale } from '../lib/i18n';
 
 interface Props {
-  locale: Locale;
   socials: readonly { label: string; url: string }[];
 }
 
-const { locale, socials } = Astro.props;
-const s = t(locale);
+const { socials } = Astro.props;
+
+/**
+ * The day the site goes live. Written once, here: the page shows it as DD/MM/YYYY in both
+ * locales (that is the design), and `<time>` carries the ISO form for machines.
+ */
+const LAUNCH_DATE = '2026-12-20';
+const [year, month, day] = LAUNCH_DATE.split('-');
+const launchLabel = `${day}/${month}/${year}`;
+
+/**
+ * Only Instagram belongs on the holding page, whatever else `ajustes/general.yml` lists:
+ * the rest of the socials wait for the Contacto page.
+ */
+const instagram = socials.find(({ url }) => {
+  try {
+    const { hostname } = new URL(url);
+    return hostname === 'instagram.com' || hostname.endsWith('.instagram.com');
+  } catch {
+    return false;
+  }
+});
 ---
 
 <div class="soon">
   <Dice placement="hero" />
-  <h1 class="title">{s('soon.title')}</h1>
-  <p class="body">{s('soon.body')}</p>
-  {socials.length > 0 && (
-    <p class="socials">
-      <span class="lead">{s('soon.follow')}</span>
-      {socials.map(({ label, url }) => (
-        <a href={url} rel="me noopener" target="_blank">
-          {label}
-        </a>
-      ))}
+  <h1 class="date">
+    <time datetime={LAUNCH_DATE}>{launchLabel}</time>
+  </h1>
+  {instagram && (
+    <p class="social">
+      <a href={instagram.url} rel="me noopener" target="_blank">
+        {instagram.label}
+      </a>
     </p>
   )}
 </div>
@@ -49,35 +65,21 @@ const s = t(locale);
     text-align: center;
   }
 
-  .title {
-    /* Uppercase in the design, lower case in the markup, so it is read out normally. */
-    text-transform: uppercase;
+  .date {
     letter-spacing: 0.08em;
   }
 
-  .body {
-    max-width: 32ch;
-  }
-
-  .socials {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: var(--space-1);
+  .social {
     font-size: var(--fs-nav);
     line-height: var(--lh-nav);
   }
 
-  .lead {
-    color: var(--color-placeholder);
-  }
-
-  .socials a {
+  .social a {
     font-weight: var(--fw-bold);
     text-decoration: none;
   }
 
-  /* The title and the dice carry the page; the gap can be tighter on a phone. */
+  /* The date and the dice carry the page; the gap can be tighter on a phone. */
   @media (width < 48rem) {
     .soon {
       gap: var(--space-1);

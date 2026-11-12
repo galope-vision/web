@@ -44,10 +44,9 @@ const ES_UI = {
   'notFound.title': 'Página no encontrada',
   'notFound.back': 'Ir al inicio',
   'placeholder.soon': 'En construcción.',
-  /* The holding page the domain shows until the real home is built (src/components/ComingSoon.astro). */
+  /* The browser title of the holding page; the page itself shows only the launch date
+     (src/components/ComingSoon.astro). */
   'soon.title': 'Próximamente',
-  'soon.body': 'Estamos construyendo el nuevo sitio.',
-  'soon.follow': 'Mientras tanto',
 } as const;
 
 export type UiKey = keyof typeof ES_UI;
@@ -75,8 +74,6 @@ const EN_UI: Record<UiKey, string> = {
   'notFound.back': 'Go to the home page',
   'placeholder.soon': 'Under construction.',
   'soon.title': 'Coming soon',
-  'soon.body': 'We are building the new site.',
-  'soon.follow': 'In the meantime',
 };
 
 const UI: Record<Locale, Record<UiKey, string>> = { es: ES_UI, en: EN_UI };
