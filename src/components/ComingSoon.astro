@@ -38,6 +38,17 @@ const instagram = socials.find(({ url }) => {
     return false;
   }
 });
+
+/**
+ * The page shows the handle, not the word "Instagram", and reads it off the URL so the CMS stays
+ * the single place the account is written down. `/ga.lo.pe/` -> `@ga.lo.pe`; anything without a
+ * handle in it falls back to the label.
+ */
+const handle = (() => {
+  if (!instagram) return undefined;
+  const name = new URL(instagram.url).pathname.split('/').filter(Boolean)[0];
+  return name === undefined ? instagram.label : `@${name}`;
+})();
 ---
 
 <div class="soon">
@@ -47,8 +58,13 @@ const instagram = socials.find(({ url }) => {
   </h1>
   {instagram && (
     <p class="social">
-      <a href={instagram.url} rel="me noopener" target="_blank">
-        {instagram.label}
+      <a
+        href={instagram.url}
+        rel="me noopener"
+        target="_blank"
+        aria-label={`${instagram.label}: ${handle}`}
+      >
+        {handle}
       </a>
     </p>
   )}
