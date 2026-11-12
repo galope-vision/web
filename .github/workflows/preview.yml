@@ -23,28 +23,47 @@ jobs:
   deploy:
     name: Build and deploy
     runs-on: ubuntu-latest
+
+    env:
+      # The `secrets` context cannot be read in a job-level `if`, so the gate is per step. Until
+      # the two Cloudflare secrets exist the job does nothing and says so, rather than failing at
+      # the deploy step and putting a red check on every open pull request.
+      # docs/preview-setup.md, step 3.
+      CONFIGURED: ${{ secrets.CLOUDFLARE_API_TOKEN != '' && secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
+
     steps:
+      - name: Say why there is no preview
+        if: env.CONFIGURED != 'true'
+        run: |
+          echo "::notice::No Cloudflare secrets on this repository yet, so no preview was built. Steps 1 to 3 of docs/preview-setup.md."
+
       - uses: actions/checkout@v7
+        if: env.CONFIGURED == 'true'
 
       - uses: actions/setup-node@v7
+        if: env.CONFIGURED == 'true'
         with:
           node-version-file: .nvmrc
           cache: npm
 
       - run: npm ci
+        if: env.CONFIGURED == 'true'
 
       # No `PUBLIC_GTM_ID`: previews carry no analytics (ADR 0002).
       - run: npm run build
+        if: env.CONFIGURED == 'true'
 
       # Cloudflare Pages reads `_headers` from the uploaded directory and does not serve it.
       # It is written here rather than kept in `public/`, so the production build on DonWeb
       # stays exactly what it is today.
       - name: Keep previews out of search engines
+        if: env.CONFIGURED == 'true'
         run: |
           printf '/*\n  X-Robots-Tag: noindex\n' > dist/_headers
 
       - name: Deploy to Cloudflare Pages
         id: deploy
+        if: env.CONFIGURED == 'true'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -56,6 +75,7 @@ jobs:
 
       # Best effort: the deployment is already up, so a failure here must not fail the job.
       - name: Leave the preview URL on the pull request
+        if: env.CONFIGURED == 'true'
         continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

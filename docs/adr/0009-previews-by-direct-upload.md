@@ -31,8 +31,9 @@ files get there. Cloudflare offers two ways:
 ## Consequences
 
 - Two repository secrets are needed — `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` — and
-  only an administrator of `galope-vision/web` can add them. Until they exist, the workflow runs
-  and fails at the deploy step; nothing else breaks.
+  only an administrator of `galope-vision/web` can add them. Until they exist, every step of the
+  workflow is skipped and the run leaves a notice saying so, so the workflow can be merged before
+  the secrets are, without a red check appearing on every open pull request.
 - The Pages project is created once by hand, as Direct Upload, with `main` as its production
   branch. This workflow never runs on `main`, so it never produces a production deployment there;
   production is DonWeb ([ADR 0003](0003-static-hosting-donweb-ftp.md)).

@@ -43,8 +43,9 @@ repository**, so it is Galope's to do.
 | `CLOUDFLARE_API_TOKEN`  | the token from step 2           |
 | `CLOUDFLARE_ACCOUNT_ID` | the account ID from the sidebar |
 
-Until both exist, the workflow runs on every pull request and fails at the deploy step. Nothing
-else breaks: CI, the build and production are untouched.
+Until both exist, the workflow runs on every pull request, skips every step and leaves a notice
+saying why. It does not fail, so it puts no red check on anything, and it is safe to merge the
+workflow before the secrets are in.
 
 ## 4. Check it works
 
