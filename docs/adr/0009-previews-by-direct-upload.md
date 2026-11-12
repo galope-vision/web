@@ -24,7 +24,7 @@ files get there. Cloudflare offers two ways:
 - **The build environment is already pinned.** `actions/setup-node` reads `.nvmrc`; Cloudflare's
   builder needs an environment variable set by hand to the same value.
 - **Analytics stay off previews by construction.** Previews simply never set `PUBLIC_GTM_ID`.
-- **Installing a GitHub App on `galope-vision` needs an organisation owner**, which is the same
+- **Installing the Cloudflare GitHub App needs the owner of `galope-vision`**, which is the same
   approval as adding two repository secrets, for less control.
 - `CLAUDE.md` already describes a `preview.yml` workflow in the repository layout.
 
