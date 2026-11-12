@@ -1,0 +1,77 @@
+name: Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: ['cms/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+# A CMS draft fires both triggers: Sveltia pushes the `cms/*` branch and opens its pull request.
+# Keying the group on the branch collapses the two runs into one, so a draft costs one build of
+# the free-tier quota instead of two (ADR 0002). The `push` trigger is the safety net for a
+# branch that has no pull request yet.
+concurrency:
+  group: preview-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build and deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      # No `PUBLIC_GTM_ID`: previews carry no analytics (ADR 0002).
+      - run: npm run build
+
+      # Cloudflare Pages reads `_headers` from the uploaded directory and does not serve it.
+      # It is written here rather than kept in `public/`, so the production build on DonWeb
+      # stays exactly what it is today.
+      - name: Keep previews out of search engines
+        run: |
+          printf '/*\n  X-Robots-Tag: noindex\n' > dist/_headers
+
+      - name: Deploy to Cloudflare Pages
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: >-
+            pages deploy dist
+            --project-name=galope-web
+            --branch=${{ github.head_ref || github.ref_name }}
+
+      # Best effort: the deployment is already up, so a failure here must not fail the job.
+      - name: Leave the preview URL on the pull request
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          URL: ${{ steps.deploy.outputs.deployment-url }}
+          BRANCH: ${{ github.head_ref || github.ref_name }}
+        run: |
+          number=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')
+          if [ -z "$number" ]; then
+            echo "No open pull request for $BRANCH. The preview is at $URL"
+            exit 0
+          fi
+          cat > body.md <<EOF
+          **Preview:** $URL
+
+          Built from \`${GITHUB_SHA:0:7}\`. It answers \`X-Robots-Tag: noindex\` and carries no
+          analytics, so it stays out of search engines and out of the numbers.
+          EOF
+          gh pr comment "$number" --body-file body.md --edit-last \
+            || gh pr comment "$number" --body-file body.md
