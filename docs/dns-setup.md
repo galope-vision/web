@@ -79,10 +79,11 @@ Checked on 2026-11-11: `ga-lo-pe.com` is already attached to the hosting plan, t
 The plan is **Web Hosting Plan Full**, Linux, service `#6624915`, on the **Ferozo** panel
 (<https://panel.ferozo.com>, its own user and password).
 
-That screen shows the domain in red: _"El dominio tiene asignados NS de otro proveedor"_.
-**That warning is expected and is not a problem.** It is DonWeb noticing that the nameservers
-are GoDaddy's, which is the whole point of the decision above. It goes away only if the
-nameservers are delegated, which is what we chose not to do.
+That screen used to show the domain in red — _"El dominio tiene asignados NS de otro
+proveedor"_ — because the nameservers were GoDaddy's. Step 2 is what clears it: once the
+delegation is published, DonWeb stops complaining and the domain is no longer tagged
+**DNS EXTERNO**. If the warning is still there, the delegation has not propagated yet, and the
+certificate in step 3 will not issue either.
 
 This step matters because Apache needs the domain mapped to a directory before any traffic
 arrives; if the DNS lands before the mapping exists, the server answers with another site on
@@ -108,11 +109,27 @@ former name, so the reverse record is the expected one.
 That same DonWeb zone carries a full mail setup for the plan — `MX` to `mail.ga-lo-pe.com` and
 `mx1.ga-lo-pe.com`, `SPF`, `DKIM`, `DMARC`, and `SRV` records for IMAP, POP3 and submission.
 
-**None of it is in effect**, because the live zone is GoDaddy's. Keeping the zone at GoDaddy
-means that if Galope ever wants an address at the domain — `ajustes/general.yml` still has the
-placeholder `hola@example.com` — those records have to be copied into GoDaddy by hand. That is
-the real cost of this decision, and it is worth deciding before the site goes live rather than
-after.
+**Since the delegation, all of it is in effect.** Checked on 2026-11-12:
+
+```
+$ dig +short MX ga-lo-pe.com @8.8.8.8
+0 mail.ga-lo-pe.com.
+20 mx1.ga-lo-pe.com.
+$ dig +short TXT ga-lo-pe.com @8.8.8.8
+"v=spf1 include:comp.hostmar.com -all"
+```
+
+So an address at the domain — `ajustes/general.yml` still has the placeholder
+`hola@example.com` — needs a mailbox created in the panel and no DNS work at all. That is one
+of the things the delegation bought.
+
+Two side effects of the zone changing hands, both worth knowing:
+
+- **The DMARC policy changed.** GoDaddy served `p=quarantine`; DonWeb serves
+  `v=DMARC1; p=none`. Nothing sends mail from the domain yet, so nothing breaks, but the
+  stricter policy is gone.
+- **`ftp.ga-lo-pe.com` resolves now**, to `200.58.111.133`. It is a record in DonWeb's zone that
+  used to be dead letter while GoDaddy answered for the domain.
 
 ## 2. Delegate the nameservers, in GoDaddy
 
@@ -158,9 +175,22 @@ nameservers before it even tries, and answers _"Los NS no son los correctos"_ if
 yet theirs. It retries on its own, but the attempts are limited — if they run out, request it
 again rather than waiting.
 
+**Done on 2026-11-11.** It came out as a wildcard, which is more than was asked for and covers
+`www` without a second certificate:
+
+```
+subject=CN = *.ga-lo-pe.com
+issuer=C = US, O = Let's Encrypt, CN = YR1
+notBefore=Nov 11 18:52:23 2026 GMT   notAfter=Feb  9 18:52:22 2027 GMT
+```
+
+Let's Encrypt certificates last 90 days. DonWeb renews them on its own; if the site ever starts
+answering with an expired one, that renewal is the first place to look.
+
 ## 4. Check it
 
 ```bash
+dig +short NS ga-lo-pe.com @8.8.8.8
 dig +short A ga-lo-pe.com @8.8.8.8
 dig +short A www.ga-lo-pe.com @8.8.8.8
 curl -sS -o /dev/null -w "%{http_code} %{remote_ip}\n" https://ga-lo-pe.com/
@@ -169,16 +199,19 @@ curl -sS -o /dev/null -w "%{http_code} %{remote_ip}\n" https://ga-lo-pe.com/
 The first two have to answer the DonWeb IP and nothing else. The third has to answer without a
 certificate warning.
 
-State on 2026-11-11, after step 3 and before step 4: the first two answer `200.58.111.133`,
-`http://ga-lo-pe.com` returns 200 from that address with an empty page — the hosting account
-has nothing in it yet — and `https://` fails with
-`no alternative certificate subject name matches target host name`, which is step 4's job.
+State on 2026-11-12, with every step done: the nameservers answer `ns3.hostmar.com` and
+`ns4.hostmar.com`, the apex and `www` both answer `200.58.111.133`, and `https://ga-lo-pe.com`
+returns 200 with no certificate warning. The hosting account is no longer empty — the holding
+page is up, uploaded by hand until the deploy workflow lands.
 
 ## The order matters
 
 `public/.htaccess` forces HTTPS. **Do not deploy it before the certificate exists** or the site
 redirects to an HTTPS URL that no certificate covers, and every visitor gets a warning they
 cannot click past. The order is: `A` record → certificate in DonWeb → `.htaccess`.
+
+All three are now satisfied: the delegation and the certificate are done, so the `.htaccess`
+that arrives with the deploy work is safe to ship.
 
 ## If something fails
 
@@ -192,8 +225,6 @@ cannot click past. The order is: `A` record → certificate in DonWeb → `.htac
 
 ## Still open
 
-- The certificate (step 3). Until it exists, `https://ga-lo-pe.com` fails with a name mismatch,
-  and `public/.htaccess` must not be deployed.
 - Whether Galope wants mail at the domain. Now that the zone is DonWeb's, this is configured
   in their panel with no DNS work — the records are already there.
 - Whether the GoDaddy Website Builder site is a paid subscription worth cancelling. It can no
