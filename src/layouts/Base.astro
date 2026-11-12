@@ -13,7 +13,11 @@ interface Props {
   description: string;
   /** The page being shown, marked as active in the nav. */
   current?: Page;
-  /** Keeps the page out of search engines: the styles page, the 404, the previews. */
+  /**
+   * Keeps the page out of search engines: the styles page, the 404, the previews, and the pages
+   * that are still placeholders. Such a page gets no canonical either, and must stay out of
+   * `src/pages/sitemap.xml.ts`.
+   */
   noindex?: boolean;
   /**
    * `full` is the nav row of every built page. `switch-only` drops it and keeps just `ES/EN`,
@@ -34,10 +38,22 @@ const {
   dice = 'nav',
 } = Astro.props;
 
-/** The same page in the other locale, for `hreflang` (docs/spec.md § 10). */
+/** The same page in the other locale, for `hreflang` (docs/spec.md § 10), and its canonical. */
 const variants = localeVariants(Astro.url.pathname);
-/** Absolute once `site` is configured; the final domain is still open (docs/spec.md § 13). */
-const absolute = (path: string): string => (Astro.site ? new URL(path, Astro.site).href : path);
+
+const site = Astro.site;
+if (!site) {
+  throw new Error(
+    '`site` must be set in astro.config.mjs: hreflang and canonical need absolute URLs',
+  );
+}
+
+/**
+ * Absolute, from the paths `localePath` builds: no trailing slash except on the two home pages.
+ * `public/.htaccess` serves exactly that shape and redirects the other one, so no canonical or
+ * `hreflang` here ever points at a URL that redirects.
+ */
+const absolute = (path: string): string => new URL(path, site).href;
 ---
 
 <!doctype html>
@@ -50,7 +66,11 @@ const absolute = (path: string): string => (Astro.site ? new URL(path, Astro.sit
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <meta name="generator" content={Astro.generator} />
-    {noindex && <meta name="robots" content="noindex" />}
+    {noindex ? (
+      <meta name="robots" content="noindex" />
+    ) : (
+      <link rel="canonical" href={absolute(variants[locale])} />
+    )}
     {LOCALES.map((item) => (
       <link rel="alternate" hreflang={item} href={absolute(variants[item])} />
     ))}
