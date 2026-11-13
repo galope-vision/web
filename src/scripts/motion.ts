@@ -46,12 +46,11 @@ function entrance(group: Element): void {
   const members = items.length > 0 ? items : [group as HTMLElement];
   const reduced = prefersReducedMotion();
 
-  const from = reduced
-    ? { opacity: 0 }
-    : members.map((_, index) => ({
-        opacity: 0,
-        transform: `translateY(${LIFT}px) scale(${SCALE}) rotate(${direction(index) * TILT}deg)`,
-      }));
+  /** Reduced motion gets the opacity and nothing else, which is the fade § 8 asks for. */
+  const tilt = (index: number): string | undefined =>
+    reduced
+      ? undefined
+      : `translateY(${LIFT}px) scale(${SCALE}) rotate(${direction(index) * TILT}deg)`;
 
   const to = reduced
     ? { opacity: 1 }
@@ -63,10 +62,9 @@ function entrance(group: Element): void {
    * wherever they already are.
    */
   members.forEach((element, index) => {
-    const start = Array.isArray(from) ? from[index] : from;
-    if (!start) return;
     element.style.opacity = '0';
-    if ('transform' in start && start.transform) element.style.transform = start.transform;
+    const start = tilt(index);
+    if (start !== undefined) element.style.transform = start;
   });
 
   const animations = members.map((element, index) =>
