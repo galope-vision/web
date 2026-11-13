@@ -1,18 +1,24 @@
 ---
 /**
- * The list on `/proyectos`: projects grouped by `group`, with a space between groups, one row
- * each showing the title and, in a second column, the type in parentheses (docs/spec.md § 5.2).
+ * The list on `/proyectos` and the collage behind it (docs/spec.md § 5.2).
  *
- * Two halves of that page are not here yet, and both belong with the collage: the general
- * collage behind the list, and the per-project collage that fades in when a row is hovered or
- * focused. The other half of that active state — the row going red and underlined — is here,
- * so the markup and the keyboard behaviour are already the final ones.
+ * Projects are grouped by `group` with a space between groups, one row each showing the title
+ * and, in a second column, the type in parentheses. Hovering a row, or reaching it with the
+ * keyboard, turns it red and underlined and fades that project's collage in over the general
+ * one in 200 ms.
  *
- * The spec describes the rows and the gap between groups, and never a heading per group, so
- * the groups are separate lists with no visible label. If the year should be shown, it is one
- * element per group.
+ * The general collage is the covers of every project; each project's own collage is the same
+ * one its page shows, from the same seed.
+ *
+ * **Why the per-project collages sit in `<template>`.** There is one per project, each with up
+ * to eight images. With the catalogue in docs/spec.md § 6.4 that is about eighty images on a
+ * page where at most one set is ever seen, and they are all inside the viewport, so `lazy`
+ * would not hold any of them back. Inside a `<template>` nothing is rendered and nothing is
+ * fetched until the script clones it, which happens the first time a row is pointed at. With no
+ * JavaScript there is no swap at all: the general collage and the list work as they are.
  */
-import { groupProjects, type Project } from '../lib/content';
+import Collage from './Collage.astro';
+import { collageItems, collageSeed, groupProjects, type Project } from '../lib/content';
 import { localePath, typeLabel, type Locale } from '../lib/i18n';
 
 interface Props {
@@ -22,39 +28,134 @@ interface Props {
 
 const { locale, projects } = Astro.props;
 const groups = groupProjects(projects);
+
+/** The general collage: one cover per project, in the order the list shows them. */
+const covers = projects.map(({ data }) => ({
+  image: data.cover,
+  alt: '',
+  focus: 'center' as const,
+}));
+
+/** Stable while the catalogue is, so the backdrop only changes when the projects do. */
+const generalSeed = projects.map(({ slug }) => slug).join('-');
 ---
 
-<div class="list">
-  {groups.map(({ group, projects: inGroup }) => (
-    <ul class="group" data-group={group}>
-      {inGroup.map(({ slug, data }) => (
-        <li>
-          {/*
-            The space between the two spans is deliberate: without it the accessible name of
-            the link runs the title into the type — "111 (Documental)(Documental)". A
-            white-space-only text node is not rendered as a grid item, so the row stays two
-            columns wide.
-          */}
-          <a class="row" href={localePath(locale, 'projects', slug)}>
-            <span class="title">{data.title}</span>{' '}
-            <span class="type">({typeLabel(locale, data.type)})</span>
-          </a>
-        </li>
-      ))}
-    </ul>
-  ))}
+<div class="stage">
+  <div class="collages">
+    <Collage items={covers} seed={generalSeed} />
+    {projects.map((project) => (
+      <div class="swap" data-slug={project.slug}>
+        <template>
+          <Collage items={collageItems(project)} seed={collageSeed(project)} />
+        </template>
+      </div>
+    ))}
+  </div>
+
+  <div class="list">
+    {groups.map(({ group, projects: inGroup }) => (
+      <ul class="group" data-group={group}>
+        {inGroup.map(({ slug, data }) => (
+          <li>
+            {/*
+              The space between the two spans is deliberate: without it the accessible name of
+              the link runs the title into the type — "111 (Documental)(Documental)". A
+              white-space-only text node is not rendered as a grid item, so the row stays two
+              columns wide.
+            */}
+            <a class="row" href={localePath(locale, 'projects', slug)} data-slug={slug}>
+              <span class="title">{data.title}</span>{' '}
+              <span class="type">({typeLabel(locale, data.type)})</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    ))}
+  </div>
 </div>
 
+<script>
+  const stage = document.querySelector<HTMLElement>('.stage');
+
+  if (stage) {
+    const swaps = new Map(
+      [...stage.querySelectorAll<HTMLElement>('.swap')].map((element) => [
+        element.dataset.slug ?? '',
+        element,
+      ]),
+    );
+
+    /** Clones the collage the first time it is asked for; after that it is already there. */
+    function reveal(slug: string): void {
+      const swap = swaps.get(slug);
+      const template = swap?.querySelector('template');
+      if (swap && template) {
+        swap.append(template.content.cloneNode(true));
+        template.remove();
+      }
+      for (const [key, element] of swaps) element.classList.toggle('is-visible', key === slug);
+    }
+
+    function clear(): void {
+      for (const element of swaps.values()) element.classList.remove('is-visible');
+    }
+
+    for (const row of stage.querySelectorAll<HTMLElement>('.row')) {
+      const { slug } = row.dataset;
+      if (!slug) continue;
+      /* Pointer and keyboard get the same treatment, which is the rule in CLAUDE.md. */
+      row.addEventListener('mouseenter', () => reveal(slug));
+      row.addEventListener('focus', () => reveal(slug));
+      row.addEventListener('mouseleave', clear);
+      row.addEventListener('blur', clear);
+    }
+  }
+</script>
+
 <style>
+  /* The list is drawn over the collage; both are the one grid cell. */
+  .stage {
+    display: grid;
+  }
+
+  .stage > * {
+    grid-area: 1 / 1;
+  }
+
+  .collages {
+    display: grid;
+  }
+
+  .collages > :global(*) {
+    grid-area: 1 / 1;
+  }
+
+  /*
+   * A project's collage fades in over the general one and is not there for anybody until it
+   * does. `prefers-reduced-motion` turns the transition off globally (src/styles/global.css),
+   * which leaves the swap instant rather than absent.
+   */
+  .swap {
+    opacity: 0;
+    transition: opacity var(--dur-swap) var(--ease-out);
+  }
+
+  .swap.is-visible {
+    opacity: 1;
+  }
+
   /*
    * The list sits on the left, in the first two of the four grid columns, because the collage
-   * goes behind it and needs the rest of the width. On a narrow screen the grid is two columns
+   * is behind it and needs the rest of the width. On a narrow screen the grid is two columns
    * wide and the list takes all of it.
    */
   .list {
     display: grid;
     gap: var(--space-3);
+    align-content: start;
     width: 100%;
+    /* Above the collage, which is the first child of the cell. */
+    position: relative;
   }
 
   /*
@@ -65,7 +166,7 @@ const groups = groupProjects(projects);
    * content.
    *
    * PROVISIONAL: the clearance is derived from the dice box, not read off the design. Worth
-   * checking against Figma when the collage lands and this zone has to be solved properly.
+   * checking against Figma when the collage zone is solved properly.
    */
   @media (width >= 48rem) {
     .list {
