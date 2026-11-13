@@ -67,6 +67,15 @@ export interface Project {
   data: ProjectData;
 }
 
+/**
+ * One of the Fotos / Vídeos / Proceso parts of a project, as the panel links to it. `id` is the
+ * id of the section further down the page, so the link and the section cannot drift apart.
+ */
+export interface ProjectPart {
+  id: 'fotos' | 'videos' | 'proceso';
+  label: string;
+}
+
 /** A group and the projects in it, as the list renders them (docs/spec.md § 5.2). */
 export interface ProjectGroup {
   group: Group;
@@ -123,4 +132,17 @@ export function groupProjects(projects: Project[]): ProjectGroup[] {
     group,
     projects: projects.filter((project) => project.data.group === group),
   })).filter(({ projects: inGroup }) => inGroup.length > 0);
+}
+
+/**
+ * A description cut to fit a `<meta name="description">`. A project description is allowed up
+ * to `DESCRIPTION_MAX` characters, which is far longer than a search result shows, so the page
+ * trims it on a word boundary rather than letting the engine cut it mid-word.
+ */
+export function excerpt(text: string, max = 155): string {
+  const clean = text.replace(/\s+/g, ' ').trim();
+  if (clean.length <= max) return clean;
+  const cut = clean.slice(0, max);
+  const lastSpace = cut.lastIndexOf(' ');
+  return `${(lastSpace > 0 ? cut.slice(0, lastSpace) : cut).replace(/[.,;:—-]$/, '')}…`;
 }

@@ -22,3 +22,4 @@ export type Group = (typeof GROUPS)[number];
 export type ProjectType = (typeof TYPES)[number];
 export type Category = (typeof CATEGORIES)[number];
 export type GalleryPart = (typeof GALLERY_PARTS)[number];
+export type Focus = (typeof FOCUS)[number];

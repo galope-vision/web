@@ -1,0 +1,206 @@
+---
+/**
+ * The info panel of a project page: title, description, the links to the parts below, the
+ * credits, the Más/Menos Info toggle and VOLVER (docs/spec.md § 5.3).
+ *
+ * It goes over the collage, on the left. The collage is not built yet, so for now the panel is
+ * simply the left column of the page.
+ *
+ * The toggle is a button, not a link, because the spec is explicit that it must not change the
+ * URL. With no JavaScript the panel stays in its "Más info" state, which is the one the page
+ * starts in and the one that has the content in it, so nothing is lost — only the toggle is
+ * inert.
+ */
+import { localePath, t, type Locale } from '../lib/i18n';
+import type { ProjectData, ProjectPart } from '../lib/content';
+
+interface Props {
+  locale: Locale;
+  data: ProjectData;
+  parts: ProjectPart[];
+}
+
+const { locale, data, parts } = Astro.props;
+const s = t(locale);
+---
+
+<div class="panel">
+  <h1 class="title">{data.title}</h1>
+
+  <div class="details" id="project-details">
+    {data.quote && <p class="quote">{data.quote}</p>}
+    <p class="description">{data.description}</p>
+
+    {parts.length > 0 && (
+      <nav class="block" aria-labelledby="parts-heading">
+        <h2 id="parts-heading">{s('project.parts')}</h2>
+        <ul class="parts">
+          {parts.map((part) => (
+            <li>
+              <a href={`#${part.id}`}>{part.label}</a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    )}
+
+    {data.credits.length > 0 && (
+      <section class="block credits-block" aria-labelledby="credits-heading">
+        <h2 id="credits-heading">{s('project.credits')}</h2>
+        <dl class="credits">
+          {data.credits.map((credit) => (
+            <div class="credit">
+              <dt>{credit.role}</dt>
+              <dd>{credit.url ? <a href={credit.url}>{credit.name}</a> : credit.name}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+    )}
+  </div>
+
+  <p class="actions">
+    <button
+      type="button"
+      class="toggle"
+      aria-expanded="true"
+      aria-controls="project-details"
+      data-more={s('project.moreInfo')}
+      data-less={s('project.lessInfo')}
+    >
+      {s('project.lessInfo')}
+    </button>
+    <a class="back" href={localePath(locale, 'projects')}>
+      {s('project.back')}
+    </a>
+  </p>
+</div>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('.toggle');
+  const details = document.getElementById('project-details');
+
+  if (toggle && details) {
+    const { more = '', less = '' } = toggle.dataset;
+
+    toggle.addEventListener('click', () => {
+      const open = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', String(!open));
+      details.hidden = open;
+      toggle.textContent = open ? more : less;
+    });
+  }
+</script>
+
+<style>
+  /*
+   * 340px wide in the design, at x = 18 of a 1366 frame, which is how it clears the dice:
+   * sideways, not by starting underneath it. The second term keeps that true on a screen
+   * narrower than the one the design was drawn at — the panel never reaches the dice, which is
+   * pinned to the middle.
+   */
+  .panel {
+    display: grid;
+    gap: var(--space-2);
+    width: min(21.25rem, calc(50% - var(--size-dice-width) / 2 - var(--space-gutter)));
+    min-width: 0;
+  }
+
+  @media (width < 48rem) {
+    /* The dice is above the content there, so the panel takes the width it has. */
+    .panel {
+      width: 100%;
+    }
+  }
+
+  /* The title of a project is red, unlike every other heading (docs/spec.md § 5.3). */
+  .title {
+    color: var(--color-accent-text);
+  }
+
+  /*
+   * The credits sit at the bottom of the panel: the design has a 190px flexible gap between the
+   * part links and the Créditos heading, and the panel is 700 tall against a 768 frame.
+   */
+  .details {
+    display: grid;
+    gap: var(--space-2);
+    align-content: start;
+  }
+
+  @media (width >= 48rem) {
+    .details {
+      display: flex;
+      flex-direction: column;
+      min-height: 60vh;
+    }
+
+    /* Whatever is above it, the credits go to the bottom. The quote is optional, so counting
+       rows would not survive a project without one. */
+    .credits-block {
+      margin-top: auto;
+    }
+  }
+
+  .details[hidden] {
+    display: none;
+  }
+
+  .quote {
+    font-style: italic;
+  }
+
+  .block {
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  /*
+   * One link per line: in the design they are at y = 240, 257 and 274, a 17px step, which is
+   * the line height of the body text. They are not a row.
+   */
+  .parts {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    /* The 17px step of the design is the body line height, not the prose one. */
+    line-height: var(--lh-body);
+  }
+
+  .credits {
+    display: grid;
+    gap: 0;
+    margin: 0;
+    /* Credit rows are 17px in the design, the same step as the part links. */
+    line-height: var(--lh-body);
+  }
+
+  /* Role and name on one line, the name starting at the same place down the column. */
+  .credit {
+    display: grid;
+    grid-template-columns: minmax(6rem, max-content) 1fr;
+    gap: 0 var(--space-gutter);
+  }
+
+  .credit dd {
+    margin: 0;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-gutter);
+  }
+
+  .toggle,
+  .back {
+    font-weight: var(--fw-bold);
+    text-decoration: underline;
+  }
+
+  .toggle:hover,
+  .back:hover {
+    color: var(--color-accent-text);
+  }
+</style>

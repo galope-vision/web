@@ -1,0 +1,113 @@
+---
+/**
+ * The collage (docs/spec.md § 7, ADR 0005). `src/lib/collage.ts` decides where everything goes
+ * at build time; this only turns the numbers into CSS.
+ *
+ * Two layouts come out of the algorithm, one for four columns and one for two, and each image
+ * carries both as custom properties. The media query picks a set. That way a single element per
+ * image serves both breakpoints, there is no layout JavaScript, and nothing moves after paint.
+ *
+ * `alt` is the caller's call. On a project page the same photographs are listed again under the
+ * collage with their real alt text, so there they come in empty and a screen reader hears each
+ * one once.
+ */
+import { Image } from 'astro:assets';
+import { collage, type CollageImage, type CollageItem } from '../lib/collage';
+
+interface Props {
+  items: CollageItem[];
+  /** The slug plus the entry's `collageSeed`; the same string always gives the same collage. */
+  seed: string;
+}
+
+const { items, seed } = Astro.props;
+
+const images: CollageImage[] = items.map(({ image }) => ({ aspect: image.width / image.height }));
+const layout = collage(images, seed);
+
+/** The placements come back indexed, so each item finds its own in both layouts. */
+const positioned = items.flatMap((item, index) => {
+  const wide = layout.wide.find((placement) => placement.index === index);
+  const narrow = layout.narrow.find((placement) => placement.index === index);
+  return wide && narrow ? [{ item, wide, narrow }] : [];
+});
+
+const round = (value: number): string => `${value.toFixed(3)}%`;
+---
+
+{positioned.length > 0 && (
+  <div
+    class="collage"
+    data-fallback={layout.fallback ? '' : undefined}
+    style={`--wide-aspect: ${layout.wideAspect.toFixed(4)}; --narrow-aspect: ${layout.narrowAspect.toFixed(4)};`}
+  >
+    {positioned.map(({ item, wide, narrow }) => (
+      <Image
+        class="item"
+        src={item.image}
+        alt={item.alt}
+        widths={[320, 640, 960]}
+        sizes="(width >= 48rem) 50vw, 100vw"
+        loading="lazy"
+        style={[
+          `--x: ${round(wide.x)}`,
+          `--y: ${round(wide.y)}`,
+          `--w: ${round(wide.width)}`,
+          `--h: ${round(wide.height)}`,
+          `--nx: ${round(narrow.x)}`,
+          `--ny: ${round(narrow.y)}`,
+          `--nw: ${round(narrow.width)}`,
+          `--nh: ${round(narrow.height)}`,
+          `object-position: ${item.focus}`,
+        ].join('; ')}
+      />
+    ))}
+  </div>
+)}
+
+<style>
+  /*
+   * The box keeps the shape the algorithm laid the cells out in, so the percentages inside it
+   * mean what they meant when they were computed, and the height is known before the images
+   * load.
+   */
+  .collage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: var(--narrow-aspect);
+  }
+
+  .item {
+    position: absolute;
+    left: var(--nx);
+    top: var(--ny);
+    width: var(--nw);
+    height: var(--nh);
+    /* The cell decides the shape, so the photograph is cropped to it, from `focus`. */
+    object-fit: cover;
+    /*
+     * The design shows images at 70% over the background, which is what the token is for. It
+     * also happens to be what makes the panel readable where it sits over the collage: the
+     * body text against the placeholder colour is 4.03:1 at full opacity, which fails AA, and
+     * 6.70:1 at 70%, which passes.
+     *
+     * Whether real photographs keep this is still an open decision (CLAUDE.md). The contrast
+     * figures above are the cost of dropping it, and a real photograph is not one flat colour,
+     * so if it goes, the panel will want a scrim behind the text instead.
+     */
+    opacity: var(--opacity-placeholder);
+  }
+
+  @media (width >= 48rem) {
+    .collage {
+      aspect-ratio: var(--wide-aspect);
+    }
+
+    .item {
+      left: var(--x);
+      top: var(--y);
+      width: var(--w);
+      height: var(--h);
+    }
+  }
+</style>

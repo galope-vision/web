@@ -1,0 +1,96 @@
+---
+/**
+ * A project page: the info panel over the collage, and the Fotos, Vídeos and Proceso sections
+ * under it (docs/spec.md § 5.3). Shared by `/proyectos/[slug]` and `/en/projects/[slug]`.
+ *
+ * The panel sits on top of the collage, on the left, so the two share one grid cell and the
+ * panel is drawn after it. The collage takes the first 8 images of the gallery in order; the
+ * rest appear only in the sections below.
+ *
+ * Which parts exist is worked out once, here, so the links in the panel and the sections below
+ * can never disagree about whether a part is empty.
+ */
+import Collage from './Collage.astro';
+import ProjectPanel from './ProjectPanel.astro';
+import ProjectSections from './ProjectSections.astro';
+import { t, type Locale } from '../lib/i18n';
+import type { CollageItem } from '../lib/collage';
+import type { Project, ProjectPart } from '../lib/content';
+
+interface Props {
+  locale: Locale;
+  project: Project;
+}
+
+const { locale, project } = Astro.props;
+const { data } = project;
+const s = t(locale);
+
+const fotos = data.gallery.filter((item) => item.part === 'fotos');
+const proceso = data.gallery.filter((item) => item.part === 'proceso');
+
+/** A part with nothing in it gets no link, as the spec asks. */
+const parts: ProjectPart[] = [
+  fotos.length > 0 && { id: 'fotos', label: s('project.photos') },
+  data.videos.length > 0 && { id: 'videos', label: s('project.videos') },
+  proceso.length > 0 && { id: 'proceso', label: s('project.process') },
+].filter((part): part is ProjectPart => part !== false);
+
+/*
+ * The collage images carry no alt text on purpose: every one of them is listed again in the
+ * sections below with its real alt, and a screen reader should hear each photograph once.
+ */
+const collageItems: CollageItem[] = data.gallery.map(({ image, focus }) => ({
+  image,
+  alt: '',
+  focus,
+}));
+
+/** Same project, same collage; an editor changes `collageSeed` to get another one. */
+const seed = `${project.slug}-${data.collageSeed}`;
+---
+
+<div class="detail">
+  <div class="stage">
+    <Collage items={collageItems} seed={seed} />
+    <ProjectPanel locale={locale} data={data} parts={parts} />
+  </div>
+  <ProjectSections
+    locale={locale}
+    title={data.title}
+    fotos={fotos}
+    videos={data.videos}
+    proceso={proceso}
+  />
+</div>
+
+<style>
+  /*
+   * One cell holding both, so the panel is over the collage rather than after it. The panel is
+   * second in the source, so it wins without a `z-index`.
+   */
+  .stage {
+    display: grid;
+  }
+
+  .stage > :global(*) {
+    grid-area: 1 / 1;
+  }
+
+  .detail {
+    display: grid;
+    gap: var(--space-4);
+    padding-bottom: var(--space-4);
+  }
+
+  /*
+   * The panel does not start below the dice; it clears it sideways. In the design (1366 × 768)
+   * the panel is 340 wide at x = 18 and the dice starts at x = 629, so they never meet
+   * horizontally and the panel begins at the top. See ProjectPanel.astro for the width.
+   */
+  @media (width >= 48rem) {
+    .detail {
+      padding-top: var(--space-1);
+    }
+  }
+</style>
