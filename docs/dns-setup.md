@@ -8,25 +8,37 @@ shared plan. Both accounts belong to Galope.
 
 ## The decision
 
-**The DNS zone stays at GoDaddy.** Only the `A` record of the apex changes, from GoDaddy's
-parking to the DonWeb server. The nameservers are not delegated to DonWeb.
+**The nameservers are delegated to DonWeb** (`ns1.donweb.com`, `ns2.donweb.com`). The domain
+stays registered at GoDaddy; only the DNS administration moves. See
+[ADR 0007](adr/0007-nameservers-at-donweb.md) for the full reasoning.
 
-This is what [ADR 0003](adr/0003-static-hosting-donweb-ftp.md) already assumed, and the state of
-the zone backs it up:
+### The decision this reverses
 
-- **There is no email on the domain.** No `MX` and no `SPF`. Delegating the nameservers to
-  DonWeb mainly buys automatic mail and `SPF`/`DKIM` configuration, and there is none to
-  configure. The one real argument for delegating does not apply.
-- **Keeping the zone preserves the `_dmarc` record** that GoDaddy set up. It does nothing while
-  there is no mail, but re-creating it by hand after a delegation is one more thing to forget.
-- **An `A` record propagates in an hour, a delegation in two days.** The `A` record's TTL is
-  3600; the registry's `NS` delegation TTL is 172800.
-- Nothing is closed off. If Galope later wants mail at DonWeb, the `MX` records go into the
-  GoDaddy zone just as easily.
+The first version of this document said the opposite: keep the zone at GoDaddy and move only
+the apex `A` record. That was done on 2026-11-11 and worked — the domain resolved to
+`200.58.111.133` within minutes. Then the certificate failed:
 
-The cost of the choice: on shared hosting DonWeb can migrate the account to another server and
-change its IP, and the site then stays down until the `A` record is updated by hand. DonWeb
-announces those migrations. The IP is recorded in step 3 for exactly that reason.
+> Su certificado se intentó generar 11-11-26 03:15 y terminó con error **"Los NS no son los
+> correctos"**.
+
+DonWeb will not issue its free Let's Encrypt certificate unless the nameservers are theirs. The
+argument for keeping the zone at GoDaddy was that nothing needed DonWeb's DNS; that was wrong,
+and the delegation followed the same day.
+
+This is written down rather than quietly edited away, because the next person will be tempted
+by the same reasoning: keeping DNS at the registrar really is tidier, and it really does not
+work here.
+
+### What it costs
+
+- A delegation propagates more slowly than a record: the registry `NS` TTL is 172800, so up to
+  48 hours, against the hour an `A` record takes.
+- DNS changes now happen in the DonWeb panel. Anyone who goes looking in GoDaddy will find a
+  zone that does nothing.
+- If the hosting ever leaves DonWeb, the nameservers move with it.
+
+There was no downtime: DonWeb's zone already answered with the same address the GoDaddy zone
+did, so the switch was invisible to visitors.
 
 ## How the zone looked before any change
 
@@ -67,10 +79,11 @@ Checked on 2026-11-11: `ga-lo-pe.com` is already attached to the hosting plan, t
 The plan is **Web Hosting Plan Full**, Linux, service `#6624915`, on the **Ferozo** panel
 (<https://panel.ferozo.com>, its own user and password).
 
-That screen shows the domain in red: _"El dominio tiene asignados NS de otro proveedor"_.
-**That warning is expected and is not a problem.** It is DonWeb noticing that the nameservers
-are GoDaddy's, which is the whole point of the decision above. It goes away only if the
-nameservers are delegated, which is what we chose not to do.
+That screen used to show the domain in red — _"El dominio tiene asignados NS de otro
+proveedor"_ — because the nameservers were GoDaddy's. Step 2 is what clears it: once the
+delegation is published, DonWeb stops complaining and the domain is no longer tagged
+**DNS EXTERNO**. If the warning is still there, the delegation has not propagated yet, and the
+certificate in step 3 will not issue either.
 
 This step matters because Apache needs the domain mapped to a directory before any traffic
 arrives; if the DNS lands before the mapping exists, the server answers with another site on
@@ -96,67 +109,88 @@ former name, so the reverse record is the expected one.
 That same DonWeb zone carries a full mail setup for the plan — `MX` to `mail.ga-lo-pe.com` and
 `mx1.ga-lo-pe.com`, `SPF`, `DKIM`, `DMARC`, and `SRV` records for IMAP, POP3 and submission.
 
-**None of it is in effect**, because the live zone is GoDaddy's. Keeping the zone at GoDaddy
-means that if Galope ever wants an address at the domain — `ajustes/general.yml` still has the
-placeholder `hola@example.com` — those records have to be copied into GoDaddy by hand. That is
-the real cost of this decision, and it is worth deciding before the site goes live rather than
-after.
-
-## 2. Disconnect the Website Builder site, in GoDaddy
-
-The apex `A` record is not a plain record: it belongs to a **GoDaddy Website Builder** site
-attached to the domain, which is why the panel shows `WebsiteBuilder Site` where an address
-would go. While that attachment is live, GoDaddy owns the record and can write it back,
-reverting step 3.
-
-In **Mis productos**, find the Website Builder product on `ga-lo-pe.com` and disconnect the
-domain from it. If editing the record in step 3 offers to disconnect the site for you, that
-does the same job.
-
-Check first whether that Website Builder site is a paid subscription. Disconnecting the domain
-does not cancel it, and nobody wants to keep paying for a site that is no longer reachable.
-
-## 3. Change the `A` record, in GoDaddy
-
-**My Products → ga-lo-pe.com → DNS → Records**:
-
-| Action      | Type    | Name             | Value                                 | TTL |
-| ----------- | ------- | ---------------- | ------------------------------------- | --- |
-| edit        | `A`     | `@`              | `200.58.111.133`                      | 600 |
-| leave as is | `CNAME` | `www`            | `ga-lo-pe.com`                        | —   |
-| leave as is | `CNAME` | `_domainconnect` | `_domainconnect.gd.domaincontrol.com` | —   |
-| leave as is | `TXT`   | `_dmarc`         | the DMARC policy GoDaddy set up       | —   |
-
-Optionally also add `AAAA @ → 2800:6c0:2::a:21f`, so the site answers over IPv6. It is not
-required, and leaving it out changes nothing for visitors on IPv4.
-
-There is only **one** `A` record to change, even though the domain resolves to two addresses
-from outside: both come from the single Website Builder record of step 2.
-
-`www` already points at the apex, so it follows along by itself. A TTL of 600 keeps later
-corrections cheap. The `NS` and `SOA` rows cannot be edited from this panel, which is correct —
-nothing here should touch them.
-
-Record the change here when it is made, so the next person does not have to reconstruct it:
+**Since the delegation, all of it is in effect.** Checked on 2026-11-12:
 
 ```
-A @ → 200.58.111.133   TTL 1800   (set on 2026-11-11)
+$ dig +short MX ga-lo-pe.com @8.8.8.8
+0 mail.ga-lo-pe.com.
+20 mx1.ga-lo-pe.com.
+$ dig +short TXT ga-lo-pe.com @8.8.8.8
+"v=spf1 include:comp.hostmar.com -all"
 ```
 
-Done on 2026-11-11. Both authoritative servers, Google and Cloudflare answered the new address
-within minutes, and `www` followed through its `CNAME`. The `_dmarc` record survived the edit,
-and GoDaddy raised no warning about the Website Builder site — so whether that attachment is
-really gone is still worth checking, since it is the one thing that could rewrite the record
-later.
+So an address at the domain — `ajustes/general.yml` still has the placeholder
+`hola@example.com` — needs a mailbox created in the panel and no DNS work at all. That is one
+of the things the delegation bought.
 
-## 4. Issue the certificate, in DonWeb
+Two side effects of the zone changing hands, both worth knowing:
 
-Once the `A` record has propagated, enable **SSL (Let's Encrypt)** in the DonWeb panel. It
-validates over HTTP on port 80, so it only works after step 3 is live.
+- **The DMARC policy changed.** GoDaddy served `p=quarantine`; DonWeb serves
+  `v=DMARC1; p=none`. Nothing sends mail from the domain yet, so nothing breaks, but the
+  stricter policy is gone.
+- **`ftp.ga-lo-pe.com` resolves now**, to `200.58.111.133`. It is a record in DonWeb's zone that
+  used to be dead letter while GoDaddy answered for the domain.
 
-## 5. Check it
+## 2. Delegate the nameservers, in GoDaddy
+
+**Mis productos → ga-lo-pe.com → DNS → Servidores de nombres → Cambiar servidores de nombres**,
+then _Usaré mi propio servidor de nombres_:
+
+```
+ns1.donweb.com
+ns2.donweb.com
+```
+
+GoDaddy asks twice: a checkbox acknowledging that DNS administration moves, and a final
+_Continuar_. It warns that existing DNS records are not copied and that connected services may
+stop working. That warning is real in general, but did not apply here: DonWeb's zone already
+carried the same address, plus `www`, the mail records and its own `DMARC`. Confirm the same
+before delegating any other domain — ask the panel's **Ver Zona DNS** (step 1) what the target
+nameservers will actually serve.
+
+`ns3.hostmar.com` and `ns4.hostmar.com` answer for this account too; `ns1`/`ns2.donweb.com` are
+the pair DonWeb documents for shared hosting. Do not use `ns9`/`ns13.hostmar.com`, which are for
+other panels and do not serve this zone.
+
+Done on 2026-11-11. The registry takes a while to publish the change; until it does, the old
+nameservers keep answering with the same address, so nothing breaks in between.
+
+### What the GoDaddy zone had, and why it no longer matters
+
+Before the delegation, the apex `A` record was changed at GoDaddy to `200.58.111.133` (TTL 1800) and resolved correctly. That record — and the `www` CNAME, the `_domainconnect` CNAME and
+the `_dmarc` TXT — now live in a zone nobody queries. They are listed above as rollback
+information and nothing more.
+
+The same goes for the **GoDaddy Website Builder** site that used to own the apex `A` record.
+It is in the unused zone, so it can no longer affect the site. Still worth checking whether it
+is a paid subscription nobody needs.
+
+## 3. Issue the certificate, in DonWeb
+
+In the Ferozo panel (<https://panel.ferozo.com>, its own user and password) → **Dominios →
+SSL** → _Generar Let's Encrypt_.
+
+This only works once the registry has published the delegation of step 2. DonWeb checks the
+nameservers before it even tries, and answers _"Los NS no son los correctos"_ if they are not
+yet theirs. It retries on its own, but the attempts are limited — if they run out, request it
+again rather than waiting.
+
+**Done on 2026-11-11.** It came out as a wildcard, which is more than was asked for and covers
+`www` without a second certificate:
+
+```
+subject=CN = *.ga-lo-pe.com
+issuer=C = US, O = Let's Encrypt, CN = YR1
+notBefore=Nov 11 18:52:23 2026 GMT   notAfter=Feb  9 18:52:22 2027 GMT
+```
+
+Let's Encrypt certificates last 90 days. DonWeb renews them on its own; if the site ever starts
+answering with an expired one, that renewal is the first place to look.
+
+## 4. Check it
 
 ```bash
+dig +short NS ga-lo-pe.com @8.8.8.8
 dig +short A ga-lo-pe.com @8.8.8.8
 dig +short A www.ga-lo-pe.com @8.8.8.8
 curl -sS -o /dev/null -w "%{http_code} %{remote_ip}\n" https://ga-lo-pe.com/
@@ -165,10 +199,10 @@ curl -sS -o /dev/null -w "%{http_code} %{remote_ip}\n" https://ga-lo-pe.com/
 The first two have to answer the DonWeb IP and nothing else. The third has to answer without a
 certificate warning.
 
-State on 2026-11-11, after step 3 and before step 4: the first two answer `200.58.111.133`,
-`http://ga-lo-pe.com` returns 200 from that address with an empty page — the hosting account
-has nothing in it yet — and `https://` fails with
-`no alternative certificate subject name matches target host name`, which is step 4's job.
+State on 2026-11-12, with every step done: the nameservers answer `ns3.hostmar.com` and
+`ns4.hostmar.com`, the apex and `www` both answer `200.58.111.133`, and `https://ga-lo-pe.com`
+returns 200 with no certificate warning. The hosting account is no longer empty — the holding
+page is up, uploaded by hand until the deploy workflow lands.
 
 ## The order matters
 
@@ -176,23 +210,25 @@ has nothing in it yet — and `https://` fails with
 redirects to an HTTPS URL that no certificate covers, and every visitor gets a warning they
 cannot click past. The order is: `A` record → certificate in DonWeb → `.htaccess`.
 
+All three are now satisfied: the delegation and the certificate are done, so the `.htaccess`
+that arrives with the deploy work is safe to ship.
+
 ## If something fails
 
-| What you see                                    | Usually means                                                                  |
-| ----------------------------------------------- | ------------------------------------------------------------------------------ |
-| The GoDaddy page comes back after a few minutes | The Website Builder site is still attached and rewrote the `A` record (step 2) |
-| Another site, or a DonWeb error page            | The domain is not mapped to the hosting account yet (step 1)                   |
-| `dig` still answers the old IP                  | The old TTL has not expired; it was 3600, so wait the hour                     |
-| The certificate cannot be issued                | The `A` record has not propagated, or `.htaccess` is already forcing HTTPS     |
-| The site works but `www` does not               | The `CNAME` for `www` was deleted instead of being left alone                  |
+| What you see                                             | Usually means                                                                         |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| The certificate fails with "Los NS no son los correctos" | The registry has not published the delegation yet (step 2); wait and request it again |
+| Another site, or a DonWeb error page                     | The domain is not mapped to the hosting account yet (step 1)                          |
+| `dig` still answers the old IP                           | The registry `NS` TTL is 172800, so a delegation can take up to 48 hours              |
+| The certificate cannot be issued                         | The `A` record has not propagated, or `.htaccess` is already forcing HTTPS            |
+| The site works but `www` does not                        | DonWeb's zone lost its `www` CNAME; add it back in **Ver Zona DNS**                   |
 
 ## Still open
 
-- The certificate (step 4). Until it exists, `https://ga-lo-pe.com` fails with a name mismatch,
-  and `public/.htaccess` must not be deployed.
-- Whether Galope wants mail at the domain. If they do, the DonWeb mail records have to be
-  copied into the GoDaddy zone by hand — see the end of step 1.
-- Whether the GoDaddy Website Builder site is a paid subscription worth cancelling (step 2).
+- Whether Galope wants mail at the domain. Now that the zone is DonWeb's, this is configured
+  in their panel with no DNS work — the records are already there.
+- Whether the GoDaddy Website Builder site is a paid subscription worth cancelling. It can no
+  longer affect the site, but it may still be billing.
 - `ALLOWED_DOMAINS` on the authenticator Worker and the OAuth App's homepage URL, which both
   want the domain now that it is known — see
   [cms-auth-setup.md](cms-auth-setup.md).

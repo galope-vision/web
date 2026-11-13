@@ -47,7 +47,7 @@ Objetivos:
 | Traducción | Traducción automática del CMS con Google Gemini (plan gratis) | La API key es de Galope y se carga una vez en Ajustes de Sveltia: queda en el navegador de quien edita, no en el repo |
 | Hosting | DonWeb, hosting compartido (Apache) | Solo archivos estáticos |
 | Deploy | GitHub Actions → FTPS (`SamKirkland/FTP-Deploy-Action`) | En cada push a `main` |
-| DNS | GoDaddy | No se mueve |
+| DNS | DonWeb (`ns1`/`ns2.donweb.com`) | El dominio sigue registrado en GoDaddy; sólo se delega el DNS (ADR 0007) |
 | Previews | Cloudflare Pages | Una por rama `cms/*` y una por PR de código. `noindex` |
 | Analítica | Cloudflare Web Analytics | Solo en producción, sin cookies |
 | Animación | Motion (motion.dev): `animate`, `inView`, `stagger` | La deriva va en CSS y el parallax en `src/scripts/motion.ts` |
