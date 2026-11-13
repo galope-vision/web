@@ -30,7 +30,8 @@ The client must be able to publish content on their own, with no developer invol
   delegated to DonWeb (`ns1`/`ns2.donweb.com`), because DonWeb only issues its free certificate
   for domains whose nameservers are theirs (ADR 0007).
 - **Previews**: Cloudflare Pages — one preview per CMS draft branch and per code PR. `noindex`.
-- **Analytics**: Cloudflare Web Analytics (production only, no cookies).
+- **Analytics**: Cloudflare Web Analytics (production only, no cookies) plus Google Tag Manager
+  (production only, `PUBLIC_GTM_ID` set by the deploy; its tags may set cookies, ADR 0008).
 - **Motion**: Motion (motion.dev) — only `animate`, `inView`, `stagger`. Idle drift in pure CSS.
   Parallax in our own TS (`src/scripts/motion.ts`).
 
@@ -48,7 +49,7 @@ src/assets/          images Astro optimizes (dado.png)
 src/content/         proyectos/<slug>/index.md + images · ajustes/general.yml, home.yml
 src/content.config.ts  Zod schemas mirroring every CMS field
 src/styles/          tokens.css (ONLY place for colors/type/spacing/motion values), global.css
-src/components/      Header, LocaleSwitch, Dice, Logo, Placeholder · still to come: Collage,
+src/components/      Header, LocaleSwitch, Dice, Logo, Placeholder, GoogleTagManager · still to come: Collage,
                      ProjectList, ProjectPanel, VideoEmbed
 src/lib/             collage.ts (seeded layout), i18n.ts (locales, routes, dictionaries),
                      content.ts (content per locale, Spanish fallback), options.ts (option keys),
@@ -171,5 +172,6 @@ Status: phase 0 closed (v0.1.0, 2026-11-10). Next: phase 1.
 - Whether real photos keep the 70% opacity of the placeholder.
 - Search page and contact form: in or out. Whether the dice excludes the current project.
 - Mobile design (default: our own adaptation).
+- Cookie consent banner for the GTM tags, and which Google account owns the container.
 - Whether the editor pane needs custom preview templates (Sveltia supports them through
   `registerPreviewTemplate`; none are registered yet).

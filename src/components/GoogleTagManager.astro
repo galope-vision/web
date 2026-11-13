@@ -1,0 +1,40 @@
+---
+/**
+ * Google Tag Manager (ADR 0008). Renders nothing unless `PUBLIC_GTM_ID` is set at build time,
+ * and only the production deploy sets it: dev, CI and the Cloudflare Pages previews ship no tag.
+ *
+ * `part="head"` goes as high as possible in `<head>`, `part="body"` right after `<body>`.
+ */
+interface Props {
+  part: 'head' | 'body';
+}
+
+const { part } = Astro.props;
+const raw: unknown = import.meta.env.PUBLIC_GTM_ID;
+const id = typeof raw === 'string' ? raw.trim() : '';
+
+// A typo in the variable would ship a dead container; fail the build instead.
+if (id && !/^GTM-[A-Z0-9]+$/.test(id)) {
+  throw new Error(`PUBLIC_GTM_ID must look like GTM-XXXXXXX, got "${id}"`);
+}
+---
+
+{id && part === 'head' && <script is:inline define:vars={{ id }}>
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
+  const script = document.createElement('script');
+  script.async = true;
+  script.src = 'https://www.googletagmanager.com/gtm.js?id=' + encodeURIComponent(id);
+  document.head.appendChild(script);
+</script>}
+{id && part === 'body' && (
+  <noscript>
+    <iframe
+      src={`https://www.googletagmanager.com/ns.html?id=${encodeURIComponent(id)}`}
+      height="0"
+      width="0"
+      style="display:none;visibility:hidden"
+      title="Google Tag Manager"
+    />
+  </noscript>
+)}
