@@ -16,10 +16,18 @@ In Galope's Cloudflare account, the same one that runs the CMS authenticator Wor
    Do not use "Connect to Git": the build belongs in this repository, not in the dashboard.
 2. Name it **`galope-web`**. The name is in the workflow's `--project-name`, so changing one means
    changing the other.
-3. Upload anything to finish creating it — an empty folder with a single `index.html` is enough.
-   The first real deployment overwrites it.
-4. In **Settings → Builds & deployments**, leave the production branch as `main`. The workflow
-   never runs on `main`, so it never produces a production deployment.
+3. The flow asks for an upload to finish creating the project. A single `index.html` is enough,
+   and it should carry `<meta name="robots" content="noindex" />`: this file is what
+   `galope-web.pages.dev` serves from then on, because the workflow only ever deploys preview
+   branches and never replaces the production deployment.
+
+A Direct Upload project has no Git connection, so it has no branch configuration to set — the
+**Settings** tab shows _Git repository: Connect_, which is left alone on purpose. Deployments
+made with `--branch` are previews unless the branch matches the project's production branch
+(`main` by default), and this workflow never runs on `main`.
+
+**Done on 2026-11-13.** The project exists and `https://galope-web.pages.dev` answers `200` with
+the placeholder. Steps 2 and 3 are what is left.
 
 ## 2. Create the API token — in Cloudflare
 
