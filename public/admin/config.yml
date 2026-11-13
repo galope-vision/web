@@ -8,10 +8,9 @@ backend:
   name: github
   repo: galope-vision/web
   branch: main
-  # Phase 1, step 4: the Cloudflare Worker running sveltia-cms-auth signs editors in.
-  # Until it is deployed, sign in with a GitHub personal access token (Contents and Pull
-  # requests, read and write).
-  # base_url: https://<worker>.workers.dev
+  # The Cloudflare Worker running sveltia-cms-auth, in Galope's account, which signs editors in
+  # with GitHub (docs/cms-auth-setup.md).
+  base_url: https://sveltia-cms-auth.galope-admin.workers.dev
 
 # Each entry is saved to its own `cms/<collection>/<slug>` branch and published by merging its
 # pull request, which Cloudflare Pages builds as a preview. The repository needs "Allow
