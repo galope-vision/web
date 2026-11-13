@@ -1,0 +1,106 @@
+---
+/**
+ * The Fotos, Vídeos and Proceso sections under the collage, with every image and video of the
+ * project — the collage itself shows at most 8 (docs/spec.md § 5.3).
+ *
+ * PROVISIONAL layout. How these sections look is still an open decision (CLAUDE.md), so this is
+ * the plain reading of the spec: a heading and everything in it, one column on a narrow screen
+ * and two where there is room. The ids are what the "Partes del proyecto" links scroll to, and
+ * those are fixed; the design on top of them is not.
+ */
+import { Image } from 'astro:assets';
+import VideoEmbed from './VideoEmbed.astro';
+import { t, type Locale } from '../lib/i18n';
+import type { ProjectData } from '../lib/content';
+
+type GalleryItem = ProjectData['gallery'][number];
+
+interface Props {
+  locale: Locale;
+  title: string;
+  fotos: GalleryItem[];
+  videos: string[];
+  proceso: GalleryItem[];
+}
+
+const { locale, title, fotos, videos, proceso } = Astro.props;
+const s = t(locale);
+---
+
+{fotos.length > 0 && (
+  <section class="section" id="fotos" aria-labelledby="fotos-heading">
+    <h2 id="fotos-heading">{s('project.photos')}</h2>
+    <div class="grid">
+      {fotos.map((item) => (
+        <Image
+          class="image"
+          src={item.image}
+          alt={item.alt}
+          widths={[480, 960]}
+          sizes="(width >= 48rem) 50vw, 100vw"
+          loading="lazy"
+        />
+      ))}
+    </div>
+  </section>
+)}
+
+{videos.length > 0 && (
+  <section class="section" id="videos" aria-labelledby="videos-heading">
+    <h2 id="videos-heading">{s('project.videos')}</h2>
+    <div class="grid">
+      {videos.map((url, index) => (
+        <VideoEmbed url={url} title={`${title} — ${s('project.video')} ${index + 1}`} />
+      ))}
+    </div>
+  </section>
+)}
+
+{proceso.length > 0 && (
+  <section class="section" id="proceso" aria-labelledby="proceso-heading">
+    <h2 id="proceso-heading">{s('project.process')}</h2>
+    <div class="grid">
+      {proceso.map((item) => (
+        <Image
+          class="image"
+          src={item.image}
+          alt={item.alt}
+          widths={[480, 960]}
+          sizes="(width >= 48rem) 50vw, 100vw"
+          loading="lazy"
+        />
+      ))}
+    </div>
+  </section>
+)}
+
+<style>
+  .section {
+    display: grid;
+    gap: var(--space-2);
+    /* The anchor links land here, so the heading must not end up under the nav row. */
+    scroll-margin-top: var(--space-3);
+  }
+
+  .grid {
+    display: grid;
+    gap: var(--space-gutter);
+    grid-template-columns: 1fr;
+  }
+
+  @media (width >= 48rem) {
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  /*
+   * Whole images, not crops: these sections are where someone goes to actually look at the
+   * photo. `focus` is the collage's business — it only means something where an image is cut
+   * to a cell, and here nothing is cut, so `object-fit` would be dead CSS.
+   */
+  .image {
+    width: 100%;
+    height: auto;
+  }
+</style>

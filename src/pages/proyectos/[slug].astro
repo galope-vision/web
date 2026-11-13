@@ -1,0 +1,29 @@
+---
+import ProjectDetail from '../../components/ProjectDetail.astro';
+import Base from '../../layouts/Base.astro';
+import { excerpt, getGeneral, getProjects, type Project } from '../../lib/content';
+import type { Locale } from '../../lib/i18n';
+
+const locale: Locale = 'es';
+
+export async function getStaticPaths() {
+  const projects = await getProjects('es');
+  return projects.map((project) => ({ params: { slug: project.slug }, props: { project } }));
+}
+
+interface Props {
+  project: Project;
+}
+
+const { project } = Astro.props;
+const { seo } = await getGeneral(locale);
+---
+
+<Base
+  locale={locale}
+  current="projects"
+  title={`${project.data.title} · ${seo.title}`}
+  description={excerpt(project.data.description)}
+>
+  <ProjectDetail locale={locale} project={project} />
+</Base>
