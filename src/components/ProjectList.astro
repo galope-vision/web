@@ -149,9 +149,14 @@ const generalSeed = projects.map(({ slug }) => slug).join('-');
    * is behind it and needs the rest of the width. On a narrow screen the grid is two columns
    * wide and the list takes all of it.
    */
+  /*
+   * Groups are 16px apart in the design; `--space-2` is 18, the nearest step of the scale, and
+   * the 2px are not visible. Hardcoding 16 would put a size in a component, which CLAUDE.md
+   * does not allow.
+   */
   .list {
     display: grid;
-    gap: var(--space-3);
+    gap: var(--space-2);
     align-content: start;
     width: 100%;
     /* Above the collage, which is the first child of the cell. */
@@ -159,22 +164,17 @@ const generalSeed = projects.map(({ slug }) => slug).join('-');
   }
 
   /*
-   * The dice is pinned over the content, centred, and the right-hand column of a row runs
-   * straight into it. The collage reserves the dice and logo zones (CLAUDE.md); the list
-   * reserves the same zone by starting below it. Narrow screens already get this from
-   * `.dice-nav .main` in Base.astro, so the rule only applies once the dice moves over the
-   * content.
+   * The list clears the dice sideways, not by starting below it: in the design it is 380 wide
+   * on the left of a 1366 frame, and the dice starts at x = 629. It begins 54px under the nav
+   * row — y = 82 against a 28px header — which is `--space-3` plus `--space-2`.
    *
-   * PROVISIONAL: the clearance is derived from the dice box, not read off the design. Worth
-   * checking against Figma when the collage zone is solved properly.
+   * The second term of the width keeps the list clear of the dice on a screen narrower than
+   * the one the design was drawn at, where 380px would reach it.
    */
   @media (width >= 48rem) {
     .list {
-      width: calc(
-        (100% - (var(--grid-columns) - 1) * var(--space-gutter)) / var(--grid-columns) * 2 +
-          var(--space-gutter)
-      );
-      padding-top: calc(var(--size-dice-top) + var(--size-dice-height) + var(--space-2));
+      width: min(23.75rem, calc(50% - var(--size-dice-width) / 2 - var(--space-gutter)));
+      padding-top: calc(var(--space-3) + var(--space-2));
     }
   }
 
@@ -184,13 +184,23 @@ const generalSeed = projects.map(({ slug }) => slug).join('-');
     list-style: none;
   }
 
+  /*
+   * A row is one 17px line in the design, which is `--lh-body`. The extra padding is kept
+   * below 48rem, where the pointer is a finger and a 17px target is too small to hit.
+   */
   .row {
     display: grid;
     grid-template-columns: 1fr auto;
     gap: var(--space-gutter);
-    padding: 2px 0;
+    padding: var(--space-1) 0;
     line-height: var(--lh-body);
     text-decoration: none;
+  }
+
+  @media (width >= 48rem) {
+    .row {
+      padding: 0;
+    }
   }
 
   .title {
