@@ -1,4 +1,8 @@
 ---
+/* `noindex` until the real projects are loaded: the only entries right now are the samples of
+   src/content/proyectos/muestra-*, and a page of invented projects in the results would have to
+   be cleaned out later. Drop it, and add the page back to src/pages/sitemap.xml.ts, once the
+   content is Galope's. */
 import ProjectList from '../../components/ProjectList.astro';
 import Base from '../../layouts/Base.astro';
 import { getGeneral, getProjects } from '../../lib/content';
@@ -13,6 +17,7 @@ const title = t(locale)('page.projects');
 <Base
   locale={locale}
   current="projects"
+  noindex
   title={`${title} · ${seo.title}`}
   description={seo.description}
 >

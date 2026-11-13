@@ -1,4 +1,7 @@
 ---
+/* `noindex` while this is a placeholder: a thin page in the results now would have to be
+   cleaned out later. Drop it, and add the page back to src/pages/sitemap.xml.ts, when it
+   holds real content. */
 import Contact from '../../components/Contact.astro';
 import Base from '../../layouts/Base.astro';
 import { getGeneral } from '../../lib/content';
@@ -12,6 +15,7 @@ const title = t(locale)('page.contact');
 <Base
   locale={locale}
   current="contact"
+  noindex
   title={`${title} · ${seo.title}`}
   description={seo.description}
 >
