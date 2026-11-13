@@ -1,11 +1,12 @@
 ---
-import Placeholder from '../../components/Placeholder.astro';
+import ProjectList from '../../components/ProjectList.astro';
 import Base from '../../layouts/Base.astro';
-import { getGeneral } from '../../lib/content';
+import { getGeneral, getProjects } from '../../lib/content';
 import { t, type Locale } from '../../lib/i18n';
 
 const locale: Locale = 'es';
 const { seo } = await getGeneral(locale);
+const projects = await getProjects(locale);
 const title = t(locale)('page.projects');
 ---
 
@@ -15,5 +16,7 @@ const title = t(locale)('page.projects');
   title={`${title} · ${seo.title}`}
   description={seo.description}
 >
-  <Placeholder locale={locale} title={title} />
+  {/* The design shows no page title here: the nav already says where you are. */}
+  <h1 class="visually-hidden">{title}</h1>
+  <ProjectList locale={locale} projects={projects} />
 </Base>

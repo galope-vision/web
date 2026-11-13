@@ -8,6 +8,7 @@
  */
 import { getCollection, type CollectionEntry } from 'astro:content';
 import { DEFAULT_LOCALE, type Locale } from './i18n';
+import { GROUPS, type Group } from './options';
 
 const warned = new Set<string>();
 
@@ -52,4 +53,74 @@ export async function getGeneral(locale: Locale): Promise<General> {
       description: fallback(en?.seo?.description, es.seo.description, 'general.seo.description'),
     },
   };
+}
+
+/* Projects. */
+
+type ProjectEntry = CollectionEntry<'proyectos'>;
+type ProjectTranslation = CollectionEntry<'proyectosEn'>['data'];
+export type ProjectData = ProjectEntry['data'];
+
+export interface Project {
+  /** The folder under `src/content/proyectos`, which is also the URL slug. */
+  slug: string;
+  data: ProjectData;
+}
+
+/** A group and the projects in it, as the list renders them (docs/spec.md § 5.2). */
+export interface ProjectGroup {
+  group: Group;
+  projects: Project[];
+}
+
+/** The translated fields of a project; everything else is the Spanish entry as it stands. */
+function translate(entry: ProjectEntry, en: ProjectTranslation | undefined): ProjectData {
+  const es = entry.data;
+  const field = (name: string): string => `proyectos/${entry.id}.${name}`;
+
+  return {
+    ...es,
+    quote: es.quote === undefined ? undefined : fallback(en?.quote, es.quote, field('quote')),
+    description: fallback(en?.description, es.description, field('description')),
+    credits: es.credits.map((credit, index) => ({
+      ...credit,
+      role: fallback(en?.credits?.[index]?.role, credit.role, field(`credits[${index}].role`)),
+    })),
+    gallery: es.gallery.map((item, index) => ({
+      ...item,
+      alt: fallback(en?.gallery?.[index]?.alt, item.alt, field(`gallery[${index}].alt`)),
+    })),
+  };
+}
+
+/**
+ * Every project with `visible: true`, in one locale, sorted by `order`.
+ *
+ * The English entry lives in its own file and is matched by slug, not by position: the loader
+ * ids are `<slug>` for Spanish and `<slug>/en` for English.
+ */
+export async function getProjects(locale: Locale): Promise<Project[]> {
+  const entries = await getCollection('proyectos');
+  const translations = locale === DEFAULT_LOCALE ? [] : await getCollection('proyectosEn');
+  const bySlug = new Map(translations.map((entry) => [entry.id.replace(/\/en$/, ''), entry.data]));
+
+  return entries
+    .filter((entry) => entry.data.visible)
+    .map((entry) => ({
+      slug: entry.id,
+      data: locale === DEFAULT_LOCALE ? entry.data : translate(entry, bySlug.get(entry.id)),
+    }))
+    .sort((a, b) => a.data.order - b.data.order || a.data.title.localeCompare(b.data.title));
+}
+
+/**
+ * Projects split into groups. The groups come out in the order their options are declared in
+ * `src/lib/options.ts`, which is the order the CMS shows them in — what the spec asks for.
+ * A group with no visible project is left out rather than rendered empty.
+ */
+export function groupProjects(projects: Project[]): ProjectGroup[] {
+  return GROUPS.map((group) => ({
+    group,
+    projects: projects.filter((project) => project.data.group === group),
+  })).filter(({ projects: inGroup }) => inGroup.length > 0);
 }

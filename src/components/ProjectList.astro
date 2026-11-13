@@ -1,0 +1,115 @@
+---
+/**
+ * The list on `/proyectos`: projects grouped by `group`, with a space between groups, one row
+ * each showing the title and, in a second column, the type in parentheses (docs/spec.md § 5.2).
+ *
+ * Two halves of that page are not here yet, and both belong with the collage: the general
+ * collage behind the list, and the per-project collage that fades in when a row is hovered or
+ * focused. The other half of that active state — the row going red and underlined — is here,
+ * so the markup and the keyboard behaviour are already the final ones.
+ *
+ * The spec describes the rows and the gap between groups, and never a heading per group, so
+ * the groups are separate lists with no visible label. If the year should be shown, it is one
+ * element per group.
+ */
+import { groupProjects, type Project } from '../lib/content';
+import { localePath, typeLabel, type Locale } from '../lib/i18n';
+
+interface Props {
+  locale: Locale;
+  projects: Project[];
+}
+
+const { locale, projects } = Astro.props;
+const groups = groupProjects(projects);
+---
+
+<div class="list">
+  {groups.map(({ group, projects: inGroup }) => (
+    <ul class="group" data-group={group}>
+      {inGroup.map(({ slug, data }) => (
+        <li>
+          {/*
+            The space between the two spans is deliberate: without it the accessible name of
+            the link runs the title into the type — "111 (Documental)(Documental)". A
+            white-space-only text node is not rendered as a grid item, so the row stays two
+            columns wide.
+          */}
+          <a class="row" href={localePath(locale, 'projects', slug)}>
+            <span class="title">{data.title}</span>{' '}
+            <span class="type">({typeLabel(locale, data.type)})</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  ))}
+</div>
+
+<style>
+  /*
+   * The list sits on the left, in the first two of the four grid columns, because the collage
+   * goes behind it and needs the rest of the width. On a narrow screen the grid is two columns
+   * wide and the list takes all of it.
+   */
+  .list {
+    display: grid;
+    gap: var(--space-3);
+    width: 100%;
+  }
+
+  /*
+   * The dice is pinned over the content, centred, and the right-hand column of a row runs
+   * straight into it. The collage reserves the dice and logo zones (CLAUDE.md); the list
+   * reserves the same zone by starting below it. Narrow screens already get this from
+   * `.dice-nav .main` in Base.astro, so the rule only applies once the dice moves over the
+   * content.
+   *
+   * PROVISIONAL: the clearance is derived from the dice box, not read off the design. Worth
+   * checking against Figma when the collage lands and this zone has to be solved properly.
+   */
+  @media (width >= 48rem) {
+    .list {
+      width: calc(
+        (100% - (var(--grid-columns) - 1) * var(--space-gutter)) / var(--grid-columns) * 2 +
+          var(--space-gutter)
+      );
+      padding-top: calc(var(--size-dice-top) + var(--size-dice-height) + var(--space-2));
+    }
+  }
+
+  .group {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--space-gutter);
+    padding: 2px 0;
+    line-height: var(--lh-body);
+    text-decoration: none;
+  }
+
+  .title {
+    font-weight: var(--fw-bold);
+    min-width: 0;
+  }
+
+  .type {
+    font-weight: var(--fw-regular);
+    white-space: nowrap;
+  }
+
+  /*
+   * Red and underlined is the active state of a row, and the keyboard gets it on the same
+   * terms as the mouse. The global `:focus-visible` outline stays on top of it: the colour
+   * carries the design, the outline carries the "this is where you are".
+   */
+  .row:hover,
+  .row:focus-visible {
+    color: var(--color-accent-text);
+    text-decoration: underline;
+  }
+</style>
