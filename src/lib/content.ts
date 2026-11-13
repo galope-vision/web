@@ -8,6 +8,7 @@
  */
 import { getCollection, type CollectionEntry } from 'astro:content';
 import { DEFAULT_LOCALE, type Locale } from './i18n';
+import type { CollageItem } from './collage';
 import { GROUPS, type Group } from './options';
 
 const warned = new Set<string>();
@@ -145,4 +146,25 @@ export function excerpt(text: string, max = 155): string {
   const cut = clean.slice(0, max);
   const lastSpace = cut.lastIndexOf(' ');
   return `${(lastSpace > 0 ? cut.slice(0, lastSpace) : cut).replace(/[.,;:—-]$/, '')}…`;
+}
+
+/**
+ * The images a project puts in its collage: the gallery, in order, and the cover when there is
+ * no gallery yet, so a project still has something behind its name.
+ *
+ * They carry no alt text. On a project page every one of them is listed again in the sections
+ * below with its real alt; on the list, the names of the projects are the text and the collage
+ * is the backdrop. Either way a screen reader should meet each photograph once at most.
+ */
+export function collageItems(project: Project): CollageItem[] {
+  const { gallery, cover } = project.data;
+  if (gallery.length > 0) {
+    return gallery.map(({ image, focus }) => ({ image, alt: '', focus }));
+  }
+  return [{ image: cover, alt: '', focus: 'center' }];
+}
+
+/** The slug plus `collageSeed`: the same project always gets the same arrangement. */
+export function collageSeed(project: Project): string {
+  return `${project.slug}-${project.data.collageSeed}`;
 }

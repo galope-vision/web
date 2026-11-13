@@ -14,7 +14,7 @@ import Collage from './Collage.astro';
 import ProjectPanel from './ProjectPanel.astro';
 import ProjectSections from './ProjectSections.astro';
 import { t, type Locale } from '../lib/i18n';
-import type { CollageItem } from '../lib/collage';
+import { collageItems, collageSeed } from '../lib/content';
 import type { Project, ProjectPart } from '../lib/content';
 
 interface Props {
@@ -35,24 +35,11 @@ const parts: ProjectPart[] = [
   data.videos.length > 0 && { id: 'videos', label: s('project.videos') },
   proceso.length > 0 && { id: 'proceso', label: s('project.process') },
 ].filter((part): part is ProjectPart => part !== false);
-
-/*
- * The collage images carry no alt text on purpose: every one of them is listed again in the
- * sections below with its real alt, and a screen reader should hear each photograph once.
- */
-const collageItems: CollageItem[] = data.gallery.map(({ image, focus }) => ({
-  image,
-  alt: '',
-  focus,
-}));
-
-/** Same project, same collage; an editor changes `collageSeed` to get another one. */
-const seed = `${project.slug}-${data.collageSeed}`;
 ---
 
 <div class="detail">
   <div class="stage">
-    <Collage items={collageItems} seed={seed} />
+    <Collage items={collageItems(project)} seed={collageSeed(project)} />
     <ProjectPanel locale={locale} data={data} parts={parts} />
   </div>
   <ProjectSections
