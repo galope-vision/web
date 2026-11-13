@@ -78,7 +78,7 @@ Pestaña **Variables** → _New repository variable_, una vez:
 
 | Nombre           | Valor                                                          |
 | ---------------- | -------------------------------------------------------------- |
-| `FTP_SERVER_DIR` | `/httpdocs/` — **con la barra final**, confirmar en el punto 6 |
+| `FTP_SERVER_DIR` | `/public_html/` — **con la barra final** (confirmado, punto 6) |
 
 `FTP_SERVER_DIR` va como _variable_ y no como secret a propósito: así aparece en los logs y se ve
 de una si un deploy fue a parar al lugar equivocado.
@@ -87,7 +87,7 @@ de una si un deploy fue a parar al lugar equivocado.
   mano cada vez — incluido lo que publique Galope desde el CMS.
 - **Detalle técnico:** [`deploy-setup.md`](deploy-setup.md) (llega con el PR #22)
 
-### 3 · Cargar los secrets de las previews
+### 3 · Cargar los secrets de las previews — ✅ hecho el 2026-11-13
 
 - **Dónde:** <https://github.com/galope-vision/web/settings/secrets/actions>
 - **Quién:** Galope (ver arriba: en un repo de cuenta personal no hay otro admin)
@@ -98,9 +98,10 @@ de una si un deploy fue a parar al lugar equivocado.
 | `CLOUDFLARE_API_TOKEN`  | el token del punto 5        |
 | `CLOUDFLARE_ACCOUNT_ID` | el ID de cuenta del punto 5 |
 
+- **Estado:** cargados. Verificado re-corriendo el workflow sobre el PR #33: buildeó, desplegó
+  y comentó la URL, y la preview responde `200` con `x-robots-tag: noindex` y sin analytics.
 - **Desbloquea:** una URL propia por cada PR y por cada borrador del CMS, para ver los cambios
-  antes de que lleguen a producción. Mientras no estén, el workflow corre, saltea todo y avisa en
-  el log; no rompe nada ni pone checks en rojo.
+  antes de que lleguen a producción.
 - **Detalle técnico:** [`preview-setup.md`](preview-setup.md) (llega con el PR #33)
 
 ---
@@ -136,7 +137,7 @@ Cloudflare Pages.
   vez de pegar un token a mano.
 - **Detalle técnico:** [`cms-auth-setup.md`](cms-auth-setup.md)
 
-### 5 · Crear el proyecto de Pages y su token — proyecto ✅, token pendiente
+### 5 · Crear el proyecto de Pages y su token — ✅ hecho el 2026-11-13
 
 - **Dónde:** dashboard de Cloudflare
 - **Quién:** Galope, o Caro si le dan acceso a la cuenta de Cloudflare
@@ -148,7 +149,7 @@ Cloudflare Pages.
 3. ✅ Para crearlo pedía subir algo: se subió un `index.html` con `noindex`. Ojo, ese archivo
    **no es descartable**: como el workflow solo despliega ramas de preview, es lo que
    `galope-web.pages.dev` va a seguir sirviendo.
-4. ⬜ El token: **My Profile → API Tokens → Create Token → Custom token**, con el permiso
+4. ✅ El token: **My Profile → API Tokens → Create Token → Custom token**, con el permiso
    **Account · Cloudflare Pages · Edit**, y en _Resources_ incluir **solo la cuenta de Galope**.
    Cloudflare muestra el token una sola vez.
 5. El **Account ID** está en la barra lateral del dashboard de la cuenta.
@@ -163,15 +164,21 @@ Cloudflare Pages.
 Cuenta de Galope. Panel en <https://panel.ferozo.com>, plan _Web Hosting Plan Full_, servicio
 `#6624915`.
 
-### 6 · Confirmar el directorio web y crear un usuario FTP
+### 6 · Confirmar el directorio web y crear un usuario FTP — directorio ✅
 
 - **Quién:** Galope, o Caro con acceso al panel
 
-1. En el administrador de archivos, confirmar cuál es el directorio web de la cuenta. En Ferozo
-   casi siempre es `/httpdocs/`. **Equivocarse acá sube el sitio al directorio padre, donde no lo
-   sirve nadie**, y el deploy igual dice que salió bien.
-2. Si el panel lo permite, crear un **usuario FTP dedicado** para el deploy, limitado a ese
-   directorio. Así las credenciales que viven en GitHub no son las de la cuenta entera.
+1. ✅ **El directorio web es `/public_html/`.** Confirmado el 2026-11-13 sobre el árbol FTP real
+   de la cuenta, que es donde se subió a mano el build que está hoy en producción. Está junto a
+   `etc`, `mail`, `logos`, `storagedir`, `tmp` y `tmpsite`.
+
+   Ojo con esto: la documentación de Ferozo suele decir `/httpdocs/`, y **esta cuenta no usa ese
+   esquema**. Si el valor queda mal, el sitio se sube al directorio padre, donde no lo sirve
+   nadie, y el deploy igual informa éxito.
+
+2. ⬜ Si el panel lo permite, crear un **usuario FTP dedicado** para el deploy, limitado a ese
+   directorio. Así las credenciales que viven en GitHub no son las de la cuenta entera. Esto lo
+   tiene que hacer Galope, porque implica fijarle una contraseña.
 
 - **Desbloquea:** el punto 2.
 
@@ -215,11 +222,11 @@ La lista completa está en [`spec.md`](spec.md) § 13.
 
 ## Resumen: qué pasa si no se hace cada cosa
 
-| Sin esto                     | Lo que sigue sin andar                                      |
-| ---------------------------- | ----------------------------------------------------------- |
-| ~~1 · Auto-merge~~ ✅        | — ya está activado                                          |
-| 2 · Secrets de FTP           | Cada publicación hay que subirla a mano por FTP             |
-| 3 · Secrets de Cloudflare    | No hay dónde ver un cambio antes de que llegue a producción |
-| 4 · Variables del Worker     | El login del CMS no funciona en ningún lado                 |
-| 5 · Token de Cloudflare      | Igual que 3 (el proyecto ya existe)                         |
-| 6 · Directorio y usuario FTP | Igual que 2                                                 |
+| Sin esto                         | Lo que sigue sin andar                          |
+| -------------------------------- | ----------------------------------------------- |
+| ~~1 · Auto-merge~~ ✅            | — ya está activado                              |
+| 2 · Secrets de FTP               | Cada publicación hay que subirla a mano por FTP |
+| ~~3 · Secrets de Cloudflare~~ ✅ | — ya están cargados y las previews andan        |
+| 4 · Variables del Worker         | El login del CMS no funciona en ningún lado     |
+| ~~5 · Proyecto y token~~ ✅      | — ya está                                       |
+| 6 · Usuario FTP                  | Igual que 2 (el directorio ya está confirmado)  |
