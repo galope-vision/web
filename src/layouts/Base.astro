@@ -66,6 +66,14 @@ const absolute = (path: string): string => new URL(path, site).href;
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <meta name="generator" content={Astro.generator} />
+    {/*
+      Marks the document as "the motion script is coming", before the first paint, so
+      `[data-enter]` can start hidden without risking a page that stays blank when the script
+      never arrives. See src/scripts/motion.ts.
+    */}
+    <script is:inline>
+      document.documentElement.classList.add('motion');
+    </script>
     {noindex ? (
       <meta name="robots" content="noindex" />
     ) : (
@@ -95,6 +103,11 @@ const absolute = (path: string): string => new URL(path, site).href;
         <Logo />
       </div>
     </div>
+    <script>
+      import { startEntrances } from '../scripts/motion';
+
+      startEntrances();
+    </script>
   </body>
 </html>
 

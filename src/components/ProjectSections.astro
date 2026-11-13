@@ -30,10 +30,11 @@ const s = t(locale);
 {fotos.length > 0 && (
   <section class="section" id="fotos" aria-labelledby="fotos-heading">
     <h2 id="fotos-heading">{s('project.photos')}</h2>
-    <div class="grid">
+    <div class="grid" data-enter-group>
       {fotos.map((item) => (
         <Image
           class="image"
+          data-enter
           src={item.image}
           alt={item.alt}
           widths={[480, 960]}
@@ -48,9 +49,11 @@ const s = t(locale);
 {videos.length > 0 && (
   <section class="section" id="videos" aria-labelledby="videos-heading">
     <h2 id="videos-heading">{s('project.videos')}</h2>
-    <div class="grid">
+    <div class="grid" data-enter-group>
       {videos.map((url, index) => (
-        <VideoEmbed url={url} title={`${title} — ${s('project.video')} ${index + 1}`} />
+        <div data-enter>
+          <VideoEmbed url={url} title={`${title} — ${s('project.video')} ${index + 1}`} />
+        </div>
       ))}
     </div>
   </section>
@@ -59,10 +62,11 @@ const s = t(locale);
 {proceso.length > 0 && (
   <section class="section" id="proceso" aria-labelledby="proceso-heading">
     <h2 id="proceso-heading">{s('project.process')}</h2>
-    <div class="grid">
+    <div class="grid" data-enter-group>
       {proceso.map((item) => (
         <Image
           class="image"
+          data-enter
           src={item.image}
           alt={item.alt}
           widths={[480, 960]}
