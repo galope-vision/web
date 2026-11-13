@@ -45,7 +45,7 @@ const s = t(locale);
     )}
 
     {data.credits.length > 0 && (
-      <section class="block" aria-labelledby="credits-heading">
+      <section class="block credits-block" aria-labelledby="credits-heading">
         <h2 id="credits-heading">{s('project.credits')}</h2>
         <dl class="credits">
           {data.credits.map((credit) => (
@@ -93,11 +93,24 @@ const s = t(locale);
 </script>
 
 <style>
+  /*
+   * 340px wide in the design, at x = 18 of a 1366 frame, which is how it clears the dice:
+   * sideways, not by starting underneath it. The second term keeps that true on a screen
+   * narrower than the one the design was drawn at — the panel never reaches the dice, which is
+   * pinned to the middle.
+   */
   .panel {
     display: grid;
     gap: var(--space-2);
-    width: 100%;
-    max-width: 30rem;
+    width: min(21.25rem, calc(50% - var(--size-dice-width) / 2 - var(--space-gutter)));
+    min-width: 0;
+  }
+
+  @media (width < 48rem) {
+    /* The dice is above the content there, so the panel takes the width it has. */
+    .panel {
+      width: 100%;
+    }
   }
 
   /* The title of a project is red, unlike every other heading (docs/spec.md § 5.3). */
@@ -105,9 +118,28 @@ const s = t(locale);
     color: var(--color-accent-text);
   }
 
+  /*
+   * The credits sit at the bottom of the panel: the design has a 190px flexible gap between the
+   * part links and the Créditos heading, and the panel is 700 tall against a 768 frame.
+   */
   .details {
     display: grid;
     gap: var(--space-2);
+    align-content: start;
+  }
+
+  @media (width >= 48rem) {
+    .details {
+      display: flex;
+      flex-direction: column;
+      min-height: 60vh;
+    }
+
+    /* Whatever is above it, the credits go to the bottom. The quote is optional, so counting
+       rows would not survive a project without one. */
+    .credits-block {
+      margin-top: auto;
+    }
   }
 
   .details[hidden] {
@@ -123,19 +155,25 @@ const s = t(locale);
     gap: var(--space-1);
   }
 
+  /*
+   * One link per line: in the design they are at y = 240, 257 and 274, a 17px step, which is
+   * the line height of the body text. They are not a row.
+   */
   .parts {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0 var(--space-gutter);
+    display: grid;
     margin: 0;
     padding: 0;
     list-style: none;
+    /* The 17px step of the design is the body line height, not the prose one. */
+    line-height: var(--lh-body);
   }
 
   .credits {
     display: grid;
     gap: 0;
     margin: 0;
+    /* Credit rows are 17px in the design, the same step as the part links. */
+    line-height: var(--lh-body);
   }
 
   /* Role and name on one line, the name starting at the same place down the column. */

@@ -84,13 +84,13 @@ const seed = `${project.slug}-${data.collageSeed}`;
   }
 
   /*
-   * The panel reserves the dice zone the way the list does (src/components/ProjectList.astro),
-   * for the same reason and with the same PROVISIONAL figure: the dice is pinned over the
-   * content and would otherwise sit on the title.
+   * The panel does not start below the dice; it clears it sideways. In the design (1366 × 768)
+   * the panel is 340 wide at x = 18 and the dice starts at x = 629, so they never meet
+   * horizontally and the panel begins at the top. See ProjectPanel.astro for the width.
    */
   @media (width >= 48rem) {
     .detail {
-      padding-top: calc(var(--size-dice-top) + var(--size-dice-height) + var(--space-2));
+      padding-top: var(--space-1);
     }
   }
 </style>
