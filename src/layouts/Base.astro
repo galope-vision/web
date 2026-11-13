@@ -87,7 +87,7 @@ const absolute = (path: string): string => new URL(path, site).href;
           <LocaleSwitch locale={locale} />
         </div>
       )}
-      {dice === 'nav' && <Dice />}
+      {dice === 'nav' && <Dice locale={locale} />}
       <main class="main">
         <slot />
       </main>
