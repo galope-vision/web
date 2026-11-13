@@ -48,11 +48,14 @@ Mientras no se decida, vale la Opción A: los puntos 1 a 3 los hace Galope.
 
 ## En GitHub · `galope-vision/web`
 
-### 1 · Activar "Allow auto-merge"
+### 1 · Activar "Allow auto-merge" — ✅ hecho el 2026-11-13
 
 - **Dónde:** <https://github.com/galope-vision/web/settings> → sección **Pull Requests** →
   tildar **Allow auto-merge**
 - **Quién:** Galope (ver arriba: en un repo de cuenta personal no hay otro admin)
+- **Estado:** activado desde la sesión del dueño. Verificado por la API:
+  `allow_auto_merge=true`, con `allow_squash_merge=true` y el resto de las opciones de merge
+  sin cambios.
 - **Desbloquea:** **publicar desde el CMS.** Cuando Galope aprieta "Publicar", el CMS mergea el PR
   de esa entrada. Si CI todavía está corriendo, el CMS prende auto-merge y espera. Sin esta
   opción, publicar falla mientras corre el check y hay que reintentar a mano.
@@ -133,17 +136,19 @@ Cloudflare Pages.
   vez de pegar un token a mano.
 - **Detalle técnico:** [`cms-auth-setup.md`](cms-auth-setup.md)
 
-### 5 · Crear el proyecto de Pages y su token
+### 5 · Crear el proyecto de Pages y su token — proyecto ✅, token pendiente
 
 - **Dónde:** dashboard de Cloudflare
 - **Quién:** Galope, o Caro si le dan acceso a la cuenta de Cloudflare
 
-1. **Workers & Pages → Create → Pages → Upload assets.** Esto crea un proyecto de tipo _Direct
-   Upload_. **No** usar "Connect to Git": el build vive en este repositorio, no en el dashboard.
-2. Llamarlo exactamente **`galope-web`**. El nombre está escrito en el workflow.
-3. Para terminar de crearlo pide subir algo: cualquier carpeta con un `index.html` sirve. El
-   primer deploy real lo pisa.
-4. El token: **My Profile → API Tokens → Create Token → Custom token**, con el permiso
+1. ✅ **Workers & Pages → Create → Pages → Upload assets.** Hecho el 2026-11-13: el proyecto
+   _Direct Upload_ **`galope-web`** existe y <https://galope-web.pages.dev> responde `200`.
+   No está conectado a Git, que es lo correcto: el build vive en este repositorio.
+2. ✅ El nombre quedó exactamente **`galope-web`**, que es el que usa el workflow.
+3. ✅ Para crearlo pedía subir algo: se subió un `index.html` con `noindex`. Ojo, ese archivo
+   **no es descartable**: como el workflow solo despliega ramas de preview, es lo que
+   `galope-web.pages.dev` va a seguir sirviendo.
+4. ⬜ El token: **My Profile → API Tokens → Create Token → Custom token**, con el permiso
    **Account · Cloudflare Pages · Edit**, y en _Resources_ incluir **solo la cuenta de Galope**.
    Cloudflare muestra el token una sola vez.
 5. El **Account ID** está en la barra lateral del dashboard de la cuenta.
@@ -212,9 +217,9 @@ La lista completa está en [`spec.md`](spec.md) § 13.
 
 | Sin esto                     | Lo que sigue sin andar                                      |
 | ---------------------------- | ----------------------------------------------------------- |
-| 1 · Auto-merge               | Publicar desde el CMS falla mientras corre CI               |
+| ~~1 · Auto-merge~~ ✅        | — ya está activado                                          |
 | 2 · Secrets de FTP           | Cada publicación hay que subirla a mano por FTP             |
 | 3 · Secrets de Cloudflare    | No hay dónde ver un cambio antes de que llegue a producción |
 | 4 · Variables del Worker     | El login del CMS no funciona en ningún lado                 |
-| 5 · Proyecto de Pages        | Igual que 3                                                 |
+| 5 · Token de Cloudflare      | Igual que 3 (el proyecto ya existe)                         |
 | 6 · Directorio y usuario FTP | Igual que 2                                                 |
