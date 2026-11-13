@@ -20,19 +20,22 @@ variable; the workflow fails with a readable message if the variable is missing.
 | `FTP_SERVER_DIR` | variable | The web directory, **with a trailing slash** (see below)         |
 
 `FTP_SERVER_DIR` is a _variable_, not a secret, so that it shows up in the logs when a deploy
-goes to the wrong place. It is the web root of the account, which depends on the panel:
+goes to the wrong place.
 
-| Panel  | Usually         |
-| ------ | --------------- |
-| Ferozo | `/httpdocs/`    |
-| cPanel | `/public_html/` |
+**The value is `/public_html/`.** Confirmed on 2026-11-13 against the FTP tree of the account,
+which is where the build that is live today was uploaded by hand. The FTP user lands on the
+account root, and the web directory is `public_html` next to `etc`, `mail`, `logos`,
+`storagedir`, `tmp` and `tmpsite`.
 
-This account is on **Ferozo** — plan _Web Hosting Plan Full_, Linux, service `#6624915`, panel
-at <https://panel.ferozo.com> with its own user and password — so the value is almost certainly
-`/httpdocs/`.
+This is worth stating plainly, because the panel is Ferozo — plan _Web Hosting Plan Full_, Linux,
+service `#6624915`, panel at <https://panel.ferozo.com> — and Ferozo documentation usually says
+`/httpdocs/`. This account does not use that layout. Never assume the path from the panel brand:
+getting it wrong uploads the site into the parent of the web directory, where nothing serves it,
+and the deploy still reports success.
 
-Confirm it in the DonWeb file manager before the first deploy. Getting it wrong uploads the site
-into the parent of the web directory, where nothing serves it.
+There is also an `.htaccess` and an `.htpasswd` at the **account root**, owned by the hosting and
+unrelated to ours. Our rules live in `public_html/.htaccess`, which the deploy uploads from
+`public/.htaccess`. Leave the root ones alone.
 
 `ftp.ga-lo-pe.com` works as the host. It used to be a trap — the name lived only in DonWeb's
 copy of the zone, which was not the live one — but the nameservers were delegated to DonWeb on
