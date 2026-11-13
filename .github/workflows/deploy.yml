@@ -57,15 +57,25 @@ jobs:
           SERVER_DIR: ${{ vars.FTP_SERVER_DIR }}
         run: |
           if [ -z "$SERVER_DIR" ]; then
-            echo "::error::The FTP_SERVER_DIR repository variable is not set. It is the web" \
-                 "directory of the hosting account, with a trailing slash — /httpdocs/ on the" \
-                 "Ferozo panel, /public_html/ on cPanel. See docs/deploy-setup.md."
+            echo "::error::The FTP_SERVER_DIR repository variable is not set. On this account" \
+                 "it is /public_html/ — confirmed on the server, not guessed from the panel." \
+                 "See docs/deploy-setup.md."
             exit 1
           fi
           case "$SERVER_DIR" in
             */) ;;
             *) echo "::error::FTP_SERVER_DIR must end with a slash."; exit 1 ;;
           esac
+          # A wrong-but-plausible directory is the failure this whole file is shaped around: the
+          # upload succeeds into a folder nothing serves, every check is green and the site never
+          # changes. /httpdocs/ is the one that actually happened, because the Ferozo docs say so
+          # and this account does not use it. Refuse it by name rather than let it pass twice.
+          if [ "$SERVER_DIR" = "/httpdocs/" ]; then
+            echo "::error::FTP_SERVER_DIR is /httpdocs/, which is not the web root of this" \
+                 "account. It is /public_html/. Uploading to /httpdocs/ reports success and" \
+                 "leaves the live site untouched. See docs/deploy-setup.md."
+            exit 1
+          fi
 
       - name: Deploy over FTPS
         uses: SamKirkland/FTP-Deploy-Action@v4.4.0
