@@ -90,6 +90,12 @@ check en rojo no publica.
 
 - **Nav** en una fila arriba: `PROYECTOS · INFO · CONTACTO · ES/EN`, un ítem por columna de la
   grilla. El activo va en rojo y subrayado (Bold 13).
+  - **El nav va también en el detalle de proyecto**, aunque los frames `Proyecto — más info` y
+    `Proyecto — menos info` del Figma no lo dibujen. En todo el archivo hay una sola instancia
+    del componente `Header`, y está en el frame del listado; por eso ahí el panel arranca en
+    `y = 12`, por encima de donde iría la fila del nav. Decidido el 2026-11-13: manda esta
+    sección, el nav se queda, y el panel empieza justo debajo de él. Si en algún momento se
+    saca, `VOLVER` pasa a ser la única salida de la página.
 - **Dado** arriba al centro, debajo del nav. Se tambalea cada ~6 s. Al hacer click gira y
   navega a un proyecto al azar entre los que tienen `inDice: true`. El sorteo es del lado del
   cliente.
