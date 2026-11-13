@@ -1,0 +1,99 @@
+# Apache rules for the DonWeb shared hosting (docs/adr/0003-static-hosting-donweb-ftp.md).
+# The site is fully static, so this file is the only server-side logic it has. Astro copies
+# `public/` verbatim, so this ends up at the root of the deployed site.
+#
+# Every block is wrapped in <IfModule>: on shared hosting a module can be missing, and an
+# unguarded directive takes the whole site down with a 500 instead of just not working.
+
+AddDefaultCharset utf-8
+
+# A directory with no index file must not be listed. Rule 4 below depends on this.
+Options -Indexes
+
+ErrorDocument 404 /404.html
+
+# ---------------------------------------------------------------------------------------------
+# URLs
+# ---------------------------------------------------------------------------------------------
+
+<IfModule mod_dir.c>
+  # Off, so that Apache does not answer `/info` with a redirect to `/info/`. Rule 4 serves the
+  # page directly instead. `/` is unaffected and still gets index.html from DirectoryIndex.
+  DirectorySlash Off
+  DirectoryIndex index.html
+</IfModule>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # 1. HTTPS. The second condition covers TLS ending at a proxy in front of Apache: there
+  # %{HTTPS} reads "off" even though the visitor is on HTTPS, and without the condition the
+  # redirect would loop forever.
+  #
+  # Careful: do not deploy this file before the certificate exists in the DonWeb panel, or
+  # every visitor lands on an HTTPS URL that no certificate covers (docs/dns-setup.md).
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+  # 2. One hostname. The apex is canonical, which is what `site` in astro.config.mjs and the
+  # hreflang links say, so www redirects to it.
+  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
+
+  # 3. No trailing slash, so each page is reachable at exactly one URL. `src/lib/i18n.ts` builds
+  # links that way. The two home pages are the exception: `/` and `/en/` keep their slash.
+  RewriteCond %{REQUEST_URI} !^/(en/)?$
+  RewriteRule ^(.+)/$ /$1 [R=301,L]
+
+  # 4. Serve `/info` from `info/index.html` internally. `build.format` is Astro's default
+  # `'directory'`, so every page is a directory with an index.html in it.
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteCond %{REQUEST_FILENAME}/index.html -f
+  RewriteRule ^(.+?)/?$ /$1/index.html [L]
+</IfModule>
+
+# ---------------------------------------------------------------------------------------------
+# Caching
+# ---------------------------------------------------------------------------------------------
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+
+  # Astro puts a content hash in the name of everything under `/_astro/`, so CSS and JS can be
+  # cached for a year: a new build means a new filename.
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType text/javascript "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+
+  # Images get a week. The ones Astro optimises are hashed and could last a year too, but the
+  # ones in `public/img/` keep their names, and a week is the safe figure for both.
+  ExpiresByType image/webp "access plus 1 week"
+  ExpiresByType image/avif "access plus 1 week"
+  ExpiresByType image/png "access plus 1 week"
+  ExpiresByType image/jpeg "access plus 1 week"
+  ExpiresByType image/svg+xml "access plus 1 week"
+  ExpiresByType image/x-icon "access plus 1 week"
+
+  # HTML is never cached: it is what points at the hashed assets, so a cached copy would hide a
+  # deploy behind stale markup.
+  ExpiresByType text/html "access plus 0 seconds"
+</IfModule>
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+
+  # The CMS config and its session must never be served from a cache.
+  <FilesMatch "^config\.yml$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml
+  AddOutputFilterByType DEFLATE text/javascript application/javascript application/json
+  AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
