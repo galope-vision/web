@@ -3,9 +3,10 @@
  * dictionary (`src/lib/i18n.ts`). The CMS stores the key, never the label, so the Spanish and
  * English names of an option live in the code and never go through machine translation.
  *
- * PROVISIONAL until the client confirms them (docs/spec.md § 13).
+ * `GROUPS` are the three of the catalogue in docs/spec.md § 6.4, which is Galope's own list;
+ * the rest is still PROVISIONAL until the client confirms it (docs/spec.md § 13).
  */
-export const GROUPS = ['2023', '2024', '2025'] as const;
+export const GROUPS = ['111', '166', '166 Deluxe'] as const;
 export const TYPES = [
   'videoclip',
   'documental',
