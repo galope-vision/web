@@ -24,10 +24,12 @@ const { locale, data, parts } = Astro.props;
 const s = t(locale);
 ---
 
-<div class="panel">
-  <h1 class="title">{data.title}</h1>
+<div class="panel" data-enter-group>
+  <h1 class="title" data-enter>
+    {data.title}
+  </h1>
 
-  <div class="details" id="project-details">
+  <div class="details" id="project-details" data-enter>
     {data.quote && <p class="quote">{data.quote}</p>}
     <p class="description">{data.description}</p>
 
@@ -59,7 +61,7 @@ const s = t(locale);
     )}
   </div>
 
-  <p class="actions">
+  <p class="actions" data-enter>
     <button
       type="button"
       class="toggle"

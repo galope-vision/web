@@ -99,6 +99,16 @@ a:hover {
   white-space: nowrap;
 }
 
+/*
+ * The starting frame of the entrance animations (src/scripts/motion.ts). Scoped to `.motion`,
+ * which only exists once the inline head script has run, so without JavaScript nothing is ever
+ * hidden. `[data-entered]` is set by the script when an element has arrived, which also covers
+ * the case of an element that animates before this stylesheet is parsed.
+ */
+.motion [data-enter]:not([data-entered]) {
+  opacity: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

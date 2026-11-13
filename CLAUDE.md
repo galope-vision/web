@@ -32,8 +32,11 @@ The client must be able to publish content on their own, with no developer invol
 - **Previews**: Cloudflare Pages — one preview per CMS draft branch and per code PR. `noindex`.
 - **Analytics**: Cloudflare Web Analytics (production only, no cookies) plus Google Tag Manager
   (production only, `PUBLIC_GTM_ID` set by the deploy; its tags may set cookies, ADR 0008).
-- **Motion**: Motion (motion.dev) — only `animate`, `inView`, `stagger`. Idle drift in pure CSS.
-  Parallax in our own TS (`src/scripts/motion.ts`).
+- **Motion**: Motion (motion.dev), imported as `motion/mini` and using **only `animate`**.
+  `inView` and `stagger` turned out to cost 22 KB gzip between them — the full entry point is
+  25.6 KB against 3.7 KB for `mini` — so they are ours: an `IntersectionObserver` and an index
+  multiplication, both in `src/scripts/motion.ts`. Idle drift in pure CSS. Parallax in our own
+  TS, same file.
 
 Never add a server runtime, database, SSR adapter or paid service.
 
