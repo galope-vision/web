@@ -45,11 +45,14 @@ commit-msg.
 | Production  | DonWeb (FTPS)    | Merge to `main`, via GitHub Actions    |
 
 - CI (`.github/workflows/ci.yml`) runs check and build, and validates the PR title, on every PR.
+- Previews (`.github/workflows/preview.yml`) build and upload to Cloudflare Pages on every PR and
+  every `cms/*` branch, and comment the URL on the PR. See
+  [`docs/preview-setup.md`](docs/preview-setup.md).
 - Releases: release-please opens a release PR from the Conventional Commits on `main`. Merging
   it tags the version (`vX.Y.Z`) and updates `CHANGELOG.md`.
   Release PRs are opened with `GITHUB_TOKEN`, which doesn't trigger workflows, so their required
   checks never start on their own. Close and reopen the release PR to run CI before merging it.
-- The preview and deploy workflows arrive in later phases (see the phases in `CLAUDE.md`).
 
-See [ADR 0002](docs/adr/0002-cloudflare-pages-previews.md) and
-[ADR 0003](docs/adr/0003-static-hosting-donweb-ftp.md).
+See [ADR 0002](docs/adr/0002-cloudflare-pages-previews.md),
+[ADR 0003](docs/adr/0003-static-hosting-donweb-ftp.md) and
+[ADR 0009](docs/adr/0009-previews-by-direct-upload.md).
