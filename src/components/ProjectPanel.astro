@@ -1,0 +1,168 @@
+---
+/**
+ * The info panel of a project page: title, description, the links to the parts below, the
+ * credits, the Más/Menos Info toggle and VOLVER (docs/spec.md § 5.3).
+ *
+ * It goes over the collage, on the left. The collage is not built yet, so for now the panel is
+ * simply the left column of the page.
+ *
+ * The toggle is a button, not a link, because the spec is explicit that it must not change the
+ * URL. With no JavaScript the panel stays in its "Más info" state, which is the one the page
+ * starts in and the one that has the content in it, so nothing is lost — only the toggle is
+ * inert.
+ */
+import { localePath, t, type Locale } from '../lib/i18n';
+import type { ProjectData, ProjectPart } from '../lib/content';
+
+interface Props {
+  locale: Locale;
+  data: ProjectData;
+  parts: ProjectPart[];
+}
+
+const { locale, data, parts } = Astro.props;
+const s = t(locale);
+---
+
+<div class="panel">
+  <h1 class="title">{data.title}</h1>
+
+  <div class="details" id="project-details">
+    {data.quote && <p class="quote">{data.quote}</p>}
+    <p class="description">{data.description}</p>
+
+    {parts.length > 0 && (
+      <nav class="block" aria-labelledby="parts-heading">
+        <h2 id="parts-heading">{s('project.parts')}</h2>
+        <ul class="parts">
+          {parts.map((part) => (
+            <li>
+              <a href={`#${part.id}`}>{part.label}</a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    )}
+
+    {data.credits.length > 0 && (
+      <section class="block" aria-labelledby="credits-heading">
+        <h2 id="credits-heading">{s('project.credits')}</h2>
+        <dl class="credits">
+          {data.credits.map((credit) => (
+            <div class="credit">
+              <dt>{credit.role}</dt>
+              <dd>{credit.url ? <a href={credit.url}>{credit.name}</a> : credit.name}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+    )}
+  </div>
+
+  <p class="actions">
+    <button
+      type="button"
+      class="toggle"
+      aria-expanded="true"
+      aria-controls="project-details"
+      data-more={s('project.moreInfo')}
+      data-less={s('project.lessInfo')}
+    >
+      {s('project.lessInfo')}
+    </button>
+    <a class="back" href={localePath(locale, 'projects')}>
+      {s('project.back')}
+    </a>
+  </p>
+</div>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('.toggle');
+  const details = document.getElementById('project-details');
+
+  if (toggle && details) {
+    const { more = '', less = '' } = toggle.dataset;
+
+    toggle.addEventListener('click', () => {
+      const open = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', String(!open));
+      details.hidden = open;
+      toggle.textContent = open ? more : less;
+    });
+  }
+</script>
+
+<style>
+  .panel {
+    display: grid;
+    gap: var(--space-2);
+    width: 100%;
+    max-width: 30rem;
+  }
+
+  /* The title of a project is red, unlike every other heading (docs/spec.md § 5.3). */
+  .title {
+    color: var(--color-accent-text);
+  }
+
+  .details {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .details[hidden] {
+    display: none;
+  }
+
+  .quote {
+    font-style: italic;
+  }
+
+  .block {
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .parts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-gutter);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .credits {
+    display: grid;
+    gap: 0;
+    margin: 0;
+  }
+
+  /* Role and name on one line, the name starting at the same place down the column. */
+  .credit {
+    display: grid;
+    grid-template-columns: minmax(6rem, max-content) 1fr;
+    gap: 0 var(--space-gutter);
+  }
+
+  .credit dd {
+    margin: 0;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-gutter);
+  }
+
+  .toggle,
+  .back {
+    font-weight: var(--fw-bold);
+    text-decoration: underline;
+  }
+
+  .toggle:hover,
+  .back:hover {
+    color: var(--color-accent-text);
+  }
+</style>

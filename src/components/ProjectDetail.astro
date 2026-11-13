@@ -1,0 +1,65 @@
+---
+/**
+ * A project page: the info panel over the collage, and the Fotos, Vídeos and Proceso sections
+ * under it (docs/spec.md § 5.3). Shared by `/proyectos/[slug]` and `/en/projects/[slug]`.
+ *
+ * The collage is not here yet. When it arrives it goes between the two, and the panel sits on
+ * top of it; nothing else about this file has to change.
+ *
+ * Which parts exist is worked out once, here, so the links in the panel and the sections below
+ * can never disagree about whether a part is empty.
+ */
+import ProjectPanel from './ProjectPanel.astro';
+import ProjectSections from './ProjectSections.astro';
+import { t, type Locale } from '../lib/i18n';
+import type { Project, ProjectPart } from '../lib/content';
+
+interface Props {
+  locale: Locale;
+  project: Project;
+}
+
+const { locale, project } = Astro.props;
+const { data } = project;
+const s = t(locale);
+
+const fotos = data.gallery.filter((item) => item.part === 'fotos');
+const proceso = data.gallery.filter((item) => item.part === 'proceso');
+
+/** A part with nothing in it gets no link, as the spec asks. */
+const parts: ProjectPart[] = [
+  fotos.length > 0 && { id: 'fotos', label: s('project.photos') },
+  data.videos.length > 0 && { id: 'videos', label: s('project.videos') },
+  proceso.length > 0 && { id: 'proceso', label: s('project.process') },
+].filter((part): part is ProjectPart => part !== false);
+---
+
+<div class="detail">
+  <ProjectPanel locale={locale} data={data} parts={parts} />
+  <ProjectSections
+    locale={locale}
+    title={data.title}
+    fotos={fotos}
+    videos={data.videos}
+    proceso={proceso}
+  />
+</div>
+
+<style>
+  .detail {
+    display: grid;
+    gap: var(--space-4);
+    padding-bottom: var(--space-4);
+  }
+
+  /*
+   * The panel reserves the dice zone the way the list does (src/components/ProjectList.astro),
+   * for the same reason and with the same PROVISIONAL figure: the dice is pinned over the
+   * content and would otherwise sit on the title.
+   */
+  @media (width >= 48rem) {
+    .detail {
+      padding-top: calc(var(--size-dice-top) + var(--size-dice-height) + var(--space-2));
+    }
+  }
+</style>

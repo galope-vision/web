@@ -1,0 +1,63 @@
+---
+/**
+ * One YouTube or Vimeo video, in a 16:9 box.
+ *
+ * The URL shapes accepted here are the ones `VIDEO_URL` in `src/content.config.ts` lets through,
+ * so a URL that reaches this component has already been validated by the schema and the build
+ * would have failed otherwise. The throw at the end is for the case where the two drift apart.
+ *
+ * Both embeds are the privacy variants — `youtube-nocookie.com` and Vimeo's `dnt=1` — because
+ * the site has no cookie banner and is not going to ask for one over an embed. They are lazy so
+ * a project with several videos does not load them all at once (CLAUDE.md asks for Lighthouse
+ * ≥ 90 on mobile).
+ */
+interface Props {
+  url: string;
+  /** What the iframe is called for a screen reader; an embed with no title is unusable. */
+  title: string;
+}
+
+const { url, title } = Astro.props;
+
+const YOUTUBE = /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/;
+const VIMEO = /vimeo\.com\/(?:video\/)?(\d+)/;
+
+function embedSrc(video: string): string {
+  const youtube = YOUTUBE.exec(video);
+  if (youtube?.[1]) return `https://www.youtube-nocookie.com/embed/${youtube[1]}`;
+
+  const vimeo = VIMEO.exec(video);
+  if (vimeo?.[1]) return `https://player.vimeo.com/video/${vimeo[1]}?dnt=1`;
+
+  throw new Error(
+    `Not a YouTube or Vimeo URL this component can embed: ${video}. ` +
+      'It passed the schema, so VIDEO_URL in src/content.config.ts and this file have drifted.',
+  );
+}
+
+const src = embedSrc(url);
+---
+
+<div class="frame">
+  <iframe
+    src={src}
+    title={title}
+    loading="lazy"
+    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen
+  ></iframe>
+</div>
+
+<style>
+  .frame {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    background-color: color-mix(in srgb, var(--color-placeholder) 70%, transparent);
+  }
+
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+</style>

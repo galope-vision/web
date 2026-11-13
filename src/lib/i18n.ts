@@ -36,6 +36,8 @@ const ES_UI = {
   'project.parts': 'Partes del proyecto',
   'project.photos': 'Fotos',
   'project.videos': 'Vídeos',
+  /* Singular, for the accessible title of one embedded video. */
+  'project.video': 'Vídeo',
   'project.process': 'Proceso',
   'project.credits': 'Créditos',
   'project.moreInfo': 'Más Info',
@@ -65,6 +67,7 @@ const EN_UI: Record<UiKey, string> = {
   'project.parts': 'Parts of the project',
   'project.photos': 'Photos',
   'project.videos': 'Videos',
+  'project.video': 'Video',
   'project.process': 'Process',
   'project.credits': 'Credits',
   'project.moreInfo': 'More Info',
