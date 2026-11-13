@@ -7,6 +7,8 @@ The client publishes content on their own through a Git-based CMS.
 - Spec (Spanish): [`docs/spec.md`](docs/spec.md)
 - Working rules and context: [`CLAUDE.md`](CLAUDE.md) · [`CONTRIBUTING.md`](CONTRIBUTING.md)
 - Decisions: [`docs/adr/`](docs/adr/)
+- What is still to be configured, and where (Spanish):
+  [`docs/configuracion-pendiente.md`](docs/configuracion-pendiente.md)
 
 ## Stack
 
