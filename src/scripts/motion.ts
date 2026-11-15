@@ -180,3 +180,122 @@ export function pauseDriftOutOfSight(): void {
     for (const collage of collages) settle(collage);
   });
 }
+
+/* Parallax (docs/spec.md § 8). */
+
+/** How far the nearest image travels from one edge of the screen to the other. */
+const PARALLAX_MAX = 12;
+
+/** How much of the remaining distance is covered each frame; the lag is the whole effect. */
+const LERP = 0.08;
+
+/** Under this, the image is close enough to its mark that nobody can tell. */
+const SETTLED = 0.01;
+
+/**
+ * Moves the collage images with the pointer, the nearer ones further than the far ones
+ * (docs/spec.md § 8).
+ *
+ * Depth runs 0.2 to 1 off the image's index, the same deterministic trick the drift uses.
+ * Movement is written to `transform` while the drift owns `translate` and `rotate`, so the two
+ * compose instead of overwriting each other.
+ *
+ * It is off entirely where it would be wrong or unwanted: a device without a fine pointer has
+ * nothing to follow, and `prefers-reduced-motion` asks for no parallax at all. The loop also
+ * stops whenever the collage is paused — off screen or in a background tab — so an idle page
+ * is not running a `requestAnimationFrame` for nothing.
+ */
+export function startParallax(): void {
+  const fine = window.matchMedia('(hover: hover) and (pointer: fine)');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const items = [...document.querySelectorAll<HTMLElement>('.collage .item')];
+  if (items.length === 0) return;
+
+  /* 0.2, 0.4, 0.6, 0.8, 1 and round again — far images barely move, near ones lead. */
+  const depth = (index: number): number => 0.2 + (index % 5) * 0.2;
+
+  let targetX = 0;
+  let targetY = 0;
+  const current = items.map(() => ({ x: 0, y: 0 }));
+  let frame = 0;
+
+  /*
+   * Visibility is tracked here rather than read off the `data-still` that the drift uses. Both
+   * come from an IntersectionObserver, and two observers' callbacks can land in either order:
+   * reading the other one's attribute meant the loop could run, find the collage still marked
+   * visible, settle, and stop — a frame before the attribute appeared. The images then stayed
+   * leaning until the pointer next moved.
+   */
+  const onScreen = new WeakSet<Element>();
+
+  function paused(): boolean {
+    if (document.hidden || !fine.matches || reduced.matches) return true;
+    return items.every((item) => {
+      const collage = item.closest('.collage');
+      return collage === null || !onScreen.has(collage);
+    });
+  }
+
+  function step(): void {
+    frame = 0;
+    let moving = false;
+
+    items.forEach((item, index) => {
+      const point = current[index];
+      if (!point) return;
+
+      const wanted = paused() ? { x: 0, y: 0 } : { x: targetX, y: targetY };
+      const factor = depth(index) * PARALLAX_MAX;
+      const wantedX = wanted.x * factor;
+      const wantedY = wanted.y * factor;
+      point.x += (wantedX - point.x) * LERP;
+      point.y += (wantedY - point.y) * LERP;
+
+      /*
+       * The distance left to travel, not the distance from the middle. Measuring from the
+       * middle keeps `moving` true for as long as an image is displaced at all, which leaves a
+       * `requestAnimationFrame` running at 60 fps on a page where nothing is happening.
+       */
+      if (Math.abs(wantedX - point.x) > SETTLED || Math.abs(wantedY - point.y) > SETTLED) {
+        moving = true;
+      }
+      item.style.transform = `translate3d(${point.x.toFixed(2)}px, ${point.y.toFixed(2)}px, 0)`;
+    });
+
+    /* Keep going only while something is still travelling, so a still page costs nothing. */
+    if (moving) frame = requestAnimationFrame(step);
+  }
+
+  function run(): void {
+    if (frame === 0) frame = requestAnimationFrame(step);
+  }
+
+  window.addEventListener(
+    'pointermove',
+    (event) => {
+      if (event.pointerType !== 'mouse') return;
+      /* −1 to 1 from the middle of the window, so the collage leans towards the pointer. */
+      targetX = (event.clientX / window.innerWidth) * 2 - 1;
+      targetY = (event.clientY / window.innerHeight) * 2 - 1;
+      run();
+    },
+    { passive: true },
+  );
+
+  /* The same callback that learns the collage has gone sets the images travelling home. */
+  const observer = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (entry.isIntersecting) onScreen.add(entry.target);
+      else onScreen.delete(entry.target);
+    }
+    run();
+  });
+  for (const collage of new Set(items.map((item) => item.closest('.collage')))) {
+    if (collage) observer.observe(collage);
+  }
+
+  /* Settle back to the middle when the page is hidden or the preference changes. */
+  document.addEventListener('visibilitychange', run);
+  reduced.addEventListener('change', run);
+  fine.addEventListener('change', run);
+}
