@@ -145,3 +145,38 @@ export function startEntrances(): void {
 
   window.addEventListener('scroll', onScroll, { passive: true });
 }
+
+/**
+ * Pauses the idle drift of a collage while nobody can see it: off screen, or with the tab in the
+ * background (docs/spec.md § 8). The drift itself is CSS — this only sets `data-still` on the
+ * container, and the stylesheet does the rest.
+ *
+ * Browsers already throttle animations in hidden tabs, but not consistently, and a page with
+ * several collages on it is a dozen images animating for nobody. The observer is the part that
+ * actually matters: a project page is taller than the screen.
+ */
+export function pauseDriftOutOfSight(): void {
+  const collages = [...document.querySelectorAll<HTMLElement>('.collage')];
+  if (collages.length === 0) return;
+
+  const onScreen = new WeakSet<Element>();
+
+  function settle(collage: HTMLElement): void {
+    const visible = onScreen.has(collage) && !document.hidden;
+    collage.toggleAttribute('data-still', !visible);
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (entry.isIntersecting) onScreen.add(entry.target);
+      else onScreen.delete(entry.target);
+      settle(entry.target as HTMLElement);
+    }
+  });
+
+  for (const collage of collages) observer.observe(collage);
+
+  document.addEventListener('visibilitychange', () => {
+    for (const collage of collages) settle(collage);
+  });
+}

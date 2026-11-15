@@ -104,9 +104,10 @@ const absolute = (path: string): string => new URL(path, site).href;
       </div>
     </div>
     <script>
-      import { startEntrances } from '../scripts/motion';
+      import { pauseDriftOutOfSight, startEntrances } from '../scripts/motion';
 
       startEntrances();
+      pauseDriftOutOfSight();
     </script>
   </body>
 </html>

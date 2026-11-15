@@ -33,6 +33,31 @@ const positioned = items.flatMap((item, index) => {
 });
 
 const round = (value: number): string => `${value.toFixed(3)}%`;
+
+/**
+ * The idle drift of one image, worked out from its position in the collage and nothing else
+ * (docs/spec.md § 8). No `Math.random` anywhere near this: the same collage has to breathe the
+ * same way on every build, or the HTML changes on every deploy for no reason.
+ *
+ * The three prime-ish steps are there so the loops fall out of sync with each other and the
+ * collage never pulses as one block. The delay is negative, which starts each image partway
+ * into its own loop instead of having them all set off together on load.
+ */
+function drift(index: number): string {
+  const seconds = 8 + (index % 5); // 8–12 s, as the spec asks
+  const delay = -((index * 1.7) % seconds);
+  const x = index % 2 === 0 ? 6 : -6; // ±6 px
+  const y = index % 3 === 0 ? -6 : 6;
+  const turn = index % 2 === 0 ? -0.6 : 0.6; // ±0.6°
+
+  return [
+    `--drift-duration: ${seconds}s`,
+    `--drift-delay: ${delay.toFixed(2)}s`,
+    `--drift-x: ${x}px`,
+    `--drift-y: ${y}px`,
+    `--drift-rotate: ${turn}deg`,
+  ].join('; ');
+}
 ---
 
 {positioned.length > 0 && (
@@ -42,7 +67,7 @@ const round = (value: number): string => `${value.toFixed(3)}%`;
     data-fallback={layout.fallback ? '' : undefined}
     style={`--wide-aspect: ${layout.wideAspect.toFixed(4)}; --narrow-aspect: ${layout.narrowAspect.toFixed(4)};`}
   >
-    {positioned.map(({ item, wide, narrow }) => (
+    {positioned.map(({ item, wide, narrow }, index) => (
       <Image
         class="item"
         data-enter
@@ -61,6 +86,7 @@ const round = (value: number): string => `${value.toFixed(3)}%`;
           `--nw: ${round(narrow.width)}`,
           `--nh: ${round(narrow.height)}`,
           `object-position: ${item.focus}`,
+          drift(index),
         ].join('; ')}
       />
     ))}
@@ -98,6 +124,43 @@ const round = (value: number): string => `${value.toFixed(3)}%`;
      * so if it goes, the panel will want a scrim behind the text instead.
      */
     opacity: var(--opacity-placeholder);
+
+    /*
+     * The idle drift (docs/spec.md § 8). It uses the `translate` and `rotate` properties rather
+     * than `transform`, so that it composes with anything written to `transform` instead of
+     * overwriting it — the entrance animation writes there, and so will the parallax.
+     *
+     * `alternate` means one set of keyframes covers the way out and the way back, so the image
+     * never jumps at the end of a loop.
+     */
+    animation: drift var(--drift-duration) var(--drift-delay) ease-in-out infinite alternate;
+  }
+
+  @keyframes drift {
+    from {
+      translate: 0 0;
+      rotate: 0deg;
+    }
+    to {
+      translate: var(--drift-x) var(--drift-y);
+      rotate: var(--drift-rotate);
+    }
+  }
+
+  /*
+   * Paused off screen and with the tab hidden, which the spec asks for and which keeps a long
+   * page of collages from animating a dozen images nobody is looking at. The class is set by
+   * src/scripts/motion.ts; the browser throttles hidden tabs anyway, but not reliably.
+   */
+  .collage[data-still] .item {
+    animation-play-state: paused;
+  }
+
+  /* No idle motion when the visitor asked for less. */
+  @media (prefers-reduced-motion: reduce) {
+    .item {
+      animation: none;
+    }
   }
 
   @media (width >= 48rem) {
