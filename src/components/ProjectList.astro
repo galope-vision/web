@@ -54,7 +54,7 @@ const generalSeed = projects.map(({ slug }) => slug).join('-');
 
   <div class="list">
     {groups.map(({ group, projects: inGroup }) => (
-      <ul class="group" data-group={group}>
+      <ul class="group" data-group={group} data-enter-group>
         {inGroup.map(({ slug, data }) => (
           <li>
             {/*
@@ -63,7 +63,7 @@ const generalSeed = projects.map(({ slug }) => slug).join('-');
               white-space-only text node is not rendered as a grid item, so the row stays two
               columns wide.
             */}
-            <a class="row" href={localePath(locale, 'projects', slug)} data-slug={slug}>
+            <a class="row" href={localePath(locale, 'projects', slug)} data-slug={slug} data-enter>
               <span class="title">{data.title}</span>{' '}
               <span class="type">({typeLabel(locale, data.type)})</span>
             </a>

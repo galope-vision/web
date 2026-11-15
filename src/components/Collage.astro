@@ -38,12 +38,14 @@ const round = (value: number): string => `${value.toFixed(3)}%`;
 {positioned.length > 0 && (
   <div
     class="collage"
+    data-enter-group
     data-fallback={layout.fallback ? '' : undefined}
     style={`--wide-aspect: ${layout.wideAspect.toFixed(4)}; --narrow-aspect: ${layout.narrowAspect.toFixed(4)};`}
   >
     {positioned.map(({ item, wide, narrow }) => (
       <Image
         class="item"
+        data-enter
         src={item.image}
         alt={item.alt}
         widths={[320, 640, 960]}
