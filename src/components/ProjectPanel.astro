@@ -87,34 +87,97 @@ const s = t(locale);
   /*
    * Más/Menos Info. "Menos Info" folds the details away — the description, "Partes del
    * proyecto" and the credits — leaving the title and the two actions, and lets the collage take
-   * the whole screen; "Más Info" brings them back. Only opacity and transform move (docs/spec.md § 8): the details lift and fade,
-   * and `hidden` is set once they are gone, so the panel closes up and screen readers skip
-   * them. With reduced motion it is a quick fade, with nothing moving.
+   * the whole screen; "Más Info" brings them back. Only opacity and transform move
+   * (docs/spec.md § 8):
+   *
+   * - the blocks of the details slide out to the left and fade, one after another, and come
+   *   back the same way; `hidden` is set once they are gone, so the panel closes up and screen
+   *   readers skip them;
+   * - each photo of the collage travels from its place in one layout to its place in the other
+   *   (a FLIP: the new layout is applied at once, and a transform takes every image back to
+   *   where it was and lets it go). The parallax writes the images' `transform` and the drift
+   *   and the hover own `translate`, `rotate` and `scale`, so this one is *added* on top
+   *   (`composite: 'add'`) instead of replacing any of them.
+   *
+   * With reduced motion the details fade and the collage simply switches.
    */
-  const LIFT = 12;
-  const DURATION = 0.25;
+  const SLIDE = 24;
+  const DURATION = 0.3;
+  const STAGGER = 0.05;
+  const TRAVEL = 700;
+  const TRAVEL_STAGGER = 40;
   const EASE = [0.22, 1, 0.36, 1] as const;
+  const EASE_CSS = 'cubic-bezier(0.22, 1, 0.36, 1)';
 
   const toggle = document.querySelector<HTMLButtonElement>('.toggle');
   const details = document.getElementById('project-details');
   /* The page carries the state, so the layout (ProjectDetail.astro) can follow it. */
   const page = document.querySelector<HTMLElement>('.detail');
-  const collage = page?.querySelector<HTMLElement>('.collage') ?? null;
+  const items = [...(page?.querySelectorAll<HTMLElement>('.collage .item') ?? [])];
 
   function reduced(): boolean {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 
-  /** Hands the element back to CSS, a frame after the library writes its last values. */
-  function release(element: HTMLElement): void {
+  /** Hands the elements back to CSS, a frame after the library writes its last values. */
+  function release(elements: HTMLElement[]): void {
     requestAnimationFrame(() => {
-      element.style.removeProperty('opacity');
-      element.style.removeProperty('transform');
+      for (const element of elements) {
+        element.style.removeProperty('opacity');
+        element.style.removeProperty('transform');
+      }
     });
   }
 
-  if (toggle && details) {
+  /** The details, block by block, sliding out (`away`) or in, one after another. */
+  function slide(blocks: HTMLElement[], away: boolean, still: boolean): Promise<unknown> {
+    const hidden = still ? { opacity: 0 } : { opacity: 0, transform: `translateX(-${SLIDE}px)` };
+    const shown = still ? { opacity: 1 } : { opacity: 1, transform: 'translateX(0px)' };
+    const order = away ? [...blocks].reverse() : blocks;
+    return Promise.all(
+      order.map((block, index) =>
+        animate(block, away ? hidden : shown, {
+          duration: still ? DURATION / 2 : DURATION,
+          ease: EASE,
+          delay: still ? 0 : index * STAGGER,
+        }),
+      ),
+    );
+  }
+
+  /** Moves every photo from where it was (`first`) to where the new layout put it. */
+  function travel(first: DOMRect[]): Promise<unknown> {
+    return Promise.all(
+      items.map((item, index) => {
+        const from = first[index];
+        const to = item.getBoundingClientRect();
+        if (!from || to.width === 0 || to.height === 0) return undefined;
+        const dx = from.left + from.width / 2 - (to.left + to.width / 2);
+        const dy = from.top + from.height / 2 - (to.top + to.height / 2);
+        const sx = from.width / to.width;
+        const sy = from.height / to.height;
+        return item.animate(
+          [
+            { transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})` },
+            { transform: 'translate(0px, 0px) scale(1, 1)' },
+          ],
+          {
+            duration: TRAVEL,
+            easing: EASE_CSS,
+            delay: index * TRAVEL_STAGGER,
+            fill: 'backwards',
+            composite: 'add',
+          },
+        ).finished;
+      }),
+    );
+  }
+
+  if (toggle && details && page) {
     const { more = '', less = '' } = toggle.dataset;
+    const blocks = [...details.children].filter(
+      (child): child is HTMLElement => child instanceof HTMLElement,
+    );
     let busy = false;
 
     toggle.addEventListener('click', async () => {
@@ -122,39 +185,28 @@ const s = t(locale);
       busy = true;
       const open = toggle.getAttribute('aria-expanded') === 'true';
       const still = reduced();
-      const away = still ? { opacity: 0 } : { opacity: 0, transform: `translateY(-${LIFT}px)` };
-      const back = still ? { opacity: 1 } : { opacity: 1, transform: 'translateY(0px)' };
-      const options = { duration: still ? DURATION / 2 : DURATION, ease: EASE };
 
       toggle.setAttribute('aria-expanded', String(!open));
       toggle.textContent = open ? more : less;
 
-      /*
-       * The collage changes layout with the panel (full width when it is folded), and a layout
-       * cannot be animated within § 8, so it fades out, switches while it cannot be seen, and
-       * fades back in.
-       */
-      const fadeOut = collage ? animate(collage, { opacity: 0 }, options) : undefined;
-
       if (open) {
-        await Promise.all([animate(details, away, options), fadeOut]);
+        await slide(blocks, true, still);
+        const first = items.map((item) => item.getBoundingClientRect());
         details.hidden = true;
+        page.dataset.info = 'less';
+        if (!still) await travel(first);
       } else {
-        await fadeOut;
-        details.style.opacity = '0';
-        if (!still) details.style.transform = `translateY(-${LIFT}px)`;
+        const first = items.map((item) => item.getBoundingClientRect());
+        for (const block of blocks) {
+          block.style.opacity = '0';
+          if (!still) block.style.transform = `translateX(-${SLIDE}px)`;
+        }
         details.hidden = false;
+        page.dataset.info = 'more';
+        await Promise.all([slide(blocks, false, still), still ? undefined : travel(first)]);
       }
 
-      if (page) page.dataset.info = open ? 'less' : 'more';
-
-      await Promise.all([
-        open ? undefined : animate(details, back, options),
-        collage ? animate(collage, { opacity: 1 }, options) : undefined,
-      ]);
-
-      release(details);
-      if (collage) release(collage);
+      release(blocks);
       busy = false;
       update();
     });
@@ -345,6 +397,16 @@ const s = t(locale);
    * VOLVER on the right. Otherwise Más Info would be a long scroll away once the details are
    * folded. The page already ends with more room than the bar takes (ProjectDetail.astro).
    */
+  /*
+   * No scrollbar flashing on load. The panel is exactly as tall as its content, and the
+   * entrance starts every block 24px lower (src/scripts/motion.ts), so for 600 ms the content
+   * spilled over and the panel's scrollbar came and went. Until the last block has arrived the
+   * panel does not scroll. Only under `.motion`: without the script nothing is held back.
+   */
+  :global(.motion) .panel:not(:has(.actions[data-entered])) {
+    overflow-y: hidden;
+  }
+
   @media (width < 48rem) {
     .actions {
       position: fixed;

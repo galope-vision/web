@@ -97,7 +97,7 @@ The dice wobbles every ~6 s and, on click, spins and navigates to a random proje
   mobile). Panel: title, description, "Partes del proyecto" links that scroll to their sections
   (the one being read turns red), credits, and at its foot Más/Menos Info above VOLVER. Menos
   Info folds the details away with an opacity/transform animation, and from 48rem up the
-  collage switches (with a fade) to a third, full-width layout that keeps the title, dice and
+  collage switches to a third, full-width layout (each photo travels to its new place) that keeps the title, dice and
   actions clear.
 - Info: highlighted words swap the image on the right on hover/focus (fade + slight rotation).
 See `docs/spec.md` for each page.

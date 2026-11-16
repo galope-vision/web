@@ -142,8 +142,9 @@ Tiene dos estados, y el toggle no cambia la URL:
 - **Menos info**: el panel se contrae (sube y se desvanece) y quedan solo el título, el
   collage, «Más Info» y «VOLVER». Desde 48rem el collage pasa a ocupar **todo el ancho de la
   pantalla**, con un layout propio que deja libres la esquina del título, el centro de arriba
-  (el dado) y la esquina de abajo a la izquierda (los botones). El cambio de layout es un
-  fundido del collage. El título y los botones siguen fijos mientras se scrollea, y las
+  (el dado) y la esquina de abajo a la izquierda (los botones). Al cambiar de layout cada
+  foto viaja desde su lugar anterior hasta el nuevo, escalonada, y el texto del panel sale y
+  entra de costado, de a un bloque. Con movimiento reducido es un fundido. El título y los botones siguen fijos mientras se scrollea, y las
   secciones de abajo dejan libre esa columna.
 - En mobile, «Menos/Más Info» y «VOLVER» van en una barra fija al pie de la pantalla, para que
   estén a mano en cualquier punto de la página.
