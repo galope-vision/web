@@ -2,11 +2,13 @@
  * The collage: random positions inside a pattern, decided at build time (ADR 0005,
  * docs/spec.md § 7).
  *
- * Images go on cells of the page grid — four columns wide, two on a narrow screen — each one
- * taking one of three preset sizes according to its shape. Every image is then nudged inside
- * its own area, which is what stops the result from reading as a grid. The nudge is what can
- * make two images overlap, so the layout is checked afterwards and a seed that breaks the
- * limits is thrown away for the next one.
+ * Images go on cells of the page grid — four columns wide, two on a narrow screen. Each one
+ * takes a single cell or, depending on its shape, a double one: two cells tall for a tall image,
+ * two wide for a wide one. Which images get the double size and where everything lands is
+ * random, and among the arrangements that fit, the one that leaves fewest cells empty wins, so
+ * the images fill the grid instead of floating in it. Every image fills its whole area, minus a
+ * gutter, cropped from its `focus`. The areas never share a cell, so images never overlap: a
+ * random grid, as in the «PROYECTOS» page of the Figma.
  *
  * Everything here is pure and deterministic: the same seed and the same images always give the
  * same layout, so the build, the preview and production cannot disagree, and there is no
@@ -18,17 +20,21 @@ import type { Focus } from './options';
 /** At most this many images; the rest live only in the Fotos and Proceso sections. */
 export const MAX_IMAGES = 8;
 
-/** How far an image may be nudged inside its area, as a share of one cell. */
-const JITTER = 0.25;
+/**
+ * The margin every area keeps on each side, as a share of one cell. Two neighbours are at least
+ * twice this apart, which leaves room for the idle drift (±6 px) and the hover (scale 1.03)
+ * without either one making an image touch the next.
+ */
+const GUTTER = 0.04;
 
-/** How much two images may overlap, as a share of the area of the smaller one. */
-const MAX_OVERLAP = 0.4;
+/** How likely a tall or wide image is to get the double size on each try. */
+const DOUBLE = 0.6;
 
-/** How many seeds to try before falling back to the fixed composition. */
-const ATTEMPTS = 40;
+/** How many arrangements to try before keeping the one that fills the most cells. */
+const ATTEMPTS = 200;
 
 export interface CollageImage {
-  /** Width ÷ height. Decides which of the three preset sizes the image gets. */
+  /** Width ÷ height. Decides whether the image may take a tall or a wide double cell. */
   aspect: number;
 }
 
@@ -57,7 +63,7 @@ export interface CollageLayout {
   /** Width ÷ height of the collage box, so the page can reserve its height. */
   wideAspect: number;
   narrowAspect: number;
-  /** True when no seed met the limits and the fixed composition was used instead. */
+  /** True when no arrangement placed every image and the fixed composition was used instead. */
   fallback: boolean;
 }
 
@@ -102,11 +108,13 @@ const NARROW: Pattern = {
   reserve: () => [],
 };
 
-/** The three preset sizes, by shape. A tall image gets a tall area, a wide one a wide area. */
-function sizeOf(aspect: number): Size {
+const SINGLE: Size = { columns: 1, rows: 1 };
+
+/** The double size an image may take, by shape, or none for a squarish one. */
+function doubleOf(aspect: number): Size | undefined {
   if (aspect < 0.9) return { columns: 1, rows: 2 };
   if (aspect > 1.15) return { columns: 2, rows: 1 };
-  return { columns: 1, rows: 1 };
+  return undefined;
 }
 
 /** FNV-1a, so that a slug and a number become one number to seed the generator with. */
@@ -152,7 +160,8 @@ interface Footprint extends Cell, Size {
 /**
  * Puts every image on free cells, or gives up. Origins are tried in a shuffled order, so the
  * same images land somewhere else with every seed; a footprint may not leave the pattern, cover
- * a reserved cell or touch one already taken.
+ * a reserved cell or touch one already taken. Double sizes go first, while there is room for
+ * them.
  */
 function place(sizes: Size[], pattern: Pattern, rows: number, random: () => number): Footprint[] {
   const taken = new Set<string>();
@@ -165,10 +174,15 @@ function place(sizes: Size[], pattern: Pattern, rows: number, random: () => numb
     for (let column = 0; column < pattern.columns; column += 1) origins.push({ column, row });
   }
 
-  const placed: Footprint[] = [];
+  const order = sizes
+    .map((size, index) => ({ size, index }))
+    .sort((a, b) => b.size.columns * b.size.rows - a.size.columns * a.size.rows);
 
-  for (const [index, size] of sizes.entries()) {
-    const spot = shuffle(origins, random).find(({ column, row }) => {
+  const placed: Footprint[] = [];
+  let free = rows * pattern.columns - taken.size;
+
+  const spotFor = (size: Size): Cell | undefined =>
+    shuffle(origins, random).find(({ column, row }) => {
       if (column + size.columns > pattern.columns || row + size.rows > rows) return false;
       for (let dx = 0; dx < size.columns; dx += 1) {
         for (let dy = 0; dy < size.rows; dy += 1) {
@@ -178,7 +192,20 @@ function place(sizes: Size[], pattern: Pattern, rows: number, random: () => numb
       return true;
     });
 
+  for (const [position, { size: wanted, index }] of order.entries()) {
+    /*
+     * A double size only goes in if it leaves a cell for every image still to come and finds
+     * room; otherwise the image takes a single cell, so an arrangement never fails for having
+     * been too generous early on.
+     */
+    const left = order.length - position - 1;
+    const roomy = free - wanted.columns * wanted.rows >= left;
+    const doubleSpot = roomy && wanted !== SINGLE ? spotFor(wanted) : undefined;
+    const size = doubleSpot ? wanted : SINGLE;
+    const spot = doubleSpot ?? spotFor(SINGLE);
+
     if (!spot) return [];
+    free -= size.columns * size.rows;
 
     for (let dx = 0; dx < size.columns; dx += 1) {
       for (let dy = 0; dy < size.rows; dy += 1) {
@@ -191,40 +218,27 @@ function place(sizes: Size[], pattern: Pattern, rows: number, random: () => numb
   return placed;
 }
 
-/** Cells to percentages, with the nudge that keeps the result from looking like a grid. */
-function toPlacements(
-  footprints: Footprint[],
-  pattern: Pattern,
-  rows: number,
-  random: () => number,
-  jitter: number,
-): Placement[] {
+/** Cells to percentages: every image fills its area, minus the gutter on each side. */
+function toPlacements(footprints: Footprint[], pattern: Pattern, rows: number): Placement[] {
   const cellWidth = 100 / pattern.columns;
   const cellHeight = 100 / rows;
 
-  return footprints.map(({ index, column, row, columns, rows: tall }) => {
-    const width = cellWidth * columns;
-    const height = cellHeight * tall;
-    const shiftX = (random() * 2 - 1) * jitter * cellWidth;
-    const shiftY = (random() * 2 - 1) * jitter * cellHeight;
-
-    return {
-      index,
-      width,
-      height,
-      /* Clamped so nothing hangs outside the box, which would crop it against the page. */
-      x: Math.min(Math.max(column * cellWidth + shiftX, 0), 100 - width),
-      y: Math.min(Math.max(row * cellHeight + shiftY, 0), 100 - height),
-    };
-  });
+  return footprints.map(({ index, column, row, columns, rows: tall }) => ({
+    index,
+    x: (column + GUTTER) * cellWidth,
+    y: (row + GUTTER) * cellHeight,
+    width: (columns - 2 * GUTTER) * cellWidth,
+    height: (tall - 2 * GUTTER) * cellHeight,
+  }));
 }
 
-/** How much two placements cover each other, as a share of the area of the smaller one. */
-function overlap(a: Placement, b: Placement): number {
-  const wide = Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x);
-  const tall = Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y);
-  if (wide <= 0 || tall <= 0) return 0;
-  return (wide * tall) / Math.min(a.width * a.height, b.width * b.height);
+/** True when two placements share any area. By construction they never do; this checks it. */
+function overlaps(a: Placement, b: Placement): boolean {
+  const epsilon = 1e-6;
+  return (
+    Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x) > epsilon &&
+    Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y) > epsilon
+  );
 }
 
 function withinLimits(placements: Placement[]): boolean {
@@ -232,40 +246,39 @@ function withinLimits(placements: Placement[]): boolean {
     for (let j = i + 1; j < placements.length; j += 1) {
       const a = placements[i];
       const b = placements[j];
-      if (a && b && overlap(a, b) > MAX_OVERLAP) return false;
+      if (a && b && overlaps(a, b)) return false;
     }
   }
   return true;
 }
 
-/** Enough rows for the footprints to fit, with one spare so there is room to choose. */
-function rowsFor(sizes: Size[], pattern: Pattern): number {
-  const demand = sizes.reduce((total, size) => total + size.columns * size.rows, 0);
-  const tallest = sizes.reduce((most, size) => Math.max(most, size.rows), 1);
+/**
+ * Just enough rows for every image to have a cell of its own. No spare row: the double sizes
+ * are what takes up the room left over, so the grid comes out full rather than gappy.
+ */
+function rowsFor(count: number, pattern: Pattern): number {
   const reserved = pattern.reserve(0).length;
-  return Math.max(tallest, Math.ceil((demand + reserved) / pattern.columns) + 1);
+  return Math.max(1, Math.ceil((count + reserved) / pattern.columns));
 }
 
 /**
- * The fixed composition, used when no seed works. Plain, non-overlapping, in the order the
- * images came in — it is the thing that must never look broken, not the thing that must look
- * exciting.
+ * The fixed composition, used when no arrangement places every image. Single cells, in the
+ * order the images came in — it is the thing that must never look broken, not the thing that
+ * must look exciting.
  *
  * PROVISIONAL: the spec calls for the fixed composition from Figma. This stands in for it until
- * that composition is available, and it satisfies every limit by construction, since it has no
- * jitter and no overlap at all.
+ * that composition is available, and it satisfies every limit by construction.
  */
-function fixed(sizes: Size[], pattern: Pattern): { placements: Placement[]; rows: number } {
-  const rows = rowsFor(sizes, pattern);
-  const footprints = place(sizes, pattern, rows, generator(0));
-  const laid = footprints.length > 0 ? footprints : [];
+function fixed(count: number, pattern: Pattern): { placements: Placement[]; rows: number } {
+  const rows = rowsFor(count, pattern);
+  const footprints = place(Array<Size>(count).fill(SINGLE), pattern, rows, generator(0));
 
-  if (laid.length === 0) {
-    /* Even the fixed arrangement could not place them: fall back to plain stacked rows. */
-    const cellHeight = 100 / Math.max(sizes.length, 1);
+  if (footprints.length === 0) {
+    /* Even single cells did not fit: fall back to plain stacked rows. */
+    const cellHeight = 100 / Math.max(count, 1);
     return {
-      rows: Math.max(sizes.length, 1),
-      placements: sizes.map((_, index) => ({
+      rows: Math.max(count, 1),
+      placements: Array.from({ length: count }, (_, index) => ({
         index,
         x: 0,
         y: index * cellHeight,
@@ -275,7 +288,7 @@ function fixed(sizes: Size[], pattern: Pattern): { placements: Placement[]; rows
     };
   }
 
-  return { rows, placements: toPlacements(laid, pattern, rows, generator(0), 0) };
+  return { rows, placements: toPlacements(footprints, pattern, rows) };
 }
 
 interface Attempt {
@@ -284,19 +297,37 @@ interface Attempt {
   fallback: boolean;
 }
 
-function layOut(sizes: Size[], pattern: Pattern, seed: number): Attempt {
-  const rows = rowsFor(sizes, pattern);
+/**
+ * Tries random choices of double sizes and positions and keeps the arrangement that covers the
+ * most cells, stopping early once one covers them all.
+ */
+function layOut(aspects: number[], pattern: Pattern, seed: number): Attempt {
+  const rows = rowsFor(aspects.length, pattern);
+  const free = rows * pattern.columns - pattern.reserve(rows).length;
+  const random = generator(seed);
+
+  let best: { footprints: Footprint[]; cells: number } | undefined;
 
   for (let attempt = 0; attempt < ATTEMPTS; attempt += 1) {
-    const random = generator(seed + attempt * 0x9e3779b9);
+    const sizes = aspects.map((aspect) => {
+      const double = doubleOf(aspect);
+      return double && random() < DOUBLE ? double : SINGLE;
+    });
+
     const footprints = place(sizes, pattern, rows, random);
     if (footprints.length === 0) continue;
 
-    const placements = toPlacements(footprints, pattern, rows, random, JITTER);
+    const cells = footprints.reduce((total, { columns, rows: tall }) => total + columns * tall, 0);
+    if (!best || cells > best.cells) best = { footprints, cells };
+    if (cells >= free) break;
+  }
+
+  if (best) {
+    const placements = toPlacements(best.footprints, pattern, rows);
     if (withinLimits(placements)) return { placements, rows, fallback: false };
   }
 
-  const { placements, rows: fixedRows } = fixed(sizes, pattern);
+  const { placements, rows: fixedRows } = fixed(aspects.length, pattern);
   return { placements, rows: fixedRows, fallback: true };
 }
 
@@ -307,16 +338,15 @@ function layOut(sizes: Size[], pattern: Pattern, seed: number): Attempt {
  * arrangement and an editor can ask for another one by changing the number.
  */
 export function collage(images: CollageImage[], seed: string): CollageLayout {
-  const used = images.slice(0, MAX_IMAGES);
-  const sizes = used.map((image) => sizeOf(image.aspect));
+  const aspects = images.slice(0, MAX_IMAGES).map((image) => image.aspect);
 
-  if (used.length === 0) {
+  if (aspects.length === 0) {
     return { wide: [], narrow: [], wideAspect: 1, narrowAspect: 1, fallback: false };
   }
 
   const start = hash(seed);
-  const wide = layOut(sizes, WIDE, start);
-  const narrow = layOut(sizes, NARROW, start);
+  const wide = layOut(aspects, WIDE, start);
+  const narrow = layOut(aspects, NARROW, start);
 
   return {
     wide: wide.placements,

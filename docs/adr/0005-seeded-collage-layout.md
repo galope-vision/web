@@ -18,7 +18,11 @@ Compute the collage **at build time** with a seeded, constrained random layout
 
 - Cells on the 4-column grid (2 columns on mobile), with the dice and logo zones reserved.
 - One image per cell, in one of 3 preset sizes by aspect ratio.
-- Jitter of at most 25% of the cell. Overlap of at most 40% of the smaller image.
+- ~~Jitter of at most 25% of the cell. Overlap of at most 40% of the smaller image.~~
+  Revised 2026-11-16: images do not overlap and fill the grid. Each one takes a single cell
+  or a double one by shape, chosen at random, keeping the arrangement that leaves fewest cells
+  empty, and fills its whole area minus a gutter. The pattern has just enough rows. The
+  reference is the «PROYECTOS» page of the Figma.
 - Seed = `slug` + `collageSeed`. The same input always gives the same output. Editors bump
   `collageSeed` ("Mezclar collage") to get a new arrangement and check it in the preview.
 - If no seed satisfies the constraints after N tries, fall back to the fixed Figma

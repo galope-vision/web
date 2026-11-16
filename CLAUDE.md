@@ -101,8 +101,10 @@ See `docs/spec.md` for each page.
 
 Seeded, constrained random layout computed at build time (`src/lib/collage.ts`), no layout JS:
 - Cells on the 4-column grid (2 columns on mobile); dice and logo zones reserved.
-- One image per cell, one of 3 preset sizes by aspect ratio; jitter ≤ 25% of the cell; overlap
-  ≤ 40% of the smaller image.
+- One area per image: a single cell, or a double one (tall for tall images, wide for wide ones),
+  chosen at random; the arrangement that leaves fewest cells empty wins, with no spare row. Each
+  image fills its area minus a gutter (cropped by `focus`). Images never overlap and the grid comes
+  out full (the «PROYECTOS» page of the Figma).
 - Seed = slug + `collageSeed` (same project → same collage; editors bump `collageSeed` to reshuffle).
 - If no seed meets the constraints, fall back to the fixed Figma composition. Never ship a broken collage.
 - Max 8 images (from `gallery`, in order); the rest only appear in the Fotos/Proceso sections.
