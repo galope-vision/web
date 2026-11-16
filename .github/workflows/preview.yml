@@ -4,7 +4,9 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
   push:
-    branches: ['cms/**']
+    # `main` is the dev site: the whole site as it is on `main`, at dev.galope-web.pages.dev,
+    # while production shows only the holding page (deploy.yml, LAUNCHED).
+    branches: ['cms/**', main]
   workflow_dispatch:
 
 permissions:
@@ -71,7 +73,7 @@ jobs:
           command: >-
             pages deploy dist
             --project-name=galope-web
-            --branch=${{ github.head_ref || github.ref_name }}
+            --branch=${{ github.ref_name == 'main' && 'dev' || github.head_ref || github.ref_name }}
 
       # Best effort: the deployment is already up, so a failure here must not fail the job.
       - name: Leave the preview URL on the pull request
