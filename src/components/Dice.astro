@@ -12,7 +12,9 @@
  * picks one per click, so two clicks can give two different projects. Without JavaScript the
  * link still works and leads to the projects list — the dice always goes somewhere.
  *
- * The spin on click belongs to phase 4, with the rest of the motion.
+ * On click it spins — two turns with a small swell, about 0.7 s — and only then goes. With
+ * reduced motion it goes straight away. A click with a modifier key, or with any button other
+ * than the main one, is left to the browser, so "open in a new tab" still works on the link.
  */
 import { Image } from 'astro:assets';
 import dice from '../assets/dado.png';
@@ -70,6 +72,17 @@ const s = locale ? t(locale) : undefined;
 )}
 
 <script>
+  import { animate } from 'motion/mini';
+
+  /* docs/spec.md § 5.0: "al hacer click gira y navega". Transform only, as § 8 asks. */
+  const SPIN = 0.7;
+  /* If the spin never finishes (a hidden tab stops animations), go anyway. */
+  const LATEST = 1000;
+
+  function reduced(): boolean {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
   for (const dice of document.querySelectorAll<HTMLAnchorElement>('[data-dice]')) {
     let targets: string[] = [];
     try {
@@ -78,8 +91,21 @@ const s = locale ? t(locale) : undefined;
       targets = [];
     }
 
+    const image = dice.querySelector<HTMLElement>('.dice');
+    let rolling = false;
+
     if (targets.length > 0) {
       dice.addEventListener('click', (event) => {
+        if (
+          event.button !== 0 ||
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.altKey
+        ) {
+          return;
+        }
+
         /*
          * Landing back where you already are is not much of a surprise, so the project being
          * read is taken out of the draw — unless it is the only one there is.
@@ -88,11 +114,34 @@ const s = locale ? t(locale) : undefined;
         const elsewhere = targets.filter((target) => target.replace(/\/$/, '') !== here);
         const pool = elsewhere.length > 0 ? elsewhere : targets;
         const choice = pool[Math.floor(Math.random() * pool.length)];
+        if (!choice) return;
 
-        if (choice) {
-          event.preventDefault();
+        event.preventDefault();
+        if (rolling) return;
+        rolling = true;
+
+        const go = (): void => {
           window.location.href = choice;
+        };
+
+        if (!image || reduced()) {
+          go();
+          return;
         }
+
+        const spin = animate(
+          image,
+          {
+            transform: [
+              'rotate(0deg) scale(1)',
+              'rotate(300deg) scale(1.15)',
+              'rotate(620deg) scale(0.95)',
+              'rotate(720deg) scale(1)',
+            ],
+          },
+          { duration: SPIN, ease: [0.22, 1, 0.36, 1] },
+        );
+        void Promise.race([spin, new Promise((resolve) => setTimeout(resolve, LATEST))]).then(go);
       });
     }
   }
