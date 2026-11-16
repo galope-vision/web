@@ -12,6 +12,17 @@ gallery:
       part: fotos,
       alt: 'Back cover of the deluxe edition, with the track list set in a diamond',
     }
+  - { image: foto-2.jpg, part: fotos, alt: 'A laptop showing a video shot in the street' }
+  - {
+      image: foto-3.jpg,
+      part: fotos,
+      alt: 'Black-and-white portrait making the peace sign in the street',
+    }
+  - { image: foto-4.jpg, part: fotos, alt: 'Black-and-white portrait with hands up' }
+  - { image: foto-5.jpg, part: fotos, alt: 'Front portrait on a black background' }
+  - { image: foto-6.jpg, part: fotos, alt: 'Profile portrait on a black background' }
+  - { image: foto-7.jpg, part: fotos, alt: 'A boy in a black jacket on a European street' }
+  - { image: proceso-1.jpg, part: proceso, alt: 'Cover mockup on purple' }
 videos: []
 collageSeed: 0
 order: 1

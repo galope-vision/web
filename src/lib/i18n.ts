@@ -88,7 +88,7 @@ export function t(locale: Locale): (key: UiKey) => string {
 
 /* Labels of the content options. The keys come from `src/lib/options.ts`. */
 
-/** Groups are years for now, so both locales read the same. */
+/** Groups are names that are not translated, so both locales read the same. */
 export const GROUP_LABELS: Record<Locale, Record<Group, string>> = {
   es: Object.fromEntries(GROUPS.map((group) => [group, group])) as Record<Group, string>,
   en: Object.fromEntries(GROUPS.map((group) => [group, group])) as Record<Group, string>,
