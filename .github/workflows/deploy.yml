@@ -13,6 +13,11 @@ permissions:
   contents: read
 
 env:
+  # Until launch day, production shows only the holding page (the launch date); the whole site
+  # lives on the dev preview, dev.galope-web.pages.dev (preview.yml). Launching is changing this
+  # to 'true'. The FTP action syncs, so the next deploy also deletes from the server whatever a
+  # previous deploy left there.
+  LAUNCHED: 'false'
   # Google Tag Manager (docs/adr/0008-google-tag-manager.md). Not a secret: it ships in the HTML
   # of every page. Only this workflow sets it, so dev, CI and the previews build with no tag at
   # all. Changing the container means editing this line.
@@ -49,6 +54,25 @@ jobs:
         run: |
           grep -q "googletagmanager.com/gtm.js" dist/index.html \
             || { echo "::error::PUBLIC_GTM_ID did not reach the build (ADR 0008)."; exit 1; }
+
+      # Keeps the home in both locales, the 404, the CMS and the shared assets (/_astro, /img,
+      # favicons, .htaccess, robots.txt). The images of the projects stay in /_astro under hashed
+      # names nothing links to.
+      - name: Keep only the holding page until launch
+        if: env.LAUNCHED != 'true'
+        run: |
+          cd dist
+          rm -rf proyectos info contacto estilos sitemap.xml
+          find en -mindepth 1 -maxdepth 1 ! -name index.html -exec rm -rf {} +
+          sed -i '/^Sitemap:/d' robots.txt
+          echo "HTML left in production:"
+          find . -name '*.html' | sort
+          extra=$(find . -name '*.html' ! -path ./index.html ! -path ./en/index.html \
+            ! -path ./404.html ! -path ./admin/index.html)
+          if [ -n "$extra" ]; then
+            echo "::error::Pages other than the holding page would reach production: $extra"
+            exit 1
+          fi
 
       # Fail with a readable message instead of letting the action deploy into the FTP root,
       # which on shared hosting is the parent of the web directory.
