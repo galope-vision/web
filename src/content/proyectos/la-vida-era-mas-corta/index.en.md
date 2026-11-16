@@ -22,7 +22,7 @@ gallery:
 videos: []
 collageSeed: 0
 order: 1
-inDice: false
-visible: false
+inDice: true
+visible: true
 date: 2025-01-01
 ---
