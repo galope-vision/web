@@ -17,6 +17,21 @@ gallery:
   - { image: foto-6.jpg, part: fotos, alt: 'A boy sitting on a couch, in front of a curtain' }
   - { image: foto-7.jpg, part: fotos, alt: 'A red bird inside a cage' }
   - { image: foto-8.jpg, part: fotos, alt: 'Two musicians playing synthesizers in the studio' }
+  - { image: foto-9.jpg, part: fotos, alt: 'Two musicians in the studio, one in a white hoodie' }
+  - {
+      image: foto-10.jpg,
+      part: fotos,
+      alt: 'A musician leaning back on a chair by the synthesizers',
+    }
+  - { image: foto-11.jpg, part: fotos, alt: 'A producer with headphones at the studio desk' }
+  - { image: foto-12.jpg, part: fotos, alt: 'The crew talking in the studio living room' }
+  - { image: foto-13.jpg, part: fotos, alt: 'A hand holding a phone with a photo on the screen' }
+  - { image: foto-14.jpg, part: fotos, alt: 'A laptop on in the dark studio' }
+  - {
+      image: foto-15.jpg,
+      part: fotos,
+      alt: 'Two boys sitting on a couch, one looking at his phone',
+    }
 videos: []
 collageSeed: 0
 order: 1

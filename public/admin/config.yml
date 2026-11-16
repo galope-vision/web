@@ -64,6 +64,10 @@ collections:
           - { label: '111', value: '111' }
           - { label: '166', value: '166' }
           - { label: '166 Deluxe', value: '166 Deluxe' }
+          - { label: 'La vida era más corta', value: 'La vida era más corta' }
+          - { label: 'Morón', value: 'Morón' }
+          - { label: 'Un día a la vez', value: 'Un día a la vez' }
+          - { label: 'Bizarrap Session #57', value: 'Bizarrap Session #57' }
       - name: type
         label: Tipo
         widget: select

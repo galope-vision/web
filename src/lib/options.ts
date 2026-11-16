@@ -3,10 +3,20 @@
  * dictionary (`src/lib/i18n.ts`). The CMS stores the key, never the label, so the Spanish and
  * English names of an option live in the code and never go through machine translation.
  *
- * `GROUPS` are the three of the catalogue in docs/spec.md § 6.4, which is Galope's own list;
- * the rest is still PROVISIONAL until the client confirms it (docs/spec.md § 13).
+ * `GROUPS` are the three of the catalogue in docs/spec.md § 6.4, which is Galope's own list, plus
+ * the ones the general map (FigJam «MAPA GENERAL») adds; those have only hidden projects for now,
+ * and a group with nothing visible is not listed. The rest is still PROVISIONAL until the client
+ * confirms it (docs/spec.md § 13). The CMS options in public/admin/config.yml must match.
  */
-export const GROUPS = ['111', '166', '166 Deluxe'] as const;
+export const GROUPS = [
+  '111',
+  '166',
+  '166 Deluxe',
+  'La vida era más corta',
+  'Morón',
+  'Un día a la vez',
+  'Bizarrap Session #57',
+] as const;
 export const TYPES = [
   'videoclip',
   'documental',
