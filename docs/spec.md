@@ -143,7 +143,10 @@ Tiene dos estados, y el toggle no cambia la URL:
   collage, «Más Info» y «VOLVER». Desde 48rem el collage pasa a ocupar **todo el ancho de la
   pantalla**, con un layout propio que deja libres la esquina del título, el centro de arriba
   (el dado) y la esquina de abajo a la izquierda (los botones). El cambio de layout es un
-  fundido del collage.
+  fundido del collage. El título y los botones siguen fijos mientras se scrollea, y las
+  secciones de abajo dejan libre esa columna.
+- En mobile, «Menos/Más Info» y «VOLVER» van en una barra fija al pie de la pantalla, para que
+  estén a mano en cualquier punto de la página.
 
 Debajo del collage van las secciones **Fotos**, **Vídeos** y **Proceso**, con todas las
 imágenes y los videos del proyecto. El collage muestra como máximo 8 imágenes.

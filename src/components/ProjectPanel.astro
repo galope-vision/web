@@ -339,6 +339,28 @@ const s = t(locale);
     margin: 0;
   }
 
+  /*
+   * Below 48rem the panel is not pinned — it is the top of a long page — so the actions are:
+   * a bar at the foot of the screen, on the page's black, with the toggle on the left and
+   * VOLVER on the right. Otherwise Más Info would be a long scroll away once the details are
+   * folded. The page already ends with more room than the bar takes (ProjectDetail.astro).
+   */
+  @media (width < 48rem) {
+    .actions {
+      position: fixed;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 2;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-gutter);
+      padding: var(--space-1) var(--space-margin);
+      background: var(--color-bg);
+    }
+  }
+
   @media (width >= 48rem) {
     .actions {
       margin-top: auto;

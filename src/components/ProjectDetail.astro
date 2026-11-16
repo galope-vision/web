@@ -92,10 +92,12 @@ const parts: ProjectPart[] = [
 
     /*
      * "Menos info" (set by ProjectPanel.astro): one column, so the collage takes the whole
-     * screen, and what is left of the panel — the title and the two actions — sits over it,
-     * in the corners the collage keeps free (src/lib/collage.ts, FULL). The panel stops being
-     * pinned, so it leaves with the collage instead of floating over the sections below, and
-     * it lets the pointer through to the photos everywhere but on its own text.
+     * screen, and what is left of the panel — the title and the two actions — stays pinned
+     * over it, in the corners the collage keeps free (src/lib/collage.ts, FULL). The panel
+     * lets the pointer through to the photos everywhere but on its own text.
+     *
+     * Below the collage the sections keep the panel's column clear, so as the page scrolls on
+     * no photo passes under Más Info and VOLVER, which are still there to be used.
      */
     .detail[data-info='less'] {
       grid-template-columns: minmax(0, 1fr);
@@ -103,10 +105,7 @@ const parts: ProjectPart[] = [
 
     .detail[data-info='less'] > :global(.panel) {
       grid-area: 1 / 1;
-      position: relative;
-      top: auto;
       z-index: 1;
-      overflow: visible;
       pointer-events: none;
     }
 
@@ -116,6 +115,16 @@ const parts: ProjectPart[] = [
 
     .detail[data-info='less'] > .content {
       grid-area: 1 / 1;
+    }
+
+    .detail[data-info='less'] > .content > :global(:not(.collage)) {
+      padding-left: calc(
+        min(
+            21.25rem,
+            calc(50vw - var(--size-dice-width) / 2 - var(--space-gutter) - var(--space-margin))
+          ) +
+          var(--space-gutter)
+      );
     }
   }
 </style>
