@@ -59,10 +59,11 @@ collections:
         widget: select
         i18n: duplicate
         hint: Agrupa los proyectos en el listado.
+        # Must match GROUPS in src/lib/options.ts: a value the code does not know fails the build.
         options:
-          - { label: '2023', value: '2023' }
-          - { label: '2024', value: '2024' }
-          - { label: '2025', value: '2025' }
+          - { label: '111', value: '111' }
+          - { label: '166', value: '166' }
+          - { label: '166 Deluxe', value: '166 Deluxe' }
       - name: type
         label: Tipo
         widget: select

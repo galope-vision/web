@@ -22,8 +22,12 @@ Set up on 2026-11-11, in Galope's accounts:
 | OAuth App  | `galope-vision` → Settings → Developer settings → **GALOPE CMS**, callback at `<worker>/callback`      |
 | `base_url` | already in [`public/admin/config.yml`](../public/admin/config.yml)                                     |
 
-What is still missing: `GITHUB_CLIENT_SECRET` on the Worker, and `ALLOWED_DOMAINS` once the
-domain is decided. The steps below are the ones to follow again if any of it has to be redone.
+Checked from outside on 2026-11-16: `GITHUB_CLIENT_ID` is set (the Worker sends `ga-lo-pe.com`
+to GitHub's authorize page) and `ALLOWED_DOMAINS` is enforced (`example.org` gets
+`UNSUPPORTED_DOMAIN`). It accepts `ga-lo-pe.com`, `www.ga-lo-pe.com` and `galope-web.pages.dev`,
+but **not** the preview subdomains (`<branch>.galope-web.pages.dev`), so `*.galope-web.pages.dev`
+is still missing. Whether `GITHUB_CLIENT_SECRET` is right can only be seen by completing a real
+sign-in. The steps below are the ones to follow again if any of it has to be redone.
 
 ## Before you start
 
@@ -77,8 +81,8 @@ and add:
 from one of those hostnames. It stops other sites from spending Galope's Worker quota and from
 getting tokens through it, so fill it in:
 
-- the final domain, once it's decided, as `galope.com, *.galope.com` (the naked domain and its
-  subdomains are two separate entries);
+- the domain, as `ga-lo-pe.com, *.ga-lo-pe.com` (the naked domain and its subdomains are two
+  separate entries);
 - the Cloudflare Pages project, if you want to sign in from a preview: `<project>.pages.dev,
 *.<project>.pages.dev`. Never `*.pages.dev` on its own, which would be every site on
   Cloudflare Pages.
