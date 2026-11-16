@@ -1,7 +1,11 @@
 # Qué falta configurar, y dónde
 
 Estado al 2026-11-16. El sitio está en producción en <https://ga-lo-pe.com> y desde el
-2026-11-16 cada merge a `main` se publica solo por FTPS (punto 2). Todo lo que falta acá es configuración
+2026-11-16 cada merge a `main` se publica solo por FTPS (punto 2). Hasta el lanzamiento, producción muestra
+solo la página de espera (dado, fecha e Instagram) y el sitio entero vive en
+<https://dev.galope-web.pages.dev>, con `noindex`. Para lanzar, en
+[`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) se cambia `LAUNCHED: 'false'`
+a `'true'` y se mergea. Todo lo que falta acá es configuración
 en paneles: no hay código pendiente de escribir para ninguno de estos puntos.
 
 Cada ítem dice **dónde** se hace, **quién** puede hacerlo y **qué desbloquea**. Los documentos
@@ -89,6 +93,9 @@ de una si un deploy fue a parar al lugar equivocado.
   antes de subir nada, y relanzarlo alcanzó: si vuelve a pasar, se relanza.
 - **Desbloquea:** que cada merge a `main` publique solo, incluido lo que publique Galope desde el
   CMS.
+- **Ojo:** ese primer deploy publicó el sitio entero en `ga-lo-pe.com`. Desde el PR #59, mientras
+  `LAUNCHED` sea `'false'`, el deploy recorta el build a la página de espera y la sincronización
+  borra del servidor el resto; todo `main` se publica en `dev.galope-web.pages.dev`.
 - **Detalle técnico:** [`deploy-setup.md`](deploy-setup.md) (llega con el PR #22)
 
 ### 3 · Cargar los secrets de las previews — ✅ hecho el 2026-11-13
