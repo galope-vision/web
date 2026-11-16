@@ -132,11 +132,22 @@ Tiene dos estados, y el toggle no cambia la URL:
   - el título en rojo (Bold 16)
   - la descripción (≤ ~600 caracteres)
   - «Partes del proyecto», con los links **Fotos · Vídeos · Proceso**. Cada link hace scroll
-    a su sección, debajo del collage. Si una parte está vacía, su link no aparece.
+    a su sección, debajo del collage. Si una parte está vacía, su link no aparece. Mientras se
+    scrollea, el link de la sección que se está viendo queda en rojo.
   - «Créditos»: el rol y, al lado, el nombre. El nombre es un link si tiene `url`.
   - al pie del panel, uno debajo del otro: «Menos Info», que oculta el panel, y «VOLVER», que
     lleva al listado
-- **Menos info**: solo el título, el collage, «Más Info» y «VOLVER».
+- Desde 48rem el panel queda **fijo a la izquierda** mientras se scrollea, y el collage y las
+  secciones van en la columna de la derecha. En mobile no queda fijo.
+- **Menos info**: el panel se contrae (sube y se desvanece) y quedan solo el título, el
+  collage, «Más Info» y «VOLVER». Desde 48rem el collage pasa a ocupar **todo el ancho de la
+  pantalla**, con un layout propio que deja libres la esquina del título, el centro de arriba
+  (el dado) y la esquina de abajo a la izquierda (los botones). Al cambiar de layout cada
+  foto viaja desde su lugar anterior hasta el nuevo, escalonada, y el texto del panel sale y
+  entra de costado, de a un bloque. Con movimiento reducido es un fundido. El título y los botones siguen fijos mientras se scrollea, y las
+  secciones de abajo dejan libre esa columna.
+- En mobile, «Menos/Más Info» y «VOLVER» van en una barra fija al pie de la pantalla, para que
+  estén a mano en cualquier punto de la página.
 
 Debajo del collage van las secciones **Fotos**, **Vídeos** y **Proceso**, con todas las
 imágenes y los videos del proyecto. El collage muestra como máximo 8 imágenes.
@@ -241,6 +252,8 @@ Es un punto medio entre una composición fija y una generada libremente: posicio
 - **Cantidad**: hasta 8 imágenes, tomadas de `gallery` en orden. El resto queda solo en las
   secciones Fotos y Proceso.
 - **Mobile**: el mismo algoritmo con un patrón de 2 columnas.
+- **Menos info** (detalle de proyecto, desde 48rem): un tercer patrón de 4 columnas a todo el
+  ancho, que reserva la celda del título, las dos del dado y la de los botones.
 - El collage general del listado usa el mismo algoritmo con la portada (`cover`) de cada
   proyecto.
 - Las imágenes usan `object-fit: cover` y `object-position` según `focus`.

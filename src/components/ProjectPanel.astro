@@ -6,6 +6,9 @@
  * From 48rem up it is the left column of the page and the collage takes the rest, as in the
  * Figma; below that it comes first and the collage goes under it.
  *
+ * From 48rem up it stays pinned while the page scrolls, and the link of the part being read
+ * turns red, so the panel works as an index of the page.
+ *
  * The toggle is a button, not a link, because the spec is explicit that it must not change the
  * URL. With no JavaScript the panel stays in its "Más info" state, which is the one the page
  * starts in and the one that has the content in it, so nothing is lost — only the toggle is
@@ -79,18 +82,172 @@ const s = t(locale);
 </div>
 
 <script>
+  import { animate } from 'motion/mini';
+
+  /*
+   * Más/Menos Info. "Menos Info" folds the details away — the description, "Partes del
+   * proyecto" and the credits — leaving the title and the two actions, and lets the collage take
+   * the whole screen; "Más Info" brings them back. Only opacity and transform move
+   * (docs/spec.md § 8):
+   *
+   * - the blocks of the details slide out to the left and fade, one after another, and come
+   *   back the same way; `hidden` is set once they are gone, so the panel closes up and screen
+   *   readers skip them;
+   * - each photo of the collage travels from its place in one layout to its place in the other
+   *   (a FLIP: the new layout is applied at once, and a transform takes every image back to
+   *   where it was and lets it go). The parallax writes the images' `transform` and the drift
+   *   and the hover own `translate`, `rotate` and `scale`, so this one is *added* on top
+   *   (`composite: 'add'`) instead of replacing any of them.
+   *
+   * With reduced motion the details fade and the collage simply switches.
+   */
+  const SLIDE = 24;
+  const DURATION = 0.3;
+  const STAGGER = 0.05;
+  const TRAVEL = 700;
+  const TRAVEL_STAGGER = 40;
+  const EASE = [0.22, 1, 0.36, 1] as const;
+  const EASE_CSS = 'cubic-bezier(0.22, 1, 0.36, 1)';
+
   const toggle = document.querySelector<HTMLButtonElement>('.toggle');
   const details = document.getElementById('project-details');
+  /* The page carries the state, so the layout (ProjectDetail.astro) can follow it. */
+  const page = document.querySelector<HTMLElement>('.detail');
+  const items = [...(page?.querySelectorAll<HTMLElement>('.collage .item') ?? [])];
 
-  if (toggle && details) {
-    const { more = '', less = '' } = toggle.dataset;
+  function reduced(): boolean {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
 
-    toggle.addEventListener('click', () => {
-      const open = toggle.getAttribute('aria-expanded') === 'true';
-      toggle.setAttribute('aria-expanded', String(!open));
-      details.hidden = open;
-      toggle.textContent = open ? more : less;
+  /** Hands the elements back to CSS, a frame after the library writes its last values. */
+  function release(elements: HTMLElement[]): void {
+    requestAnimationFrame(() => {
+      for (const element of elements) {
+        element.style.removeProperty('opacity');
+        element.style.removeProperty('transform');
+      }
     });
+  }
+
+  /** The details, block by block, sliding out (`away`) or in, one after another. */
+  function slide(blocks: HTMLElement[], away: boolean, still: boolean): Promise<unknown> {
+    const hidden = still ? { opacity: 0 } : { opacity: 0, transform: `translateX(-${SLIDE}px)` };
+    const shown = still ? { opacity: 1 } : { opacity: 1, transform: 'translateX(0px)' };
+    const order = away ? [...blocks].reverse() : blocks;
+    return Promise.all(
+      order.map((block, index) =>
+        animate(block, away ? hidden : shown, {
+          duration: still ? DURATION / 2 : DURATION,
+          ease: EASE,
+          delay: still ? 0 : index * STAGGER,
+        }),
+      ),
+    );
+  }
+
+  /** Moves every photo from where it was (`first`) to where the new layout put it. */
+  function travel(first: DOMRect[]): Promise<unknown> {
+    return Promise.all(
+      items.map((item, index) => {
+        const from = first[index];
+        const to = item.getBoundingClientRect();
+        if (!from || to.width === 0 || to.height === 0) return undefined;
+        const dx = from.left + from.width / 2 - (to.left + to.width / 2);
+        const dy = from.top + from.height / 2 - (to.top + to.height / 2);
+        const sx = from.width / to.width;
+        const sy = from.height / to.height;
+        return item.animate(
+          [
+            { transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})` },
+            { transform: 'translate(0px, 0px) scale(1, 1)' },
+          ],
+          {
+            duration: TRAVEL,
+            easing: EASE_CSS,
+            delay: index * TRAVEL_STAGGER,
+            fill: 'backwards',
+            composite: 'add',
+          },
+        ).finished;
+      }),
+    );
+  }
+
+  if (toggle && details && page) {
+    const { more = '', less = '' } = toggle.dataset;
+    const blocks = [...details.children].filter(
+      (child): child is HTMLElement => child instanceof HTMLElement,
+    );
+    let busy = false;
+
+    toggle.addEventListener('click', async () => {
+      if (busy) return;
+      busy = true;
+      const open = toggle.getAttribute('aria-expanded') === 'true';
+      const still = reduced();
+
+      toggle.setAttribute('aria-expanded', String(!open));
+      toggle.textContent = open ? more : less;
+
+      if (open) {
+        await slide(blocks, true, still);
+        const first = items.map((item) => item.getBoundingClientRect());
+        details.hidden = true;
+        page.dataset.info = 'less';
+        if (!still) await travel(first);
+      } else {
+        const first = items.map((item) => item.getBoundingClientRect());
+        for (const block of blocks) {
+          block.style.opacity = '0';
+          if (!still) block.style.transform = `translateX(-${SLIDE}px)`;
+        }
+        details.hidden = false;
+        page.dataset.info = 'more';
+        await Promise.all([slide(blocks, false, still), still ? undefined : travel(first)]);
+      }
+
+      release(blocks);
+      busy = false;
+      update();
+    });
+  }
+
+  /*
+   * The part being read. As the page scrolls, the link of the section that has reached the
+   * upper part of the screen turns red (`aria-current`). Above the first section — on the
+   * collage — none is marked. At the very bottom the last one is, even if it is too short to
+   * reach the line.
+   */
+  const LINE = 0.35;
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('.parts a[href^="#"]')];
+  const sections = links
+    .map((link) => document.getElementById(link.hash.slice(1)))
+    .filter((section): section is HTMLElement => section !== null);
+
+  function current(): HTMLElement | undefined {
+    const atBottom =
+      window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
+    if (atBottom) return sections.at(-1);
+    const line = window.innerHeight * LINE;
+    return sections.filter((section) => section.getBoundingClientRect().top <= line).at(-1);
+  }
+
+  function update(): void {
+    const id = current()?.id;
+    for (const link of links) {
+      if (link.hash === `#${id}`) link.setAttribute('aria-current', 'true');
+      else link.removeAttribute('aria-current');
+    }
+  }
+
+  /*
+   * Straight from the scroll event, with no frame throttling: it measures at most three
+   * sections and touches at most three attributes, which is less than a throttle costs to run.
+   */
+  if (sections.length > 0) {
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update, { passive: true });
+    update();
   }
 </script>
 
@@ -118,8 +275,19 @@ const s = t(locale);
    * at y = 678 and 737 of 768, one under the other).
    */
   @media (width >= 48rem) {
-    /* x = 18 in the design, one step in from the page margin. */
+    /*
+     * x = 18 in the design, one step in from the page margin.
+     *
+     * Pinned while the page scrolls, and as tall as the screen below the nav row, so the
+     * actions stay at its foot: VOLVER lands at about y = 726 of 768, where the design has it
+     * (737). Content that does not fit scrolls inside the panel instead of being cut.
+     */
     .panel {
+      position: sticky;
+      top: calc(var(--size-header-height) + var(--space-1));
+      align-self: start;
+      height: calc(100svh - var(--size-header-height) - var(--space-1) - var(--space-2));
+      overflow-y: auto;
       display: flex;
       flex-direction: column;
       padding-left: var(--space-1);
@@ -188,6 +356,14 @@ const s = t(locale);
     line-height: var(--lh-body);
   }
 
+  /*
+   * The part being read, set by the script below as the page scrolls. Red like every active
+   * state on the site, with `aria-current` so it is not colour alone.
+   */
+  .parts a[aria-current='true'] {
+    color: var(--color-accent-text);
+  }
+
   .credits {
     display: grid;
     gap: 0;
@@ -213,6 +389,38 @@ const s = t(locale);
     align-items: start;
     gap: var(--space-3);
     margin: 0;
+  }
+
+  /*
+   * Below 48rem the panel is not pinned — it is the top of a long page — so the actions are:
+   * a bar at the foot of the screen, on the page's black, with the toggle on the left and
+   * VOLVER on the right. Otherwise Más Info would be a long scroll away once the details are
+   * folded. The page already ends with more room than the bar takes (ProjectDetail.astro).
+   */
+  /*
+   * No scrollbar flashing on load. The panel is exactly as tall as its content, and the
+   * entrance starts every block 24px lower (src/scripts/motion.ts), so for 600 ms the content
+   * spilled over and the panel's scrollbar came and went. Until the last block has arrived the
+   * panel does not scroll. Only under `.motion`: without the script nothing is held back.
+   */
+  :global(.motion) .panel:not(:has(.actions[data-entered])) {
+    overflow-y: hidden;
+  }
+
+  @media (width < 48rem) {
+    .actions {
+      position: fixed;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 2;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-gutter);
+      padding: var(--space-1) var(--space-margin);
+      background: var(--color-bg);
+    }
   }
 
   @media (width >= 48rem) {

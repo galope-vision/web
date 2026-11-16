@@ -1,12 +1,14 @@
 ---
 /**
- * A project page: the info panel beside the collage, and the Fotos, Vídeos and Proceso sections
- * under it (docs/spec.md § 5.3). Shared by `/proyectos/[slug]` and `/en/projects/[slug]`.
+ * A project page: the info panel, the collage, and the Fotos, Vídeos and Proceso sections
+ * (docs/spec.md § 5.3). Shared by `/proyectos/[slug]` and `/en/projects/[slug]`.
  *
- * From 48rem up the panel is a column on the left and the collage takes the rest of the width,
- * as in the Figma: the photos never go under the text. Below that the panel comes first and
- * the collage under it, for the same reason. The collage takes
- * the first 8 images of the gallery in order; the rest appear only in the sections below.
+ * From 48rem up the page is two columns: the panel on the left, pinned while the page scrolls,
+ * and the collage with the sections under it on the right, as in the Figma — the photos never
+ * go under the text. Pinning the panel is what keeps "Partes del proyecto" in view, so the part
+ * being read can be marked in it (ProjectPanel.astro). Below 48rem everything is one column:
+ * the panel, the collage, the sections. The collage takes the first 8 images of the gallery in
+ * order; the rest appear only in the sections.
  *
  * Which parts exist is worked out once, here, so the links in the panel and the sections below
  * can never disagree about whether a part is empty.
@@ -38,78 +40,91 @@ const parts: ProjectPart[] = [
 ].filter((part): part is ProjectPart => part !== false);
 ---
 
-<div class="detail">
-  <div class="stage">
+<div class="detail" data-info="more">
+  <ProjectPanel locale={locale} data={data} parts={parts} />
+  <div class="content">
     <Collage items={collageItems(project)} seed={collageSeed(project)} />
-    <ProjectPanel locale={locale} data={data} parts={parts} />
+    <ProjectSections
+      locale={locale}
+      title={data.title}
+      fotos={fotos}
+      videos={data.videos}
+      proceso={proceso}
+    />
   </div>
-  <ProjectSections
-    locale={locale}
-    title={data.title}
-    fotos={fotos}
-    videos={data.videos}
-    proceso={proceso}
-  />
 </div>
 
 <style>
   /*
-   * Narrow: the panel first and the collage under it. The collage comes first in the source, so
-   * the rows are set by hand.
-   *
    * `minmax(0, 1fr)` on both grids: an implicit track is as wide as its widest content, and the
-   * collage and the sections below it would rather be wider than the page, which gave every
-   * project page a horizontal scroll. A track that may shrink to zero takes the width it is given.
+   * collage and the sections would rather be wider than the page, which gave every project page
+   * a horizontal scroll. A track that may shrink to zero takes the width it is given.
    */
-  .stage {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-2);
-  }
-
-  .stage > :global(.panel) {
-    grid-area: 1 / 1;
-  }
-
-  .stage > :global(.collage) {
-    grid-area: 2 / 1;
-  }
-
-  /*
-   * Wide: the panel on the left and the collage beside it, both as tall as the taller of the
-   * two, which is what puts Más/Menos Info and VOLVER at the bottom of the screen.
-   */
-  @media (width >= 48rem) {
-    .stage {
-      grid-template-columns: auto minmax(0, 1fr);
-      gap: 0 var(--space-gutter);
-    }
-
-    .stage > :global(.collage) {
-      grid-area: 1 / 2;
-      align-self: start;
-    }
-
-    .stage > :global(.panel) {
-      grid-area: 1 / 1;
-    }
-  }
-
   .detail {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-4);
+    gap: var(--space-2);
     padding-bottom: var(--space-4);
+  }
+
+  .content {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-4);
+    align-content: start;
+    min-width: 0;
   }
 
   /*
    * The panel does not start below the dice; it clears it sideways. In the design (1366 × 768)
    * the panel is 340 wide at x = 18 and the dice starts at x = 629, so they never meet
    * horizontally and the panel begins at the top. See ProjectPanel.astro for the width.
+   *
+   * The panel's column stretches down the whole page, which is what gives it room to stay
+   * pinned while the collage and the sections scroll past.
    */
   @media (width >= 48rem) {
     .detail {
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 0 var(--space-gutter);
       padding-top: var(--space-1);
+    }
+
+    /*
+     * "Menos info" (set by ProjectPanel.astro): one column, so the collage takes the whole
+     * screen, and what is left of the panel — the title and the two actions — stays pinned
+     * over it, in the corners the collage keeps free (src/lib/collage.ts, FULL). The panel
+     * lets the pointer through to the photos everywhere but on its own text.
+     *
+     * Below the collage the sections keep the panel's column clear, so as the page scrolls on
+     * no photo passes under Más Info and VOLVER, which are still there to be used.
+     */
+    .detail[data-info='less'] {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .detail[data-info='less'] > :global(.panel) {
+      grid-area: 1 / 1;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .detail[data-info='less'] > :global(.panel > *) {
+      pointer-events: auto;
+    }
+
+    .detail[data-info='less'] > .content {
+      grid-area: 1 / 1;
+    }
+
+    .detail[data-info='less'] > .content > :global(:not(.collage)) {
+      padding-left: calc(
+        min(
+            21.25rem,
+            calc(50vw - var(--size-dice-width) / 2 - var(--space-gutter) - var(--space-margin))
+          ) +
+          var(--space-gutter)
+      );
     }
   }
 </style>
