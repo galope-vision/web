@@ -1,6 +1,6 @@
 ---
 /**
- * The list on `/proyectos` and the collage behind it (docs/spec.md § 5.2).
+ * The list on `/proyectos` and the collage beside it (docs/spec.md § 5.2).
  *
  * Projects are grouped by `group` with a space between groups, one row each showing the title
  * and, in a second column, the type in parentheses. Hovering a row, or reaching it with the
@@ -113,13 +113,39 @@ const generalSeed = projects.map(({ slug }) => slug).join('-');
 </script>
 
 <style>
-  /* The list is drawn over the collage; both are the one grid cell. */
+  /*
+   * Narrow: the list first and the collages under it. Wide: the list is a column on the left
+   * and the collages take the rest, as in the Figma. Either way no photo goes under the list.
+   */
   .stage {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-2);
   }
 
-  .stage > * {
+  .stage > .list {
     grid-area: 1 / 1;
+  }
+
+  .stage > .collages {
+    grid-area: 2 / 1;
+  }
+
+  @media (width >= 48rem) {
+    .stage {
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 0 var(--space-gutter);
+    }
+
+    .stage > .collages {
+      grid-area: 1 / 2;
+      align-self: start;
+      padding-top: var(--space-1);
+    }
+
+    .stage > .list {
+      grid-area: 1 / 1;
+    }
   }
 
   .collages {
@@ -145,11 +171,6 @@ const generalSeed = projects.map(({ slug }) => slug).join('-');
   }
 
   /*
-   * The list sits on the left, in the first two of the four grid columns, because the collage
-   * is behind it and needs the rest of the width. On a narrow screen the grid is two columns
-   * wide and the list takes all of it.
-   */
-  /*
    * Groups are 16px apart in the design; `--space-2` is 18, the nearest step of the scale, and
    * the 2px are not visible. Hardcoding 16 would put a size in a component, which CLAUDE.md
    * does not allow.
@@ -173,7 +194,11 @@ const generalSeed = projects.map(({ slug }) => slug).join('-');
    */
   @media (width >= 48rem) {
     .list {
-      width: min(23.75rem, calc(50% - var(--size-dice-width) / 2 - var(--space-gutter)));
+      /* From the viewport: the list's own column is sized by the list. */
+      width: min(
+        23.75rem,
+        calc(50vw - var(--size-dice-width) / 2 - var(--space-gutter) - var(--space-margin))
+      );
       padding-top: calc(var(--space-3) + var(--space-2));
     }
   }

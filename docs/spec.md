@@ -115,7 +115,8 @@ check en rojo no publica.
 - A la izquierda, la lista de proyectos agrupados por `group`, con un espacio entre grupos.
   Cada fila muestra el título (Bold 16) y, en otra columna, el `type` entre paréntesis
   (Regular 16).
-- Detrás de la lista va un **collage general** con imágenes de todos los proyectos.
+- Al lado de la lista, a la derecha, va un **collage general** con imágenes de todos los
+  proyectos. No pasa por debajo de la lista (en mobile va debajo de ella), como en el Figma.
 - Al pasar el mouse por un nombre, o al llegarle con el foco del teclado, se ve el collage de
   ese proyecto con un fundido de 200 ms. La fila activa va en rojo y subrayada.
 - Orden: por `order` dentro de cada grupo. El orden de los grupos sale del orden de sus
@@ -126,14 +127,15 @@ check en rojo no publica.
 
 Tiene dos estados, y el toggle no cambia la URL:
 
-- **Más info** (el estado inicial): un panel a la izquierda, encima del collage, con:
+- **Más info** (el estado inicial): un panel a la izquierda y el collage a su derecha, sin
+  que las fotos pasen por debajo del texto (en mobile, el panel arriba y el collage debajo), con:
   - el título en rojo (Bold 16)
   - la descripción (≤ ~600 caracteres)
   - «Partes del proyecto», con los links **Fotos · Vídeos · Proceso**. Cada link hace scroll
     a su sección, debajo del collage. Si una parte está vacía, su link no aparece.
   - «Créditos»: el rol y, al lado, el nombre. El nombre es un link si tiene `url`.
-  - «Menos Info», que oculta el panel
-  - «VOLVER», que lleva al listado
+  - al pie del panel, uno debajo del otro: «Menos Info», que oculta el panel, y «VOLVER», que
+    lleva al listado
 - **Menos info**: solo el título, el collage, «Más Info» y «VOLVER».
 
 Debajo del collage van las secciones **Fotos**, **Vídeos** y **Proceso**, con todas las
