@@ -43,6 +43,10 @@ export interface CollageItem {
   image: ImageMetadata;
   alt: string;
   focus: Focus;
+  /** Where the image leads, if it is a link (the covers on the projects list). */
+  href?: string;
+  /** The link's accessible name; the image itself stays decorative. */
+  label?: string;
 }
 
 /** Where one image ends up, in percentages of the collage box. */

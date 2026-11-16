@@ -117,6 +117,7 @@ check en rojo no publica.
   (Regular 16).
 - Al lado de la lista, a la derecha, va un **collage general** con imágenes de todos los
   proyectos. No pasa por debajo de la lista (en mobile va debajo de ella), como en el Figma.
+  Cada portada es un link a su proyecto.
 - Al pasar el mouse por un nombre, o al llegarle con el foco del teclado, se ve el collage de
   ese proyecto con un fundido de 200 ms. La fila activa va en rojo y subrayada.
 - Orden: por `order` dentro de cada grupo. El orden de los grupos sale del orden de sus

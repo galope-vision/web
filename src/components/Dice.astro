@@ -109,8 +109,13 @@ const s = locale ? t(locale) : undefined;
     line-height: 0;
   }
 
+  /*
+   * Above the page's content: the collages start at the top of the page, and although they
+   * keep the cells under the dice empty, their boxes still covered it and took its clicks.
+   */
   .nav {
     position: absolute;
+    z-index: 3;
     top: var(--size-dice-top);
     left: 50%;
     transform: translateX(-50%);

@@ -70,33 +70,49 @@ function drift(index: number): string {
     data-fallback={layout.fallback ? '' : undefined}
     style={`--wide-aspect: ${layout.wideAspect.toFixed(4)}; --narrow-aspect: ${layout.narrowAspect.toFixed(4)}; --full-aspect: ${layout.fullAspect.toFixed(4)};`}
   >
-    {positioned.map(({ item, wide, narrow, full }, index) => (
-      <Image
-        class="item"
-        data-enter
-        src={item.image}
-        alt={item.alt}
-        widths={[320, 640, 960]}
-        sizes="(width >= 48rem) 50vw, 100vw"
-        loading="lazy"
-        style={[
-          `--x: ${round(wide.x)}`,
-          `--y: ${round(wide.y)}`,
-          `--w: ${round(wide.width)}`,
-          `--h: ${round(wide.height)}`,
-          `--nx: ${round(narrow.x)}`,
-          `--ny: ${round(narrow.y)}`,
-          `--nw: ${round(narrow.width)}`,
-          `--nh: ${round(narrow.height)}`,
-          `--fx: ${round(full.x)}`,
-          `--fy: ${round(full.y)}`,
-          `--fw: ${round(full.width)}`,
-          `--fh: ${round(full.height)}`,
-          `object-position: ${item.focus}`,
-          drift(index),
-        ].join('; ')}
-      />
-    ))}
+    {positioned.map(({ item, wide, narrow, full }, index) => {
+      const place = [
+        `--x: ${round(wide.x)}`,
+        `--y: ${round(wide.y)}`,
+        `--w: ${round(wide.width)}`,
+        `--h: ${round(wide.height)}`,
+        `--nx: ${round(narrow.x)}`,
+        `--ny: ${round(narrow.y)}`,
+        `--nw: ${round(narrow.width)}`,
+        `--nh: ${round(narrow.height)}`,
+        `--fx: ${round(full.x)}`,
+        `--fy: ${round(full.y)}`,
+        `--fw: ${round(full.width)}`,
+        `--fh: ${round(full.height)}`,
+        drift(index),
+      ].join('; ');
+      const focus = `object-position: ${item.focus}`;
+
+      return item.href ? (
+        <a class="item link" href={item.href} aria-label={item.label} data-enter style={place}>
+          <Image
+            class="photo"
+            src={item.image}
+            alt=""
+            widths={[320, 640, 960]}
+            sizes="(width >= 48rem) 50vw, 100vw"
+            loading="lazy"
+            style={focus}
+          />
+        </a>
+      ) : (
+        <Image
+          class="item"
+          data-enter
+          src={item.image}
+          alt={item.alt}
+          widths={[320, 640, 960]}
+          sizes="(width >= 48rem) 50vw, 100vw"
+          loading="lazy"
+          style={`${place}; ${focus}`}
+        />
+      );
+    })}
   </div>
 )}
 
@@ -110,6 +126,22 @@ function drift(index: number): string {
     position: relative;
     width: 100%;
     aspect-ratio: var(--narrow-aspect);
+  }
+
+  /*
+   * An image that leads somewhere (a cover on the projects list) is a link carrying the
+   * placement, with the photograph filling it; everything said about `.item` below applies to
+   * the link.
+   */
+  .link {
+    display: block;
+  }
+
+  .photo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   .item {
