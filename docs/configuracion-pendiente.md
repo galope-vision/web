@@ -1,7 +1,7 @@
 # Qué falta configurar, y dónde
 
-Estado al 2026-11-12. El sitio ya está en producción en <https://ga-lo-pe.com> con la página de
-"Próximamente", pero ese build se subió **a mano** por FTP. Todo lo que falta acá es configuración
+Estado al 2026-11-16. El sitio está en producción en <https://ga-lo-pe.com> y desde el
+2026-11-16 cada merge a `main` se publica solo por FTPS (punto 2). Todo lo que falta acá es configuración
 en paneles: no hay código pendiente de escribir para ninguno de estos puntos.
 
 Cada ítem dice **dónde** se hace, **quién** puede hacerlo y **qué desbloquea**. Los documentos
@@ -60,7 +60,7 @@ Mientras no se decida, vale la Opción A: los puntos 1 a 3 los hace Galope.
   de esa entrada. Si CI todavía está corriendo, el CMS prende auto-merge y espera. Sin esta
   opción, publicar falla mientras corre el check y hay que reintentar a mano.
 
-### 2 · Cargar los secrets del deploy a DonWeb
+### 2 · Cargar los secrets del deploy a DonWeb — ✅ hecho el 2026-11-16
 
 - **Dónde:** <https://github.com/galope-vision/web/settings/secrets/actions>
 - **Quién:** Galope (ver arriba: en un repo de cuenta personal no hay otro admin)
@@ -83,8 +83,12 @@ Pestaña **Variables** → _New repository variable_, una vez:
 `FTP_SERVER_DIR` va como _variable_ y no como secret a propósito: así aparece en los logs y se ve
 de una si un deploy fue a parar al lugar equivocado.
 
-- **Desbloquea:** que cada merge a `main` publique solo. Hoy hay que buildear y subir por FTP a
-  mano cada vez — incluido lo que publique Galope desde el CMS.
+- **Estado:** cargados. La variable había quedado en `/httpdocs/` y el workflow frenó cuatro
+  deploys a propósito; con `/public_html/` el primer deploy automático (el del PR #57) subió los
+  424 archivos el 2026-11-16. Un primer intento se cortó con `ECONNRESET` en el canal de datos
+  antes de subir nada, y relanzarlo alcanzó: si vuelve a pasar, se relanza.
+- **Desbloquea:** que cada merge a `main` publique solo, incluido lo que publique Galope desde el
+  CMS.
 - **Detalle técnico:** [`deploy-setup.md`](deploy-setup.md) (llega con el PR #22)
 
 ### 3 · Cargar los secrets de las previews — ✅ hecho el 2026-11-13
@@ -137,9 +141,8 @@ Es la misma cuenta donde ya está corriendo el Worker del CMS.
   autenticador de Galope a cualquier sitio de Cloudflare Pages. Y como el Worker se redespliega
   en cada push a `galope-vision/sveltia-cms-auth`, conviene editar las variables existentes sin
   cambiarles el tipo (ver [`cms-auth-setup.md`](cms-auth-setup.md)).
-- **Lo que falta para producción:** `ga-lo-pe.com` ya está en `ALLOWED_DOMAINS`, pero
-  `ga-lo-pe.com/admin` sirve un `config.yml` viejo, sin el Worker, porque ese build se subió a
-  mano. Se arregla solo con el primer deploy automático, que espera los secrets FTP (punto 2).
+- **Producción:** desde el primer deploy automático (punto 2), `ga-lo-pe.com/admin` sirve el
+  config con el Worker. Caro probó el login ahí el 2026-11-16 y funciona.
 - **Detalle técnico:** [`cms-auth-setup.md`](cms-auth-setup.md)
 
 ### 5 · Crear el proyecto de Pages y su token — ✅ hecho el 2026-11-13
@@ -227,11 +230,11 @@ La lista completa está en [`spec.md`](spec.md) § 13.
 
 ## Resumen: qué pasa si no se hace cada cosa
 
-| Sin esto                         | Lo que sigue sin andar                          |
-| -------------------------------- | ----------------------------------------------- |
-| ~~1 · Auto-merge~~ ✅            | — ya está activado                              |
-| 2 · Secrets de FTP               | Cada publicación hay que subirla a mano por FTP |
-| ~~3 · Secrets de Cloudflare~~ ✅ | — ya están cargados y las previews andan        |
-| 4 · `*.galope-web.pages.dev`     | El login del CMS no anda en las previews        |
-| ~~5 · Proyecto y token~~ ✅      | — ya está                                       |
-| 6 · Usuario FTP                  | Igual que 2 (el directorio ya está confirmado)  |
+| Sin esto                         | Lo que sigue sin andar                         |
+| -------------------------------- | ---------------------------------------------- |
+| ~~1 · Auto-merge~~ ✅            | — ya está activado                             |
+| ~~2 · Secrets de FTP~~ ✅        | — cada merge a `main` se publica solo          |
+| ~~3 · Secrets de Cloudflare~~ ✅ | — ya están cargados y las previews andan       |
+| ~~4 · Worker del CMS~~ ✅        | — el login anda en previews y en producción    |
+| ~~5 · Proyecto y token~~ ✅      | — ya está                                      |
+| 6 · Usuario FTP                  | Igual que 2 (el directorio ya está confirmado) |
