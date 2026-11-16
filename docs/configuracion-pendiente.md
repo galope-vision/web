@@ -110,40 +110,36 @@ de una si un deploy fue a parar al lugar equivocado.
 
 Es la misma cuenta donde ya está corriendo el Worker del CMS.
 
-### 4 · Terminar de configurar el Worker del CMS
-
-El Worker `sveltia-cms-auth` ya está desplegado y la OAuth App **GALOPE CMS** ya está registrada.
-
-**Estado al 2026-11-16, probado desde afuera:** `GITHUB_CLIENT_ID` está cargado (el Worker manda
-a `ga-lo-pe.com` a la página de autorización de GitHub) y `ALLOWED_DOMAINS` filtra (a
-`example.org` le contesta `UNSUPPORTED_DOMAIN`). Faltan dos cosas:
-
-- **Las previews:** acepta `galope-web.pages.dev` pero no `<rama>.galope-web.pages.dev`, que es
-  donde vive cada preview. Hay que sumar `*.galope-web.pages.dev` a `ALLOWED_DOMAINS`.
-- **El Client Secret:** si está bien solo se ve completando un login real. Hoy no hay dónde
-  hacerlo: las previews están rechazadas y producción tiene un `config.yml` viejo sin el Worker,
-  porque el build se subió a mano (punto 2).
+### 4 · Terminar de configurar el Worker del CMS — ✅ hecho el 2026-11-16
 
 - **Dónde:** dashboard de Cloudflare → **Workers & Pages** → `sveltia-cms-auth` →
-  **Settings → Variables**
-- **Quién:** Galope (el client secret lo genera la cuenta de GitHub que registró la OAuth App)
+  **Settings → Variables and Secrets**
+- **Quién:** Galope, o Caro desde la cuenta de Cloudflare de Galope
 
 | Variable               | Valor                                                                        |
 | ---------------------- | ---------------------------------------------------------------------------- |
-| `GITHUB_CLIENT_ID`     | el Client ID de la OAuth App                                                 |
-| `GITHUB_CLIENT_SECRET` | el Client Secret — **tildar _Encrypt_** antes de guardar                     |
+| `GITHUB_CLIENT_ID`     | el Client ID de la OAuth App **GALOPE CMS**                                  |
+| `GITHUB_CLIENT_SECRET` | el Client Secret, encriptado                                                 |
 | `ALLOWED_DOMAINS`      | `ga-lo-pe.com, *.ga-lo-pe.com, galope-web.pages.dev, *.galope-web.pages.dev` |
 
-El Client Secret se genera en <https://github.com/settings/developers> → **GALOPE CMS** →
-_Generate a new client secret_. **GitHub lo muestra una sola vez**, así que conviene pegarlo en
-Cloudflare en el mismo momento.
-
-`ALLOWED_DOMAINS` es la lista de hostnames que pueden usar el Worker para loguearse. **Nunca poner
-`*.pages.dev` solo**: eso le daría el autenticador de Galope a cualquier sitio alojado en
-Cloudflare Pages.
-
-- **Desbloquea:** que Galope entre a `ga-lo-pe.com/admin` y se loguee con el botón de GitHub, en
-  vez de pegar un token a mano.
+- **Estado:** funciona de punta a punta en las previews. El 2026-11-16 se sumó
+  `*.galope-web.pages.dev` a `ALLOWED_DOMAINS`. Verificado con `curl`: las URLs de rama y de hash
+  de las previews pasan a GitHub, y `example.org` y `evil.pages.dev` siguen rechazados. Después
+  Caro hizo un login real en una preview (`/admin/` → _Iniciar sesión con GitHub_ → autorizar),
+  así que el Client Secret y la callback URL están bien. También guardó un borrador de prueba
+  (PR #56): el CMS creó la rama `cms/proyectos/bizarrap-session-57`, el PR y su preview.
+- **Lo que apareció en esa prueba:** el CMS titulaba los PR `Update Proyecto “…”`, sin tipo de
+  Conventional Commits, y el check obligatorio _PR title_ los rechazaba. Con eso, «Publicar» se
+  habría quedado esperando el auto-merge para siempre. Se arregló con `commit_messages` en
+  [`public/admin/config.yml`](../public/admin/config.yml): ahora los títulos empiezan con
+  `content:`.
+- **Ojo si se vuelve a tocar:** **nunca poner `*.pages.dev` solo**, porque le daría el
+  autenticador de Galope a cualquier sitio de Cloudflare Pages. Y como el Worker se redespliega
+  en cada push a `galope-vision/sveltia-cms-auth`, conviene editar las variables existentes sin
+  cambiarles el tipo (ver [`cms-auth-setup.md`](cms-auth-setup.md)).
+- **Lo que falta para producción:** `ga-lo-pe.com` ya está en `ALLOWED_DOMAINS`, pero
+  `ga-lo-pe.com/admin` sirve un `config.yml` viejo, sin el Worker, porque ese build se subió a
+  mano. Se arregla solo con el primer deploy automático, que espera los secrets FTP (punto 2).
 - **Detalle técnico:** [`cms-auth-setup.md`](cms-auth-setup.md)
 
 ### 5 · Crear el proyecto de Pages y su token — ✅ hecho el 2026-11-13

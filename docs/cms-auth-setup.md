@@ -22,12 +22,17 @@ Set up on 2026-11-11, in Galope's accounts:
 | OAuth App  | `galope-vision` → Settings → Developer settings → **GALOPE CMS**, callback at `<worker>/callback`      |
 | `base_url` | already in [`public/admin/config.yml`](../public/admin/config.yml)                                     |
 
-Checked from outside on 2026-11-16: `GITHUB_CLIENT_ID` is set (the Worker sends `ga-lo-pe.com`
-to GitHub's authorize page) and `ALLOWED_DOMAINS` is enforced (`example.org` gets
-`UNSUPPORTED_DOMAIN`). It accepts `ga-lo-pe.com`, `www.ga-lo-pe.com` and `galope-web.pages.dev`,
-but **not** the preview subdomains (`<branch>.galope-web.pages.dev`), so `*.galope-web.pages.dev`
-is still missing. Whether `GITHUB_CLIENT_SECRET` is right can only be seen by completing a real
-sign-in. The steps below are the ones to follow again if any of it has to be redone.
+**Working end to end on the previews since 2026-11-16.** `ALLOWED_DOMAINS` now reads
+`ga-lo-pe.com, *.ga-lo-pe.com, galope-web.pages.dev, *.galope-web.pages.dev`. Checked with `curl`
+against `<worker>/auth?provider=github&site_id=<host>`: branch and hash previews are sent to
+GitHub's authorize page, while `example.org` and `evil.pages.dev` get `UNSUPPORTED_DOMAIN`. A real
+sign-in from a preview's `/admin/` went through, which proves the client secret and the callback
+URL, and a test draft (PR #56) produced its `cms/proyectos/<slug>` branch, pull request and preview.
+
+Production is the one place still missing: `ga-lo-pe.com` is allowed, but `ga-lo-pe.com/admin`
+serves an old hand-uploaded `config.yml` without `base_url`. The first automatic deploy fixes it,
+and that deploy waits for the FTP secrets ([configuracion-pendiente.md](configuracion-pendiente.md),
+point 2). The steps below are the ones to follow again if any of it has to be redone.
 
 ## Before you start
 
@@ -89,6 +94,12 @@ getting tokens through it, so fill it in:
 
 Save and deploy.
 
+The Worker is redeployed from `galope-vision/sveltia-cms-auth` on every push, and its
+`wrangler.toml` declares no `vars` and no `keep_vars`. Wrangler can drop plain-text variables that
+were set in the dashboard when it deploys, so when changing one, edit the existing variable and
+keep its type. If a push ever leaves the Worker answering `UNSUPPORTED_DOMAIN` to every site, or
+sending no `client_id`, this is the first thing to check.
+
 ## 4. Point the CMS at the Worker
 
 In [`public/admin/config.yml`](../public/admin/config.yml), uncomment `base_url` under `backend`
@@ -116,6 +127,15 @@ Open a PR with that change, as with everything else.
 
 While working locally, keep using **Sign in with an access token** or **Work with a local
 repository**: the Worker only serves the hostnames in `ALLOWED_DOMAINS`.
+
+## Pull request titles
+
+Sveltia uses the commit message as the title of a draft's pull request, adding ` +N` when the
+draft touches more files (the English version, images). The required **PR title** check wants a
+Conventional Commits type, and Sveltia's defaults (`Update Proyecto “slug”`) have none, so the
+check failed and publishing would have waited on auto-merge forever. That's why `config.yml` sets
+`backend.commit_messages` so every title starts with `content:`. Keep it when touching the backend
+block.
 
 ## Repository setting
 
@@ -149,6 +169,4 @@ command of your own runs into the same `pnpm` shim problem.
 
 ## Still open
 
-- The final domain, which `ALLOWED_DOMAINS` and the OAuth App's homepage URL both want.
-- Whether `/admin` is published on the Cloudflare Pages previews at all, or only on production
-  (phase 5).
+- Signing in on production, which needs the first automatic deploy to DonWeb (the FTP secrets).
