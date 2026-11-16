@@ -92,10 +92,11 @@ The dice wobbles every ~6 s and, on click, spins and navigates to a random proje
 - Projects list: grouped by `group`, title + (type); the collage sits to the right of the list,
   never under it (below it on mobile); hover/focus on a row fades in that project's collage
   (200 ms) over the general one.
-- Project detail: info panel on the left, collage to its right, never under the text (below it
-  on mobile). Panel: title, description, "Partes del proyecto" links Fotos/Vídeos/Proceso that
-  scroll to their sections below the collage, credits, and at its foot Más/Menos Info above
-  VOLVER.
+- Project detail: info panel on the left, pinned while scrolling from 48rem up; collage and
+  the Fotos/Vídeos/Proceso sections in the right column, never under the text (one column on
+  mobile). Panel: title, description, "Partes del proyecto" links that scroll to their sections
+  (the one being read turns red), credits, and at its foot Más/Menos Info above VOLVER. Menos
+  Info folds the details away with an opacity/transform animation.
 - Info: highlighted words swap the image on the right on hover/focus (fade + slight rotation).
 See `docs/spec.md` for each page.
 

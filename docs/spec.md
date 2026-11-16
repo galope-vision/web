@@ -132,11 +132,15 @@ Tiene dos estados, y el toggle no cambia la URL:
   - el título en rojo (Bold 16)
   - la descripción (≤ ~600 caracteres)
   - «Partes del proyecto», con los links **Fotos · Vídeos · Proceso**. Cada link hace scroll
-    a su sección, debajo del collage. Si una parte está vacía, su link no aparece.
+    a su sección, debajo del collage. Si una parte está vacía, su link no aparece. Mientras se
+    scrollea, el link de la sección que se está viendo queda en rojo.
   - «Créditos»: el rol y, al lado, el nombre. El nombre es un link si tiene `url`.
   - al pie del panel, uno debajo del otro: «Menos Info», que oculta el panel, y «VOLVER», que
     lleva al listado
-- **Menos info**: solo el título, el collage, «Más Info» y «VOLVER».
+- Desde 48rem el panel queda **fijo a la izquierda** mientras se scrollea, y el collage y las
+  secciones van en la columna de la derecha. En mobile no queda fijo.
+- **Menos info**: el panel se contrae (sube y se desvanece) y quedan solo el título, el
+  collage, «Más Info» y «VOLVER».
 
 Debajo del collage van las secciones **Fotos**, **Vídeos** y **Proceso**, con todas las
 imágenes y los videos del proyecto. El collage muestra como máximo 8 imágenes.
