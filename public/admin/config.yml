@@ -11,6 +11,16 @@ backend:
   # The Cloudflare Worker running sveltia-cms-auth, in Galope's account, which signs editors in
   # with GitHub (docs/cms-auth-setup.md).
   base_url: https://sveltia-cms-auth.galope-admin.workers.dev
+  # Sveltia uses the commit message as the title of a draft's pull request (plus " +N" when the
+  # draft touches more files, e.g. the English version). The required "PR title" check wants a
+  # Conventional Commits type, and the defaults ("Update Proyecto …") have none, so publishing
+  # would wait forever on auto-merge. `{{collection}}` is the singular label, e.g. "Proyecto".
+  commit_messages:
+    create: 'content: create {{collection}} “{{slug}}”'
+    update: 'content: update {{collection}} “{{slug}}”'
+    delete: 'content: delete {{collection}} “{{slug}}”'
+    uploadMedia: 'content: upload “{{path}}”'
+    deleteMedia: 'content: delete “{{path}}”'
 
 # Each entry is saved to its own `cms/<collection>/<slug>` branch and published by merging its
 # pull request, which Cloudflare Pages builds as a preview. The repository needs "Allow
