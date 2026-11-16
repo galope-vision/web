@@ -3,8 +3,8 @@
  * The info panel of a project page: title, description, the links to the parts below, the
  * credits, the Más/Menos Info toggle and VOLVER (docs/spec.md § 5.3).
  *
- * It goes over the collage, on the left. The collage is not built yet, so for now the panel is
- * simply the left column of the page.
+ * From 48rem up it is the left column of the page and the collage takes the rest, as in the
+ * Figma; below that it comes first and the collage goes under it.
  *
  * The toggle is a button, not a link, because the spec is explicit that it must not change the
  * URL. With no JavaScript the panel stays in its "Más info" state, which is the one the page
@@ -104,14 +104,33 @@ const s = t(locale);
   .panel {
     display: grid;
     gap: var(--space-2);
-    width: min(21.25rem, calc(50% - var(--size-dice-width) / 2 - var(--space-gutter)));
+    width: 100%;
     min-width: 0;
   }
 
-  @media (width < 48rem) {
-    /* The dice is above the content there, so the panel takes the width it has. */
+  /*
+   * The width is worked out from the viewport, not from the panel's own column, which is sized
+   * by the panel itself. Half the screen minus half the dice, the gutter and the page margin is
+   * where the dice starts.
+   *
+   * A column that runs from top to bottom: the details take the room in between, and the
+   * actions sit at the foot, Menos Info above VOLVER, both on the left (in the design they are
+   * at y = 678 and 737 of 768, one under the other).
+   */
+  @media (width >= 48rem) {
+    /* x = 18 in the design, one step in from the page margin. */
     .panel {
-      width: 100%;
+      display: flex;
+      flex-direction: column;
+      padding-left: var(--space-1);
+      width: min(
+        21.25rem,
+        calc(50vw - var(--size-dice-width) / 2 - var(--space-gutter) - var(--space-margin))
+      );
+    }
+
+    .details {
+      flex: 1;
     }
   }
 
@@ -134,7 +153,6 @@ const s = t(locale);
     .details {
       display: flex;
       flex-direction: column;
-      min-height: 60vh;
     }
 
     /* Whatever is above it, the credits go to the bottom. The quote is optional, so counting
@@ -191,8 +209,17 @@ const s = t(locale);
 
   .actions {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0 var(--space-gutter);
+    flex-direction: column;
+    align-items: start;
+    gap: var(--space-3);
+    margin: 0;
+  }
+
+  @media (width >= 48rem) {
+    .actions {
+      margin-top: auto;
+      padding-top: var(--space-2);
+    }
   }
 
   .toggle,

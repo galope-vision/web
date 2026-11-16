@@ -1,11 +1,12 @@
 ---
 /**
- * A project page: the info panel over the collage, and the Fotos, Vídeos and Proceso sections
+ * A project page: the info panel beside the collage, and the Fotos, Vídeos and Proceso sections
  * under it (docs/spec.md § 5.3). Shared by `/proyectos/[slug]` and `/en/projects/[slug]`.
  *
- * The panel sits on top of the collage, on the left, so the two share one grid cell and the
- * panel is drawn after it. The collage takes the first 8 images of the gallery in order; the
- * rest appear only in the sections below.
+ * From 48rem up the panel is a column on the left and the collage takes the rest of the width,
+ * as in the Figma: the photos never go under the text. Below that the panel comes first and
+ * the collage under it, for the same reason. The collage takes
+ * the first 8 images of the gallery in order; the rest appear only in the sections below.
  *
  * Which parts exist is worked out once, here, so the links in the panel and the sections below
  * can never disagree about whether a part is empty.
@@ -53,10 +54,9 @@ const parts: ProjectPart[] = [
 
 <style>
   /*
-   * One cell holding both, so the panel is over the collage rather than after it. The panel is
-   * second in the source, so it wins without a `z-index`.
-   */
-  /*
+   * Narrow: the panel first and the collage under it. The collage comes first in the source, so
+   * the rows are set by hand.
+   *
    * `minmax(0, 1fr)` on both grids: an implicit track is as wide as its widest content, and the
    * collage and the sections below it would rather be wider than the page, which gave every
    * project page a horizontal scroll. A track that may shrink to zero takes the width it is given.
@@ -64,10 +64,35 @@ const parts: ProjectPart[] = [
   .stage {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-2);
   }
 
-  .stage > :global(*) {
+  .stage > :global(.panel) {
     grid-area: 1 / 1;
+  }
+
+  .stage > :global(.collage) {
+    grid-area: 2 / 1;
+  }
+
+  /*
+   * Wide: the panel on the left and the collage beside it, both as tall as the taller of the
+   * two, which is what puts Más/Menos Info and VOLVER at the bottom of the screen.
+   */
+  @media (width >= 48rem) {
+    .stage {
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 0 var(--space-gutter);
+    }
+
+    .stage > :global(.collage) {
+      grid-area: 1 / 2;
+      align-self: start;
+    }
+
+    .stage > :global(.panel) {
+      grid-area: 1 / 1;
+    }
   }
 
   .detail {

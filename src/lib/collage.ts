@@ -86,18 +86,23 @@ interface Pattern {
 }
 
 /*
- * The dice is pinned over the middle of the content from 48rem up, so the cells under it are
- * out of bounds. The logo is not: it lives in its own row at the bottom of the shell
- * (src/layouts/Base.astro), below the collage rather than over it. The mechanism takes any
- * number of zones, so when the layout changes and the logo does sit over the collage, that is
- * one more entry here and nothing else.
+ * From 48rem up the collage sits to the right of the info panel, as in the Figma, and the dice
+ * is pinned to the middle of the viewport. Where that lands in the collage depends on the
+ * width of the screen: in the first column on a narrow one, the second on a wide one (at 1366
+ * it covers x = 629–720, which is the second column of a collage starting at 380). Both are
+ * kept free in the top row. The logo lives in its own row at the bottom of the shell
+ * (src/layouts/Base.astro), below the collage rather than over it.
+ *
+ * The cell is 1.12 : 1 so that three rows — eight images plus the two reserved cells — fill the
+ * room the design gives the collage at 1366 × 768: about 990 × 655 between the panel, the
+ * header and the logo.
  */
 const WIDE: Pattern = {
   columns: 4,
-  cellAspect: 4 / 3,
+  cellAspect: 1.12,
   reserve: () => [
+    { column: 0, row: 0 },
     { column: 1, row: 0 },
-    { column: 2, row: 0 },
   ],
 };
 
