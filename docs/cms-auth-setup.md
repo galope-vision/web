@@ -29,10 +29,8 @@ GitHub's authorize page, while `example.org` and `evil.pages.dev` get `UNSUPPORT
 sign-in from a preview's `/admin/` went through, which proves the client secret and the callback
 URL, and a test draft (PR #56) produced its `cms/proyectos/<slug>` branch, pull request and preview.
 
-Production is the one place still missing: `ga-lo-pe.com` is allowed, but `ga-lo-pe.com/admin`
-serves an old hand-uploaded `config.yml` without `base_url`. The first automatic deploy fixes it,
-and that deploy waits for the FTP secrets ([configuracion-pendiente.md](configuracion-pendiente.md),
-point 2). The steps below are the ones to follow again if any of it has to be redone.
+Production works too: the first automatic deploy to DonWeb (2026-11-16) replaced the
+hand-uploaded `config.yml`, and a real sign-in on `ga-lo-pe.com/admin` went through. The steps below are the ones to follow again if any of it has to be redone.
 
 ## Before you start
 
@@ -166,7 +164,3 @@ command of your own runs into the same `pnpm` shim problem.
 | Sign-in returns to `/admin` with no session                          | the site's hostname isn't in `ALLOWED_DOMAINS`                  |
 | Saving fails with "Resource not accessible by personal access token" | a token sign-in without the Pull requests permission            |
 | The editor can read but not save                                     | the GitHub account has no write access to the repo              |
-
-## Still open
-
-- Signing in on production, which needs the first automatic deploy to DonWeb (the FTP secrets).
