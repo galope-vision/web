@@ -29,7 +29,14 @@ const s = t(locale);
 
 {fotos.length > 0 && (
   <section class="section" id="fotos" aria-labelledby="fotos-heading">
-    <h2 id="fotos-heading">{s('project.photos')}</h2>
+    {/*
+      Hidden to the eye only: right under the collage, the same photos with "Fotos" over them
+      read as a repeat of the panel's link. Screen readers still get the heading, and the
+      link still lands on the section.
+    */}
+    <h2 id="fotos-heading" class="visually-hidden">
+      {s('project.photos')}
+    </h2>
     <div class="grid" data-enter-group>
       {fotos.map((item) => (
         <Image
