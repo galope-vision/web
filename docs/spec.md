@@ -223,12 +223,13 @@ Es un punto medio entre una composición fija y una generada libremente: posicio
 
 - **Patrón**: el área del collage se divide en celdas sobre la grilla de 4 columnas, por ejemplo
   4 × 3. Las zonas del dado y del logo quedan reservadas. Cada imagen ocupa una celda.
-- **Tamaño**: según la proporción de la imagen (vertical, horizontal o cuadrada), cada una toma
-  uno de 3 tamaños predefinidos, de 1 a 2 celdas.
-- **Variación**: dentro de su zona, y dejando un margen con las vecinas, cada imagen conserva
-  su proporción, ocupa entre el 72% y el 100% del espacio y cae en un lugar al azar del que
-  sobra. Las imágenes **no se superponen**: quedan desparramadas como una grilla aleatoria,
-  como en la página «PROYECTOS» del Figma.
+- **Tamaño**: cada imagen ocupa una celda o, según su proporción, una doble: dos celdas de alto
+  si es vertical, dos de ancho si es horizontal. Cuáles van dobles y dónde cae cada una sale al
+  azar, y entre las combinaciones posibles gana la que deja menos celdas vacías.
+- **Grilla completa**: el patrón tiene las filas justas para las imágenes, y cada imagen llena su
+  zona entera, menos un margen con las vecinas, recortada según `focus`. Las imágenes **no se
+  superponen** y no quedan huecos: una grilla aleatoria, como en la página «PROYECTOS» del
+  Figma.
 - **Aleatorio pero estable**: el azar sale de una semilla (`slug` + `collageSeed`), así que el
   mismo proyecto da siempre el mismo collage. Se calcula en el build, sin JS para acomodar
   nada y sin saltos de layout. Si a Galope no le gusta cómo quedó, cambia el número
