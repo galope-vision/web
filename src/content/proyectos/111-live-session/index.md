@@ -18,7 +18,7 @@ gallery:
 videos: []
 collageSeed: 0
 order: 2
-inDice: false
-visible: false
+inDice: true
+visible: true
 date: 2023-06-01
 ---
