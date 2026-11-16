@@ -29,11 +29,16 @@ interface Props {
 const { locale, projects } = Astro.props;
 const groups = groupProjects(projects);
 
-/** The general collage: one cover per project, in the order the list shows them. */
-const covers = projects.map(({ data }) => ({
+/**
+ * The general collage: one cover per project, in the order the list shows them. Each cover is
+ * a link to its project, named after it.
+ */
+const covers = projects.map(({ slug, data }) => ({
   image: data.cover,
   alt: '',
   focus: 'center' as const,
+  href: localePath(locale, 'projects', slug),
+  label: data.title,
 }));
 
 /** Stable while the catalogue is, so the backdrop only changes when the projects do. */
@@ -161,7 +166,12 @@ const generalSeed = projects.map(({ slug }) => slug).join('-');
    * does. `prefers-reduced-motion` turns the transition off globally (src/styles/global.css),
    * which leaves the swap instant rather than absent.
    */
+  /*
+   * A project's collage is only ever looked at, never clicked: it lies over the general one,
+   * and while hidden it would still swallow the clicks meant for the covers underneath.
+   */
   .swap {
+    pointer-events: none;
     opacity: 0;
     transition: opacity var(--dur-swap) var(--ease-out);
   }
