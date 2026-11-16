@@ -3,9 +3,11 @@
  * The collage (docs/spec.md § 7, ADR 0005). `src/lib/collage.ts` decides where everything goes
  * at build time; this only turns the numbers into CSS.
  *
- * Two layouts come out of the algorithm, one for four columns and one for two, and each image
- * carries both as custom properties. The media query picks a set. That way a single element per
- * image serves both breakpoints, there is no layout JavaScript, and nothing moves after paint.
+ * Three layouts come out of the algorithm — four columns, two columns, and four columns across
+ * the whole screen for a project page in its "Menos info" state — and each image carries all
+ * of them as custom properties. The media query and the page's `data-info` pick a set. That way
+ * a single element per image serves every case, there is no layout JavaScript, and nothing
+ * moves after paint.
  *
  * `alt` is the caller's call. On a project page the same photographs are listed again under the
  * collage with their real alt text, so there they come in empty and a screen reader hears each
@@ -25,11 +27,12 @@ const { items, seed } = Astro.props;
 const images: CollageImage[] = items.map(({ image }) => ({ aspect: image.width / image.height }));
 const layout = collage(images, seed);
 
-/** The placements come back indexed, so each item finds its own in both layouts. */
+/** The placements come back indexed, so each item finds its own in every layout. */
 const positioned = items.flatMap((item, index) => {
   const wide = layout.wide.find((placement) => placement.index === index);
   const narrow = layout.narrow.find((placement) => placement.index === index);
-  return wide && narrow ? [{ item, wide, narrow }] : [];
+  const full = layout.full.find((placement) => placement.index === index);
+  return wide && narrow && full ? [{ item, wide, narrow, full }] : [];
 });
 
 const round = (value: number): string => `${value.toFixed(3)}%`;
@@ -65,9 +68,9 @@ function drift(index: number): string {
     class="collage"
     data-enter-group
     data-fallback={layout.fallback ? '' : undefined}
-    style={`--wide-aspect: ${layout.wideAspect.toFixed(4)}; --narrow-aspect: ${layout.narrowAspect.toFixed(4)};`}
+    style={`--wide-aspect: ${layout.wideAspect.toFixed(4)}; --narrow-aspect: ${layout.narrowAspect.toFixed(4)}; --full-aspect: ${layout.fullAspect.toFixed(4)};`}
   >
-    {positioned.map(({ item, wide, narrow }, index) => (
+    {positioned.map(({ item, wide, narrow, full }, index) => (
       <Image
         class="item"
         data-enter
@@ -85,6 +88,10 @@ function drift(index: number): string {
           `--ny: ${round(narrow.y)}`,
           `--nw: ${round(narrow.width)}`,
           `--nh: ${round(narrow.height)}`,
+          `--fx: ${round(full.x)}`,
+          `--fy: ${round(full.y)}`,
+          `--fw: ${round(full.width)}`,
+          `--fh: ${round(full.height)}`,
           `object-position: ${item.focus}`,
           drift(index),
         ].join('; ')}
@@ -173,6 +180,22 @@ function drift(index: number): string {
       top: var(--y);
       width: var(--w);
       height: var(--h);
+    }
+
+    /*
+     * A project page in its "Menos info" state (ProjectDetail.astro sets `data-info`): the
+     * collage spans the whole screen with the third layout, which keeps the title, the dice
+     * and the two actions clear.
+     */
+    :global([data-info='less']) .collage {
+      aspect-ratio: var(--full-aspect);
+    }
+
+    :global([data-info='less']) .item {
+      left: var(--fx);
+      top: var(--fy);
+      width: var(--fw);
+      height: var(--fh);
     }
   }
 </style>

@@ -86,8 +86,8 @@ const s = t(locale);
 
   /*
    * Más/Menos Info. "Menos Info" folds the details away — the description, "Partes del
-   * proyecto" and the credits — leaving the title and the two actions, and "Más Info" brings
-   * them back. Only opacity and transform move (docs/spec.md § 8): the details lift and fade,
+   * proyecto" and the credits — leaving the title and the two actions, and lets the collage take
+   * the whole screen; "Más Info" brings them back. Only opacity and transform move (docs/spec.md § 8): the details lift and fade,
    * and `hidden` is set once they are gone, so the panel closes up and screen readers skip
    * them. With reduced motion it is a quick fade, with nothing moving.
    */
@@ -97,6 +97,9 @@ const s = t(locale);
 
   const toggle = document.querySelector<HTMLButtonElement>('.toggle');
   const details = document.getElementById('project-details');
+  /* The page carries the state, so the layout (ProjectDetail.astro) can follow it. */
+  const page = document.querySelector<HTMLElement>('.detail');
+  const collage = page?.querySelector<HTMLElement>('.collage') ?? null;
 
   function reduced(): boolean {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -126,17 +129,32 @@ const s = t(locale);
       toggle.setAttribute('aria-expanded', String(!open));
       toggle.textContent = open ? more : less;
 
+      /*
+       * The collage changes layout with the panel (full width when it is folded), and a layout
+       * cannot be animated within § 8, so it fades out, switches while it cannot be seen, and
+       * fades back in.
+       */
+      const fadeOut = collage ? animate(collage, { opacity: 0 }, options) : undefined;
+
       if (open) {
-        await animate(details, away, options);
+        await Promise.all([animate(details, away, options), fadeOut]);
         details.hidden = true;
       } else {
+        await fadeOut;
         details.style.opacity = '0';
         if (!still) details.style.transform = `translateY(-${LIFT}px)`;
         details.hidden = false;
-        await animate(details, back, options);
       }
 
+      if (page) page.dataset.info = open ? 'less' : 'more';
+
+      await Promise.all([
+        open ? undefined : animate(details, back, options),
+        collage ? animate(collage, { opacity: 1 }, options) : undefined,
+      ]);
+
       release(details);
+      if (collage) release(collage);
       busy = false;
       update();
     });

@@ -60,9 +60,12 @@ export interface CollageLayout {
   wide: Placement[];
   /** Two columns, used below 48rem. */
   narrow: Placement[];
+  /** Four columns across the whole screen, for a project page in its "Menos info" state. */
+  full: Placement[];
   /** Width ÷ height of the collage box, so the page can reserve its height. */
   wideAspect: number;
   narrowAspect: number;
+  fullAspect: number;
   /** True when no arrangement placed every image and the fixed composition was used instead. */
   fallback: boolean;
 }
@@ -103,6 +106,25 @@ const WIDE: Pattern = {
   reserve: () => [
     { column: 0, row: 0 },
     { column: 1, row: 0 },
+  ],
+};
+
+/*
+ * A project page with its panel folded away ("Menos info", from 48rem up): the collage spans the
+ * whole screen, as in the «menos info» frames of the Figma, and what is left of the panel sits
+ * over it. Kept free: the title in the top-left cell, the dice over the middle of the top row
+ * (the line between the second and third columns, at any width), and Más Info with VOLVER in
+ * the bottom-left cell. The cell is 1.43 : 1 so three rows fill about 1333 × 700, the screen
+ * below the nav row at 1366 × 768.
+ */
+const FULL: Pattern = {
+  columns: 4,
+  cellAspect: 1.43,
+  reserve: (rows) => [
+    { column: 0, row: 0 },
+    { column: 1, row: 0 },
+    { column: 2, row: 0 },
+    { column: 0, row: Math.max(rows - 1, 0) },
   ],
 };
 
@@ -346,18 +368,29 @@ export function collage(images: CollageImage[], seed: string): CollageLayout {
   const aspects = images.slice(0, MAX_IMAGES).map((image) => image.aspect);
 
   if (aspects.length === 0) {
-    return { wide: [], narrow: [], wideAspect: 1, narrowAspect: 1, fallback: false };
+    return {
+      wide: [],
+      narrow: [],
+      full: [],
+      wideAspect: 1,
+      narrowAspect: 1,
+      fullAspect: 1,
+      fallback: false,
+    };
   }
 
   const start = hash(seed);
   const wide = layOut(aspects, WIDE, start);
   const narrow = layOut(aspects, NARROW, start);
+  const full = layOut(aspects, FULL, start);
 
   return {
     wide: wide.placements,
     narrow: narrow.placements,
+    full: full.placements,
     wideAspect: (WIDE.columns * WIDE.cellAspect) / wide.rows,
     narrowAspect: (NARROW.columns * NARROW.cellAspect) / narrow.rows,
-    fallback: wide.fallback || narrow.fallback,
+    fullAspect: (FULL.columns * FULL.cellAspect) / full.rows,
+    fallback: wide.fallback || narrow.fallback || full.fallback,
   };
 }

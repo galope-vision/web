@@ -40,7 +40,7 @@ const parts: ProjectPart[] = [
 ].filter((part): part is ProjectPart => part !== false);
 ---
 
-<div class="detail">
+<div class="detail" data-info="more">
   <ProjectPanel locale={locale} data={data} parts={parts} />
   <div class="content">
     <Collage items={collageItems(project)} seed={collageSeed(project)} />
@@ -88,6 +88,34 @@ const parts: ProjectPart[] = [
       grid-template-columns: auto minmax(0, 1fr);
       gap: 0 var(--space-gutter);
       padding-top: var(--space-1);
+    }
+
+    /*
+     * "Menos info" (set by ProjectPanel.astro): one column, so the collage takes the whole
+     * screen, and what is left of the panel — the title and the two actions — sits over it,
+     * in the corners the collage keeps free (src/lib/collage.ts, FULL). The panel stops being
+     * pinned, so it leaves with the collage instead of floating over the sections below, and
+     * it lets the pointer through to the photos everywhere but on its own text.
+     */
+    .detail[data-info='less'] {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .detail[data-info='less'] > :global(.panel) {
+      grid-area: 1 / 1;
+      position: relative;
+      top: auto;
+      z-index: 1;
+      overflow: visible;
+      pointer-events: none;
+    }
+
+    .detail[data-info='less'] > :global(.panel > *) {
+      pointer-events: auto;
+    }
+
+    .detail[data-info='less'] > .content {
+      grid-area: 1 / 1;
     }
   }
 </style>
