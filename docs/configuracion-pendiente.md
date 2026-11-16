@@ -112,18 +112,27 @@ Es la misma cuenta donde ya está corriendo el Worker del CMS.
 
 ### 4 · Terminar de configurar el Worker del CMS
 
-El Worker `sveltia-cms-auth` ya está desplegado y la OAuth App **GALOPE CMS** ya está registrada,
-pero al Worker le faltan sus variables, así que **el login del CMS todavía no funciona**.
+El Worker `sveltia-cms-auth` ya está desplegado y la OAuth App **GALOPE CMS** ya está registrada.
+
+**Estado al 2026-11-16, probado desde afuera:** `GITHUB_CLIENT_ID` está cargado (el Worker manda
+a `ga-lo-pe.com` a la página de autorización de GitHub) y `ALLOWED_DOMAINS` filtra (a
+`example.org` le contesta `UNSUPPORTED_DOMAIN`). Faltan dos cosas:
+
+- **Las previews:** acepta `galope-web.pages.dev` pero no `<rama>.galope-web.pages.dev`, que es
+  donde vive cada preview. Hay que sumar `*.galope-web.pages.dev` a `ALLOWED_DOMAINS`.
+- **El Client Secret:** si está bien solo se ve completando un login real. Hoy no hay dónde
+  hacerlo: las previews están rechazadas y producción tiene un `config.yml` viejo sin el Worker,
+  porque el build se subió a mano (punto 2).
 
 - **Dónde:** dashboard de Cloudflare → **Workers & Pages** → `sveltia-cms-auth` →
   **Settings → Variables**
 - **Quién:** Galope (el client secret lo genera la cuenta de GitHub que registró la OAuth App)
 
-| Variable               | Valor                                                    |
-| ---------------------- | -------------------------------------------------------- |
-| `GITHUB_CLIENT_ID`     | el Client ID de la OAuth App                             |
-| `GITHUB_CLIENT_SECRET` | el Client Secret — **tildar _Encrypt_** antes de guardar |
-| `ALLOWED_DOMAINS`      | `ga-lo-pe.com, *.ga-lo-pe.com, galope-web.pages.dev`     |
+| Variable               | Valor                                                                        |
+| ---------------------- | ---------------------------------------------------------------------------- |
+| `GITHUB_CLIENT_ID`     | el Client ID de la OAuth App                                                 |
+| `GITHUB_CLIENT_SECRET` | el Client Secret — **tildar _Encrypt_** antes de guardar                     |
+| `ALLOWED_DOMAINS`      | `ga-lo-pe.com, *.ga-lo-pe.com, galope-web.pages.dev, *.galope-web.pages.dev` |
 
 El Client Secret se genera en <https://github.com/settings/developers> → **GALOPE CMS** →
 _Generate a new client secret_. **GitHub lo muestra una sola vez**, así que conviene pegarlo en
@@ -227,6 +236,6 @@ La lista completa está en [`spec.md`](spec.md) § 13.
 | ~~1 · Auto-merge~~ ✅            | — ya está activado                              |
 | 2 · Secrets de FTP               | Cada publicación hay que subirla a mano por FTP |
 | ~~3 · Secrets de Cloudflare~~ ✅ | — ya están cargados y las previews andan        |
-| 4 · Variables del Worker         | El login del CMS no funciona en ningún lado     |
+| 4 · `*.galope-web.pages.dev`     | El login del CMS no anda en las previews        |
 | ~~5 · Proyecto y token~~ ✅      | — ya está                                       |
 | 6 · Usuario FTP                  | Igual que 2 (el directorio ya está confirmado)  |
