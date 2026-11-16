@@ -225,8 +225,10 @@ Es un punto medio entre una composición fija y una generada libremente: posicio
   4 × 3. Las zonas del dado y del logo quedan reservadas. Cada imagen ocupa una celda.
 - **Tamaño**: según la proporción de la imagen (vertical, horizontal o cuadrada), cada una toma
   uno de 3 tamaños predefinidos, de 1 a 2 celdas.
-- **Variación**: dentro de su celda, cada imagen se corre hasta un 25% del tamaño de la celda.
-  Las imágenes se pueden superponer, pero como máximo un 40% del área de la más chica.
+- **Variación**: dentro de su zona, y dejando un margen con las vecinas, cada imagen conserva
+  su proporción, ocupa entre el 72% y el 100% del espacio y cae en un lugar al azar del que
+  sobra. Las imágenes **no se superponen**: quedan desparramadas como una grilla aleatoria,
+  como en la página «PROYECTOS» del Figma.
 - **Aleatorio pero estable**: el azar sale de una semilla (`slug` + `collageSeed`), así que el
   mismo proyecto da siempre el mismo collage. Se calcula en el build, sin JS para acomodar
   nada y sin saltos de layout. Si a Galope no le gusta cómo quedó, cambia el número
