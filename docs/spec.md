@@ -96,7 +96,9 @@ check en rojo no publica.
     `y = 12`, por encima de donde iría la fila del nav. Decidido el 2026-11-13: manda esta
     sección, el nav se queda, y el panel empieza justo debajo de él. Si en algún momento se
     saca, `VOLVER` pasa a ser la única salida de la página.
-- **Dado** arriba al centro, debajo del nav. Se tambalea cada ~6 s. Al hacer click gira y
+- **Dado** arriba al centro, debajo del nav. Es la animación del diseño (el dado rueda por sus
+  seis caras): en la página de espera rueda todo el tiempo; en el nav descansa 3 s en G, L y P y
+  rueda 3 s. Al hacer click gira y
   navega a un proyecto al azar entre los que tienen `inDice: true`. El sorteo es del lado del
   cliente.
   - **A definir**: si excluye el proyecto que se está viendo.

@@ -46,9 +46,8 @@ Never add a server runtime, database, SSR adapter or paid service.
 .github/workflows/   ci.yml (PRs), preview.yml (cms/* + PRs), deploy.yml (main → DonWeb)
 public/admin/        index.html, config.yml (Sveltia), preview styles
 public/fonts/        final web fonts (woff2)
-public/img/          images served as they are (logo-galope.svg)
+public/img/          images served as they are (logo-galope.svg, dado/: the dice's animated WebPs)
 public/.htaccess     https, caching, 404
-src/assets/          images Astro optimizes (dado.png)
 src/content/         proyectos/<slug>/index.md + images · ajustes/general.yml, home.yml
 src/content.config.ts  Zod schemas mirroring every CMS field
 src/styles/          tokens.css (ONLY place for colors/type/spacing/motion values), global.css
@@ -87,7 +86,9 @@ never production. The project "count" shown in the UI is computed (images + vide
 Design source: Figma `landing-web-2026`, pages named **[actualizado]** (older pages are obsolete).
 Every page: nav row on top (`PROYECTOS · INFO · CONTACTO · ES/EN`, one per grid column; active one
 red + underlined), the dice top-center under the nav, the GALOPE logo (SVG) bottom-center.
-The dice wobbles every ~6 s and, on click, spins and navigates to a random project from the
+The dice is the design team's rendered animation (animated WebP cut from their export, not rebuilt
+in CSS, to keep the texture): it rolls all the time on the holding page, and in the nav it rests on
+G, L and P for 3 s and rolls for 3 s. On click it spins and navigates to a random project from the
 `inDice` pool (client-side random).
 - Projects list: grouped by `group`, title + (type); the collage sits to the right of the list,
   never under it (below it on mobile); hover/focus on a row fades in that project's collage

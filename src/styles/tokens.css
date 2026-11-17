@@ -59,6 +59,11 @@
   --size-dice-width: 91px;
   --size-dice-height: 96px;
   --size-dice-top: 15px;
+  /*
+   * The dice's animation frames are square and wider than the dice at rest, to leave it room to
+   * roll: 533 px of frame for 493 px of dice in the design team's export.
+   */
+  --ratio-dice-frame: 1.081;
   --size-logo-width: 321px;
   --size-logo-height: 40px;
 
