@@ -8,6 +8,16 @@
  * - `hero` puts it in the flow, larger, for the holding page (src/components/ComingSoon.astro).
  *   There it goes nowhere, because none of the pages it could lead to are built yet.
  *
+ * The dice is the design team's own animation (Galope_Dado.gif), rendered, not rebuilt: an
+ * animated WebP keeps the texture of the faces as they drew it. The files in public/img/dado/
+ * are cut from the export's frames: a square centred on the dice at rest that holds every frame,
+ * at 1x and 2x, WebP quality 80 (the grain of the texture, not the quality setting, is what
+ * weighs). It comes in two cuts:
+ * - `rueda`, for the holding page: it rolls all the time, as in the GIF.
+ * - `pausa`, for the nav: the same roll after 3 s at rest on G, L and P — the "every ~6 s" of the
+ *   spec. The pause is in the file itself, so no script keeps time.
+ * With reduced motion a <source> swaps either of them for `quieto`, the resting frame.
+ *
  * The draw is the visitor's, not the build's: the candidates ship in the HTML and the script
  * picks one per click, so two clicks can give two different projects. Without JavaScript the
  * link still works and leads to the projects list — the dice always goes somewhere.
@@ -16,8 +26,6 @@
  * reduced motion it goes straight away. A click with a modifier key, or with any button other
  * than the main one, is left to the browser, so "open in a new tab" still works on the link.
  */
-import { Image } from 'astro:assets';
-import dice from '../assets/dado.png';
 import { getProjects } from '../lib/content';
 import { localePath, t, type Locale } from '../lib/i18n';
 
@@ -29,9 +37,16 @@ interface Props {
 
 const { placement = 'nav', locale } = Astro.props;
 
-/** 91 × 96 is the size in the design; the holding page is the one place it gets to be big. */
-const width = placement === 'hero' ? 182 : 91;
-const height = Math.round((width * 96) / 91);
+/*
+ * The frames are square and leave room for the dice to roll; at rest it fills the 91 × 96 box of
+ * the design, and the frame spills a little past it on every side. Sizes are the frame's side in
+ * CSS pixels, at 1x and 2x.
+ */
+const DIR = '/img/dado';
+const side = placement === 'hero' ? 198 : 99;
+const cut = placement === 'hero' ? 'rueda' : 'pausa';
+const srcset = (name: string): string =>
+  `${DIR}/dado-${name}-${side}.webp 1x, ${DIR}/dado-${name}-${side * 2}.webp 2x`;
 
 const projects = placement === 'nav' && locale ? await getProjects(locale) : [];
 const targets = projects
@@ -49,26 +64,44 @@ const s = locale ? t(locale) : undefined;
     aria-label={s('dice.label')}
     data-dice={JSON.stringify(targets)}
   >
-    <Image
-      class="dice"
-      src={dice}
-      alt=""
-      width={width}
-      height={height}
-      densities={[1, 2]}
-      loading="eager"
-    />
+    <span class="box">
+      <picture>
+        <source
+          media="(prefers-reduced-motion: reduce)"
+          srcset={srcset('quieto')}
+          type="image/webp"
+        />
+        <img
+          class="dice"
+          src={`${DIR}/dado-${cut}-${side}.webp`}
+          srcset={srcset(cut)}
+          alt=""
+          width={side}
+          height={side}
+          loading="eager"
+        />
+      </picture>
+    </span>
   </a>
 ) : (
-  <Image
-    class:list={['dice', placement]}
-    src={dice}
-    alt=""
-    width={width}
-    height={height}
-    densities={[1, 2]}
-    loading="eager"
-  />
+  <span class:list={['box', placement]}>
+    <picture>
+      <source
+        media="(prefers-reduced-motion: reduce)"
+        srcset={srcset('quieto')}
+        type="image/webp"
+      />
+      <img
+        class="dice"
+        src={`${DIR}/dado-${cut}-${side}.webp`}
+        srcset={srcset(cut)}
+        alt=""
+        width={side}
+        height={side}
+        loading="eager"
+      />
+    </picture>
+  </span>
 )}
 
 <script>
@@ -148,9 +181,31 @@ const s = locale ? t(locale) : undefined;
 </script>
 
 <style>
-  .dice {
+  /* The box the dice takes in the layout: 91 × 96 in the design, twice that on the holding page. */
+  .box {
+    position: relative;
+    display: block;
     width: var(--size-dice-width);
     height: var(--size-dice-height);
+  }
+
+  .hero {
+    width: min(calc(var(--size-dice-width) * 2), 60vw);
+    height: auto;
+    aspect-ratio: 91 / 96;
+  }
+
+  /* The frame, centred on the box and a little larger than it (see the comment at the top). */
+  .dice {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: calc(100% * var(--ratio-dice-frame));
+    max-width: none;
+    height: auto;
+
+    /* `translate`, not `transform`: the spin on click animates the transform and keeps this. */
+    translate: -50% -50%;
   }
 
   .link {
@@ -174,63 +229,6 @@ const s = locale ? t(locale) : undefined;
   @media (width < 48rem) {
     .nav {
       top: calc(var(--size-header-height) + var(--space-1));
-    }
-  }
-
-  .hero {
-    width: calc(var(--size-dice-width) * 2);
-    max-width: 60vw;
-    height: auto;
-  }
-
-  /*
-   * Every dice wobbles, not just the holding page's. It is the `rotate` property rather than a
-   * `transform`, because the pinned one is centred with `translateX(-50%)` and a `transform`
-   * animation would overwrite that and drag it off centre. `rotate` composes with it, and is
-   * composited the same way.
-   */
-  .dice,
-  .link {
-    animation: wobble 6s var(--ease-out) infinite;
-    will-change: rotate;
-  }
-
-  /* The image inside the link is carried by the link; it must not wobble twice as hard. */
-  .link .dice {
-    animation: none;
-    will-change: auto;
-  }
-
-  /*
-   * Still for most of the loop, then a short wobble: all of the movement happens in the last
-   * 12% of the 6 s. This is the dice wobble of CLAUDE.md, not the idle drift, so it is wider
-   * than the ±0.6° that drift gets; phase 4 settles the exact figure against the design.
-   */
-  @keyframes wobble {
-    0%,
-    88% {
-      rotate: 0deg;
-    }
-    91% {
-      rotate: -2deg;
-    }
-    94% {
-      rotate: 1.6deg;
-    }
-    97% {
-      rotate: -0.8deg;
-    }
-    100% {
-      rotate: 0deg;
-    }
-  }
-
-  /* No idle motion when the visitor asked for less (global.css also clamps the duration). */
-  @media (prefers-reduced-motion: reduce) {
-    .dice,
-    .link {
-      animation: none;
-      will-change: auto;
     }
   }
 </style>
