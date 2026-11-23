@@ -101,6 +101,8 @@ export const TYPE_LABELS: Record<Locale, Record<ProjectType, string>> = {
     visualizer: 'Visualizer',
     'sesion-en-vivo': 'Sesión en vivo',
     'diseno-grafico': 'Diseño gráfico',
+    cortometraje: 'Cortometraje',
+    spots: 'Spots',
   },
   en: {
     videoclip: 'Music video',
@@ -108,6 +110,8 @@ export const TYPE_LABELS: Record<Locale, Record<ProjectType, string>> = {
     visualizer: 'Visualizer',
     'sesion-en-vivo': 'Live session',
     'diseno-grafico': 'Graphic design',
+    cortometraje: 'Short film',
+    spots: 'Commercials',
   },
 };
 

@@ -1,24 +1,75 @@
 ---
-title: 'La vida era más corta'
-group: 'La vida era más corta'
+title: La vida era más corta
+group: La vida era más corta
 type: diseno-grafico
-categories: [diseno-grafico]
-description: >-
-  Placeholder text, loaded from the general map: the description and credits are still missing.
+categories:
+  - diseno-grafico
+description: 'Placeholder text, loaded from the general map: the description and credits are still missing.'
 cover: portada.jpg
 gallery:
-  - { image: foto-1.jpg, part: fotos, alt: 'A blurred portrait in a cemetery' }
-  - { image: foto-2.jpg, part: fotos, alt: 'Musicians recording in a white studio' }
-  - { image: foto-3.jpg, part: fotos, alt: 'Musicians resting in the studio' }
-  - { image: foto-4.jpg, part: fotos, alt: 'A hole in the ground' }
-  - { image: foto-5.jpg, part: fotos, alt: 'Front portrait with gold teeth and a white turtleneck' }
-  - { image: foto-6.jpg, part: fotos, alt: 'A boy seen from behind by a white cloth' }
-  - { image: foto-7.jpg, part: fotos, alt: 'A gold tooth on black soil' }
-  - { image: foto-8.jpg, part: fotos, alt: 'Bushes in a sepia landscape' }
-  - { image: foto-9.jpg, part: fotos, alt: 'A shirtless boy on a dirt road' }
-  - { image: foto-10.jpg, part: fotos, alt: 'A silhouette in a field at dusk' }
-  - { image: proceso-1.jpg, part: proceso, alt: 'Poster with the album title over a hand' }
-  - { image: proceso-2.jpg, part: proceso, alt: 'Metal ex-voto with engraved initials' }
+  - image: foto-1.jpg
+    part: fotos
+    alt: A violinist and Milo J recording in a white studio
+  - image: foto-2.jpg
+    part: fotos
+    alt: Musicians talking in the studio, one holding a guitar
+  - image: foto-3.jpg
+    part: fotos
+    alt: Milo J at the computer, looking at the camera
+  - image: foto-4.jpg
+    part: fotos
+    alt: A hole in the ground
+  - image: foto-5.jpg
+    part: fotos
+    alt: A boy from behind in a field, in black and white
+  - image: foto-6.jpg
+    part: fotos
+    alt: An abandoned Santiago del Estero billboard among the weeds
+  - image: foto-7.jpg
+    part: fotos
+    alt: Portrait of Milo J in a black jacket on a light background
+  - image: foto-8.jpg
+    part: fotos
+    alt: A group of gauchos posing by a corral
+  - image: foto-9.jpg
+    part: fotos
+    alt: 'Back cover of the album: a face with handwritten phrases'
+  - image: foto-10.jpg
+    part: fotos
+    alt: 'Album cover: close-up of a mouth with a gold tooth'
+  - image: foto-11.jpg
+    part: fotos
+    alt: A blurred portrait in a cemetery
+  - image: foto-12.jpg
+    part: fotos
+    alt: Musicians recording in a white studio
+  - image: foto-13.jpg
+    part: fotos
+    alt: Musicians resting in the studio
+  - image: foto-14.jpg
+    part: fotos
+    alt: Front portrait with gold teeth and a white turtleneck
+  - image: foto-15.jpg
+    part: fotos
+    alt: A boy seen from behind by a white cloth
+  - image: foto-16.jpg
+    part: fotos
+    alt: A gold tooth on black soil
+  - image: foto-17.jpg
+    part: fotos
+    alt: Bushes in a sepia landscape
+  - image: foto-18.jpg
+    part: fotos
+    alt: A shirtless boy on a dirt road
+  - image: foto-19.jpg
+    part: fotos
+    alt: A silhouette in a field at dusk
+  - image: proceso-1.jpg
+    part: proceso
+    alt: Poster with the album title over a hand
+  - image: proceso-2.jpg
+    part: proceso
+    alt: Metal ex-voto with engraved initials
 videos: []
 collageSeed: 0
 order: 1
