@@ -16,6 +16,8 @@ export const GROUPS = [
   'Morón',
   'Un día a la vez',
   'Bizarrap Session #57',
+  'Penas de antaño',
+  'Vitalicio',
 ] as const;
 export const TYPES = [
   'videoclip',
@@ -23,6 +25,8 @@ export const TYPES = [
   'visualizer',
   'sesion-en-vivo',
   'diseno-grafico',
+  'cortometraje',
+  'spots',
 ] as const;
 export const CATEGORIES = TYPES;
 export const GALLERY_PARTS = ['fotos', 'proceso'] as const;

@@ -78,6 +78,8 @@ collections:
           - { label: 'Morón', value: 'Morón' }
           - { label: 'Un día a la vez', value: 'Un día a la vez' }
           - { label: 'Bizarrap Session #57', value: 'Bizarrap Session #57' }
+          - { label: 'Penas de antaño', value: 'Penas de antaño' }
+          - { label: 'Vitalicio', value: 'Vitalicio' }
       - name: type
         label: Tipo
         widget: select
@@ -89,6 +91,8 @@ collections:
           - { label: Visualizer, value: visualizer }
           - { label: Sesión en vivo, value: sesion-en-vivo }
           - { label: Diseño gráfico, value: diseno-grafico }
+          - { label: Cortometraje, value: cortometraje }
+          - { label: Spots, value: spots }
       - name: categories
         label: Categorías
         widget: select
@@ -101,6 +105,8 @@ collections:
           - { label: Visualizer, value: visualizer }
           - { label: Sesión en vivo, value: sesion-en-vivo }
           - { label: Diseño gráfico, value: diseno-grafico }
+          - { label: Cortometraje, value: cortometraje }
+          - { label: Spots, value: spots }
       - name: quote
         label: Frase
         widget: string
