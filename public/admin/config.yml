@@ -93,6 +93,7 @@ collections:
           - { label: Diseño gráfico, value: diseno-grafico }
           - { label: Cortometraje, value: cortometraje }
           - { label: Spots, value: spots }
+          - { label: Show en vivo, value: show-en-vivo }
       - name: categories
         label: Categorías
         widget: select
@@ -107,6 +108,7 @@ collections:
           - { label: Diseño gráfico, value: diseno-grafico }
           - { label: Cortometraje, value: cortometraje }
           - { label: Spots, value: spots }
+          - { label: Show en vivo, value: show-en-vivo }
       - name: quote
         label: Frase
         widget: string

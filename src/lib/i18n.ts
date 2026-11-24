@@ -103,6 +103,7 @@ export const TYPE_LABELS: Record<Locale, Record<ProjectType, string>> = {
     'diseno-grafico': 'Diseño gráfico',
     cortometraje: 'Cortometraje',
     spots: 'Spots',
+    'show-en-vivo': 'Show en vivo',
   },
   en: {
     videoclip: 'Music video',
@@ -112,6 +113,7 @@ export const TYPE_LABELS: Record<Locale, Record<ProjectType, string>> = {
     'diseno-grafico': 'Graphic design',
     cortometraje: 'Short film',
     spots: 'Commercials',
+    'show-en-vivo': 'Live show',
   },
 };
 

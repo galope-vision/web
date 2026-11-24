@@ -1,10 +1,26 @@
 ---
 title: La vida era más corta
 group: La vida era más corta
-type: diseno-grafico
+type: videoclip
 categories:
-  - diseno-grafico
-description: 'Placeholder text, loaded from the general map: the description and credits are still missing.'
+  - videoclip
+  - visualizer
+description:
+  Milo J's second album, which Galope worked on from the very start. Together with BRBR, they
+  made the 7 music videos and 7 visualizers that make up the album. Its visual world was built in Santiago
+  del Estero, with Violeta Capasso and Monty Kaplan on photography, Adrián Romero on graphic design and
+  Javier Unknos on the project's typography.
+credits:
+  - role: Audiovisual direction
+    name: Nacho A. Villar (BRBR)
+  - role: Photography
+    name: Violeta Capasso y Monty Kaplan
+  - role: Animation and design
+    name: Adrián Romero (Talleres La Visión)
+  - role: Typography
+    name: Javier Unknos
+  - role: Production
+    name: The Movement
 cover: portada.jpg
 gallery:
   - image: foto-1.jpg
@@ -70,7 +86,22 @@ gallery:
   - image: proceso-2.jpg
     part: proceso
     alt: Metal ex-voto with engraved initials
-videos: []
+videos:
+  - https://www.youtube.com/watch?v=9GCyD6HexgM
+  - https://www.youtube.com/watch?v=Lg2UXs9SDx4
+  - https://www.youtube.com/watch?v=2ezVj9wLr5U
+  - https://www.youtube.com/watch?v=dKVYuxTTmmA
+  - https://www.youtube.com/watch?v=7WBy2u9epeM
+  - https://www.youtube.com/watch?v=fK7cGwZqWaM
+  - https://www.youtube.com/watch?v=-chPyyuAMLI
+  - https://www.youtube.com/watch?v=kaX4bwL6UlM
+  - https://www.youtube.com/watch?v=k6DePaKr-7g
+  - https://www.youtube.com/watch?v=Zwggkz3z6SY
+  - https://www.youtube.com/watch?v=aRk5vAI9xHc
+  - https://www.youtube.com/watch?v=eKX1uoKDDaI
+  - https://www.youtube.com/watch?v=brrkTawr0n4
+  - https://www.youtube.com/watch?v=ObMo7H8CZRg
+  - https://www.youtube.com/watch?v=PkU5_6_KGps
 collageSeed: 0
 order: 1
 inDice: true

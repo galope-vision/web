@@ -27,6 +27,7 @@ export const TYPES = [
   'diseno-grafico',
   'cortometraje',
   'spots',
+  'show-en-vivo',
 ] as const;
 export const CATEGORIES = TYPES;
 export const GALLERY_PARTS = ['fotos', 'proceso'] as const;
