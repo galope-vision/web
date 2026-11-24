@@ -18,6 +18,14 @@
  *   spec. The pause is in the file itself, so no script keeps time.
  * With reduced motion a <source> swaps either of them for `quieto`, the resting frame.
  *
+ * **The page loads with `quieto` and switches to the animation afterwards.** The animated files
+ * weigh 0.5–1.7 MB against 4–31 KB for the still frame, and they were on every page: the dice
+ * was the page's Largest Contentful Paint, or took the bandwidth the real one needed. The
+ * `<img>` therefore starts on `quieto`, which is also the first frame of both cuts (the roll
+ * starts and ends at rest), and the script below puts the animated `srcset` in once the page
+ * has loaded and the browser is idle, decoding it first so the switch never shows a blank.
+ * Without JavaScript the dice stays still, which is what reduced motion gets anyway.
+ *
  * The draw is the visitor's, not the build's: the candidates ship in the HTML and the script
  * picks one per click, so two clicks can give two different projects. Without JavaScript the
  * link still works and leads to the projects list — the dice always goes somewhere.
@@ -73,8 +81,9 @@ const s = locale ? t(locale) : undefined;
         />
         <img
           class="dice"
-          src={`${DIR}/dado-${cut}-${side}.webp`}
-          srcset={srcset(cut)}
+          src={`${DIR}/dado-quieto-${side}.webp`}
+          srcset={srcset('quieto')}
+          data-animated={srcset(cut)}
           alt=""
           width={side}
           height={side}
@@ -93,8 +102,9 @@ const s = locale ? t(locale) : undefined;
       />
       <img
         class="dice"
-        src={`${DIR}/dado-${cut}-${side}.webp`}
-        srcset={srcset(cut)}
+        src={`${DIR}/dado-quieto-${side}.webp`}
+        srcset={srcset('quieto')}
+        data-animated={srcset(cut)}
         alt=""
         width={side}
         height={side}
@@ -106,6 +116,35 @@ const s = locale ? t(locale) : undefined;
 
 <script>
   import { animate } from 'motion/mini';
+
+  /*
+   * The animation goes in after the page has loaded (see the top of this file). Not under
+   * reduced motion: there the <source> shows `quieto` whatever the `<img>` holds, so there is
+   * nothing to gain from downloading it.
+   */
+  function animateDice(): void {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    for (const image of document.querySelectorAll<HTMLImageElement>('img[data-animated]')) {
+      const srcset = image.dataset.animated;
+      if (!srcset) continue;
+      const next = new Image();
+      next.sizes = image.sizes;
+      next.srcset = srcset;
+      void next
+        .decode()
+        .catch(() => undefined)
+        .then(() => {
+          image.srcset = srcset;
+        });
+    }
+  }
+
+  const idle = (): void => {
+    if ('requestIdleCallback' in window) window.requestIdleCallback(animateDice, { timeout: 2000 });
+    else setTimeout(animateDice, 200);
+  };
+  if (document.readyState === 'complete') idle();
+  else window.addEventListener('load', idle, { once: true });
 
   /* docs/spec.md § 5.0: "al hacer click gira y navega". Transform only, as § 8 asks. */
   const SPIN = 0.7;

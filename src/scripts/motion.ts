@@ -20,14 +20,10 @@
  * setting without reloading.
  */
 import { animate } from 'motion/mini';
+import { ENTRANCE } from '../lib/entrance';
 
-/** docs/spec.md § 8. The durations also live in tokens.css, for the CSS-only animations. */
-const DURATION = 0.6;
-const STAGGER = 0.08;
-const LIFT = 24;
-const SCALE = 0.96;
-const TILT = 1.5;
-const EASE = [0.22, 1, 0.36, 1] as const;
+const { duration: DURATION, stagger: STAGGER, lift: LIFT, scale: SCALE, tilt: TILT } = ENTRANCE;
+const EASE = ENTRANCE.ease;
 
 function prefersReducedMotion(): boolean {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -101,11 +97,17 @@ function reveal(group: Element): void {
   }
 }
 
+/**
+ * Whatever was on screen at load is already entering: the inline script in Base.astro started it
+ * before the first paint and marked it `data-entering`. Waiting for this module instead kept the
+ * first screen at opacity 0 until the script had downloaded, which on a slow phone was seconds
+ * of blank page, and that blank was the page's Largest Contentful Paint.
+ */
 export function startEntrances(): void {
-  const groups = [...document.querySelectorAll('[data-enter-group]')];
-  const loose = [...document.querySelectorAll<HTMLElement>('[data-enter]')].filter(
-    (element) => element.closest('[data-enter-group]') === null,
-  );
+  const groups = [...document.querySelectorAll('[data-enter-group]:not([data-entering])')];
+  const loose = [
+    ...document.querySelectorAll<HTMLElement>('[data-enter]:not([data-entering])'),
+  ].filter((element) => element.closest('[data-enter-group]') === null);
 
   const pending = new Set<Element>([...groups, ...loose]);
 

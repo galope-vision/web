@@ -69,7 +69,7 @@ const paragraphs = info.text
         alt={alt}
         widths={[324, 648]}
         sizes="(width < 48rem) 100vw, 324px"
-        loading="eager"
+        {...(index === 0 ? { priority: true } : { loading: 'eager' as const })}
         data-image={index}
         data-current={index === 0 ? '' : undefined}
         aria-hidden={index === 0 ? undefined : 'true'}
