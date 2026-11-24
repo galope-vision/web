@@ -1,0 +1,90 @@
+---
+/**
+ * The page background: black at the top of the page, warming to red as the visitor scrolls,
+ * under a light film grain that never stops moving.
+ *
+ * It sits fixed behind everything (`z-index: -1`) and takes no pointer events, so nothing on the
+ * page has to know it is there. The red is a layer twice the height of the window, transparent
+ * along its upper half and reaching red at its foot; `startBackdrop` (src/scripts/motion.ts)
+ * slides it up by the scroll progress, so at the top of the page only the transparent half is in
+ * view and at the end the red rises from the bottom edge. Only its `transform` changes, so the
+ * scroll never leaves the compositor.
+ *
+ * The grain is SVG turbulence drawn once as a tile and jumped around with `steps()`, which reads
+ * as film flicker rather than as something sliding. `prefers-reduced-motion` freezes it.
+ */
+---
+
+<div class="backdrop" aria-hidden="true">
+  <div class="red" data-backdrop-red></div>
+  <div class="grain"></div>
+</div>
+
+<style>
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .red {
+    position: absolute;
+    inset: 0 0 auto;
+    height: 200%;
+    /*
+     * A glow rather than a band: an ellipse wider than the window, centred on the layer's foot,
+     * so the red comes up soft and rounded, as through a lens (the reference Galope sent).
+     */
+    background: radial-gradient(
+      120% 55% at 50% 100%,
+      color-mix(in srgb, var(--color-accent) var(--mix-backdrop-red), transparent),
+      transparent
+    );
+    will-change: transform;
+  }
+
+  .grain {
+    position: absolute;
+    inset: -50%;
+    opacity: var(--opacity-grain);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    animation: grain var(--dur-grain) steps(1) infinite;
+    will-change: translate;
+  }
+
+  /* Eight jumps to scattered offsets: far enough apart that the eye never tracks a direction. */
+  @keyframes grain {
+    0% {
+      translate: 0 0;
+    }
+    12.5% {
+      translate: -7% 4%;
+    }
+    25% {
+      translate: 5% -9%;
+    }
+    37.5% {
+      translate: -11% -3%;
+    }
+    50% {
+      translate: 8% 10%;
+    }
+    62.5% {
+      translate: -3% 12%;
+    }
+    75% {
+      translate: 12% -5%;
+    }
+    87.5% {
+      translate: -9% -11%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .grain {
+      animation: none;
+    }
+  }
+</style>

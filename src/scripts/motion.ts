@@ -299,3 +299,36 @@ export function startParallax(): void {
   reduced.addEventListener('change', run);
   fine.addEventListener('change', run);
 }
+
+/**
+ * Slides the background's red layer (src/components/Backdrop.astro) with the scroll: 0 at the
+ * top of the page, half its height — the whole window — at the bottom. A page too short to
+ * scroll stays black.
+ *
+ * Read in a `requestAnimationFrame`, so a burst of scroll events costs one write per frame, and
+ * re-read when the page changes height (images loading, Menos Info folding the panel), since
+ * the same scroll position then means a different progress.
+ */
+export function startBackdrop(): void {
+  const found = document.querySelector<HTMLElement>('[data-backdrop-red]');
+  if (!found) return;
+  const red: HTMLElement = found;
+
+  let frame = 0;
+
+  function step(): void {
+    frame = 0;
+    const range = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = range > 0 ? Math.min(Math.max(window.scrollY / range, 0), 1) : 0;
+    red.style.transform = `translate3d(0, ${(-progress * 50).toFixed(3)}%, 0)`;
+  }
+
+  function run(): void {
+    if (frame === 0) frame = requestAnimationFrame(step);
+  }
+
+  window.addEventListener('scroll', run, { passive: true });
+  window.addEventListener('resize', run, { passive: true });
+  new ResizeObserver(run).observe(document.body);
+  run();
+}

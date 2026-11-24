@@ -17,6 +17,14 @@
   /* Image placeholder in the design: shown at 70% over the background. */
   --color-placeholder: #786e5b;
   --opacity-placeholder: 0.7;
+  /*
+   * The page background warms from black to red as the page scrolls (Backdrop.astro): how much
+   * of the brand red reaches the bottom edge once the page is scrolled to the end. Kept low so
+   * the red is a glow behind the work, never a second colour competing with it.
+   */
+  --mix-backdrop-red: 40%;
+  /* The film grain over the background: a light noise, barely there on black. */
+  --opacity-grain: 0.1;
 
   /*
    * Type. The design uses Baskerville Bold and Regular; Figma stands in Libre Baskerville,
@@ -77,4 +85,6 @@
   --dur-base: 600ms;
   --dur-stagger: 80ms;
   --dur-drift: 10s;
+  /* One loop of the grain's jitter: eight jumps, so it flickers like film at ~10 fps. */
+  --dur-grain: 0.8s;
 }
