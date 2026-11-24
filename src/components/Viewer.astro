@@ -1,0 +1,247 @@
+---
+/**
+ * The full-screen viewer of a project page: any photo in the collage or in the Fotos and
+ * Proceso sections opens here, over the whole window, and the arrows walk through the gallery.
+ *
+ * It is a native `<dialog>` opened with `showModal()`, which brings for free what a viewer has
+ * to get right: focus moves in and comes back to the photo that opened it, the page behind is
+ * inert, and Escape closes it. The script below only adds what a dialog does not know about —
+ * which photo to show, the arrows (on screen, on the keyboard and as a swipe) and closing on a
+ * click outside the photo.
+ *
+ * The large files are made at build time and only requested when a photo is opened, plus the
+ * ones on either side so the arrows do not wait.
+ */
+import { getImage } from 'astro:assets';
+import { t, type Locale } from '../lib/i18n';
+import type { ProjectData } from '../lib/content';
+
+interface Props {
+  locale: Locale;
+  gallery: ProjectData['gallery'];
+}
+
+const { locale, gallery } = Astro.props;
+const s = t(locale);
+
+/** Two sizes, never wider than the original: Drive's copies come at 2000 px on the long side. */
+const WIDTHS = [1280, 2048];
+
+const photos = await Promise.all(
+  gallery.map(async ({ image, alt }) => {
+    const widths = WIDTHS.filter((width) => width < image.width);
+    const large = await getImage({
+      src: image,
+      widths: [...widths, image.width],
+      sizes: '100vw',
+    });
+    return { src: large.src, srcset: large.srcSet.attribute, alt };
+  }),
+);
+---
+
+{photos.length > 0 && (
+  <dialog class="viewer" aria-label={s('viewer.label')} data-viewer>
+    <img class="photo" alt="" sizes="100vw" data-viewer-image />
+    <div class="bar">
+      <p class="count" data-viewer-count></p>
+      <button type="button" class="close" data-viewer-close>
+        {s('viewer.close')}
+      </button>
+    </div>
+    {photos.length > 1 && (
+      <>
+        <button
+          type="button"
+          class="step previous"
+          data-viewer-step="-1"
+          aria-label={s('viewer.previous')}
+        >
+          ←
+        </button>
+        <button type="button" class="step next" data-viewer-step="1" aria-label={s('viewer.next')}>
+          →
+        </button>
+      </>
+    )}
+    <script type="application/json" data-viewer-photos set:html={JSON.stringify(photos)} />
+  </dialog>
+)}
+
+<script>
+  interface Photo {
+    src: string;
+    srcset: string;
+    alt: string;
+  }
+
+  /* How far a finger has to travel sideways before it counts as a swipe. */
+  const SWIPE = 50;
+
+  const dialog = document.querySelector<HTMLDialogElement>('[data-viewer]');
+  const image = dialog?.querySelector<HTMLImageElement>('[data-viewer-image]');
+  const count = dialog?.querySelector<HTMLElement>('[data-viewer-count]');
+  const data = dialog?.querySelector('[data-viewer-photos]')?.textContent;
+
+  if (dialog && image && count && data) {
+    const photos = JSON.parse(data) as Photo[];
+    let current = 0;
+
+    /* Asks the browser for a photo without showing it, so the next arrow finds it ready. */
+    const warm = (index: number): void => {
+      const photo = photos[(index + photos.length) % photos.length];
+      if (!photo) return;
+      const preload = new Image();
+      preload.sizes = '100vw';
+      preload.srcset = photo.srcset;
+      preload.src = photo.src;
+    };
+
+    const show = (index: number): void => {
+      current = (index + photos.length) % photos.length;
+      const photo = photos[current];
+      if (!photo) return;
+      image.srcset = photo.srcset;
+      image.src = photo.src;
+      image.alt = photo.alt;
+      count.textContent = `${current + 1} / ${photos.length}`;
+      if (photos.length > 1) {
+        warm(current + 1);
+        warm(current - 1);
+      }
+    };
+
+    document.addEventListener('click', (event) => {
+      const opener = (event.target as Element).closest<HTMLElement>('[data-viewer-open]');
+      const index = Number(opener?.dataset.viewerOpen);
+      if (!opener || Number.isNaN(index)) return;
+      event.preventDefault();
+      show(index);
+      dialog.showModal();
+    });
+
+    dialog.addEventListener('click', (event) => {
+      const target = event.target as Element;
+      const step = target.closest<HTMLElement>('[data-viewer-step]');
+      if (step) show(current + Number(step.dataset.viewerStep));
+      /* The dialog itself is the empty space around the photo: a click there closes. */
+      else if (target === dialog || target.closest('[data-viewer-close]')) dialog.close();
+    });
+
+    dialog.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowRight') show(current + 1);
+      else if (event.key === 'ArrowLeft') show(current - 1);
+    });
+
+    let startX: number | null = null;
+    dialog.addEventListener('pointerdown', (event) => {
+      startX = event.pointerType === 'mouse' ? null : event.clientX;
+    });
+    dialog.addEventListener('pointerup', (event) => {
+      if (startX === null || photos.length < 2) return;
+      const distance = event.clientX - startX;
+      startX = null;
+      if (Math.abs(distance) > SWIPE) show(current + (distance < 0 ? 1 : -1));
+    });
+  }
+</script>
+
+<style>
+  .viewer {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-size: var(--fs-nav);
+    line-height: var(--lh-nav);
+    overscroll-behavior: contain;
+    /* The swipe is ours; the browser must not take it for a scroll or a back gesture. */
+    touch-action: pan-y pinch-zoom;
+    /* The width of each arrow's column, which the photo leaves clear. */
+    --viewer-side: max(var(--space-4), 10%);
+  }
+
+  .viewer[open] {
+    display: grid;
+    place-items: center;
+    animation: viewer-in var(--dur-fast) var(--ease-out);
+  }
+
+  .viewer::backdrop {
+    background: var(--color-bg);
+  }
+
+  /* Nothing scrolls behind the photo while it is open. */
+  :global(html:has(.viewer[open])) {
+    overflow: hidden;
+  }
+
+  .photo {
+    max-width: calc(100% - 2 * var(--space-margin));
+    max-height: calc(100% - 2 * var(--space-3));
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    user-select: none;
+  }
+
+  /* The same row as the nav: count on the left, Cerrar on the right. */
+  .bar {
+    position: absolute;
+    inset: 0 0 auto;
+    display: flex;
+    justify-content: space-between;
+    padding: 6px var(--space-margin);
+  }
+
+  .close,
+  .step {
+    font-weight: var(--fw-bold);
+  }
+
+  .close:hover,
+  .step:hover {
+    color: var(--color-accent-text);
+  }
+
+  /* The arrows take each side's whole height, so they are easy to hit and never cover the photo. */
+  .step {
+    position: absolute;
+    top: var(--space-3);
+    bottom: var(--space-3);
+    width: var(--viewer-side);
+    font-size: var(--fs-body);
+  }
+
+  @media (width >= 48rem) {
+    .photo {
+      max-width: calc(100% - 2 * var(--viewer-side));
+    }
+  }
+
+  .previous {
+    left: 0;
+  }
+
+  .next {
+    right: 0;
+  }
+
+  /* On a phone the photo goes edge to edge and the swipe replaces the arrows. */
+  @media (width < 48rem) {
+    .step {
+      display: none;
+    }
+  }
+
+  @keyframes viewer-in {
+    from {
+      opacity: 0;
+    }
+  }
+</style>

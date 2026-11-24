@@ -16,6 +16,7 @@
 import Collage from './Collage.astro';
 import ProjectPanel from './ProjectPanel.astro';
 import ProjectSections from './ProjectSections.astro';
+import Viewer from './Viewer.astro';
 import { t, type Locale } from '../lib/i18n';
 import { collageItems, collageSeed } from '../lib/content';
 import type { Project, ProjectPart } from '../lib/content';
@@ -29,8 +30,16 @@ const { locale, project } = Astro.props;
 const { data } = project;
 const s = t(locale);
 
-const fotos = data.gallery.filter((item) => item.part === 'fotos');
-const proceso = data.gallery.filter((item) => item.part === 'proceso');
+/*
+ * Every photo keeps its place in the gallery, which is also its place in the full-screen viewer:
+ * the collage (the gallery's first images, in order) and the sections open the same one.
+ */
+const indexed = data.gallery.map((item, index) => ({ ...item, index }));
+const fotos = indexed.filter((item) => item.part === 'fotos');
+const proceso = indexed.filter((item) => item.part === 'proceso');
+const collage = collageItems(project).map((item, index) =>
+  data.gallery.length > 0 ? { ...item, viewer: index } : item,
+);
 
 /** A part with nothing in it gets no link, as the spec asks. */
 const parts: ProjectPart[] = [
@@ -43,7 +52,7 @@ const parts: ProjectPart[] = [
 <div class="detail" data-info="more">
   <ProjectPanel locale={locale} data={data} parts={parts} />
   <div class="content">
-    <Collage items={collageItems(project)} seed={collageSeed(project)} />
+    <Collage items={collage} seed={collageSeed(project)} />
     <ProjectSections
       locale={locale}
       title={data.title}
@@ -53,6 +62,7 @@ const parts: ProjectPart[] = [
     />
   </div>
 </div>
+<Viewer locale={locale} gallery={data.gallery} />
 
 <style>
   /*

@@ -104,6 +104,7 @@ function drift(index: number): string {
         <Image
           class="item"
           data-enter
+          data-viewer-open={item.viewer}
           src={item.image}
           alt={item.alt}
           widths={[320, 640, 960]}
@@ -135,6 +136,15 @@ function drift(index: number): string {
    */
   .link {
     display: block;
+  }
+
+  /*
+   * A project page's collage opens the viewer on click. Only for the pointer: the same photos
+   * are listed under the collage as real buttons, which is the keyboard's way in, and the
+   * collage stays decorative to a screen reader (its alt text is empty there).
+   */
+  [data-viewer-open] {
+    cursor: zoom-in;
   }
 
   .photo {
