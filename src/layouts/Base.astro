@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import Backdrop from '../components/Backdrop.astro';
 import Dice from '../components/Dice.astro';
 import GoogleTagManager from '../components/GoogleTagManager.astro';
 import Header from '../components/Header.astro';
@@ -87,6 +88,7 @@ const absolute = (path: string): string => new URL(path, site).href;
   </head>
   <body>
     <GoogleTagManager part="body" />
+    <Backdrop />
     <div class:list={['shell', `dice-${dice}`]}>
       {chrome === 'full' ? (
         <Header locale={locale} current={current} />
@@ -104,11 +106,17 @@ const absolute = (path: string): string => new URL(path, site).href;
       </div>
     </div>
     <script>
-      import { pauseDriftOutOfSight, startEntrances, startParallax } from '../scripts/motion';
+      import {
+        pauseDriftOutOfSight,
+        startBackdrop,
+        startEntrances,
+        startParallax,
+      } from '../scripts/motion';
 
       startEntrances();
       pauseDriftOutOfSight();
       startParallax();
+      startBackdrop();
     </script>
   </body>
 </html>
