@@ -47,6 +47,8 @@ export interface CollageItem {
   href?: string;
   /** The link's accessible name; the image itself stays decorative. */
   label?: string;
+  /** Its position in the full-screen viewer (Viewer.astro), on a project page. */
+  viewer?: number;
 }
 
 /** Where one image ends up, in percentages of the collage box. */

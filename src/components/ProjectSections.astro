@@ -13,7 +13,8 @@ import VideoEmbed from './VideoEmbed.astro';
 import { t, type Locale } from '../lib/i18n';
 import type { ProjectData } from '../lib/content';
 
-type GalleryItem = ProjectData['gallery'][number];
+/** A gallery image and its place in the gallery, which is also its place in the viewer. */
+type GalleryItem = ProjectData['gallery'][number] & { index: number };
 
 interface Props {
   locale: Locale;
@@ -39,15 +40,22 @@ const s = t(locale);
     </h2>
     <div class="grid" data-enter-group>
       {fotos.map((item) => (
-        <Image
-          class="image"
+        <button
+          type="button"
+          class="open"
           data-enter
-          src={item.image}
-          alt={item.alt}
-          widths={[480, 960]}
-          sizes="(width >= 48rem) 50vw, 100vw"
-          loading="lazy"
-        />
+          data-viewer-open={item.index}
+          aria-label={`${s('viewer.open')}: ${item.alt}`}
+        >
+          <Image
+            class="image"
+            src={item.image}
+            alt=""
+            widths={[480, 960]}
+            sizes="(width >= 48rem) 50vw, 100vw"
+            loading="lazy"
+          />
+        </button>
       ))}
     </div>
   </section>
@@ -71,15 +79,22 @@ const s = t(locale);
     <h2 id="proceso-heading">{s('project.process')}</h2>
     <div class="grid" data-enter-group>
       {proceso.map((item) => (
-        <Image
-          class="image"
+        <button
+          type="button"
+          class="open"
           data-enter
-          src={item.image}
-          alt={item.alt}
-          widths={[480, 960]}
-          sizes="(width >= 48rem) 50vw, 100vw"
-          loading="lazy"
-        />
+          data-viewer-open={item.index}
+          aria-label={`${s('viewer.open')}: ${item.alt}`}
+        >
+          <Image
+            class="image"
+            src={item.image}
+            alt=""
+            widths={[480, 960]}
+            sizes="(width >= 48rem) 50vw, 100vw"
+            loading="lazy"
+          />
+        </button>
       ))}
     </div>
   </section>
@@ -113,5 +128,15 @@ const s = t(locale);
   .image {
     width: 100%;
     height: auto;
+  }
+
+  /*
+   * Each photo is a button that opens it full screen (Viewer.astro). The alt text moves to the
+   * button's name, after "Ver en pantalla completa", so it is still read once.
+   */
+  .open {
+    display: block;
+    width: 100%;
+    cursor: zoom-in;
   }
 </style>
