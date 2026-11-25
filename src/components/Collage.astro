@@ -14,15 +14,21 @@
  * one once.
  */
 import { Image } from 'astro:assets';
-import { collage, type CollageImage, type CollageItem } from '../lib/collage';
+import { collage, type CollageImage, type CollageItem, type Placement } from '../lib/collage';
 
 interface Props {
   items: CollageItem[];
   /** The slug plus the entry's `collageSeed`; the same string always gives the same collage. */
   seed: string;
+  /**
+   * For a collage at the top of its page: its largest image is fetched first, with high
+   * priority, because it is what the browser will report as the page's Largest Contentful
+   * Paint. The rest stay lazy. Leave it off for a collage that is not on the first screen.
+   */
+  priority?: boolean;
 }
 
-const { items, seed } = Astro.props;
+const { items, seed, priority = false } = Astro.props;
 
 const images: CollageImage[] = items.map(({ image }) => ({ aspect: image.width / image.height }));
 const layout = collage(images, seed);
@@ -36,6 +42,27 @@ const positioned = items.flatMap((item, index) => {
 });
 
 const round = (value: number): string => `${value.toFixed(3)}%`;
+
+/**
+ * How wide the image is shown, for `sizes`, straight from its placement. The collage is never
+ * wider than the screen, so a cell that takes a quarter of the box is at most a quarter of the
+ * viewport. A single `50vw`/`100vw` for every image made a phone download the 960 px version of
+ * a photo shown at 200 px. From 48rem up the larger of the two four-column layouts counts,
+ * because "Menos info" moves the same element from one to the other without reloading it.
+ */
+function sizes(wide: Placement, narrow: Placement, full: Placement): string {
+  const large = Math.ceil(Math.max(wide.width, full.width));
+  return `(width >= 48rem) ${large}vw, ${Math.ceil(narrow.width)}vw`;
+}
+
+/** The image that covers the most of the four-column box: the likely LCP, when `priority`. */
+const largest = priority
+  ? layout.wide.reduce<Placement | undefined>(
+      (best, placement) =>
+        !best || placement.width * placement.height > best.width * best.height ? placement : best,
+      undefined,
+    )?.index
+  : undefined;
 
 /**
  * The idle drift of one image, worked out from its position in the collage and nothing else
@@ -71,6 +98,8 @@ function drift(index: number): string {
     style={`--wide-aspect: ${layout.wideAspect.toFixed(4)}; --narrow-aspect: ${layout.narrowAspect.toFixed(4)}; --full-aspect: ${layout.fullAspect.toFixed(4)};`}
   >
     {positioned.map(({ item, wide, narrow, full }, index) => {
+      const first = wide.index === largest;
+      const load = first ? { priority: true } : { loading: 'lazy' as const };
       const place = [
         `--x: ${round(wide.x)}`,
         `--y: ${round(wide.y)}`,
@@ -95,8 +124,8 @@ function drift(index: number): string {
             src={item.image}
             alt=""
             widths={[320, 640, 960]}
-            sizes="(width >= 48rem) 50vw, 100vw"
-            loading="lazy"
+            sizes={sizes(wide, narrow, full)}
+            {...load}
             style={focus}
           />
         </a>
@@ -108,8 +137,8 @@ function drift(index: number): string {
           src={item.image}
           alt={item.alt}
           widths={[320, 640, 960]}
-          sizes="(width >= 48rem) 50vw, 100vw"
-          loading="lazy"
+          sizes={sizes(wide, narrow, full)}
+          {...load}
           style={`${place}; ${focus}`}
         />
       );

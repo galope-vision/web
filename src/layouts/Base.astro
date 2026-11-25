@@ -7,6 +7,7 @@ import Header from '../components/Header.astro';
 import LocaleSwitch from '../components/LocaleSwitch.astro';
 import Logo from '../components/Logo.astro';
 import { DEFAULT_LOCALE, LOCALES, localeVariants, type Locale, type Page } from '../lib/i18n';
+import { ENTRANCE } from '../lib/entrance';
 
 interface Props {
   locale: Locale;
@@ -105,6 +106,63 @@ const absolute = (path: string): string => new URL(path, site).href;
         <Logo />
       </div>
     </div>
+    {/*
+      The entrance of whatever is on screen at load (docs/spec.md § 8), started here rather
+      than in src/scripts/motion.ts. That module comes later — it is downloaded after the HTML,
+      with Motion inside — and until it ran, the first screen sat at opacity 0: on a slow phone
+      that was seconds of blank page, and it was what Lighthouse measured as the Largest
+      Contentful Paint. This runs before the first paint, with the browser's own Web Animations
+      and nothing to download, and marks what it took with `data-entering` so motion.ts leaves
+      it alone. The rest of the page still enters on scroll, from motion.ts.
+
+      The same values and the same rules as motion.ts: a fade alone with reduced motion, and the
+      element is handed back to CSS (`data-entered`, inline animation cancelled) once it has
+      arrived, so the hover and the drift never fight a leftover transform.
+    */}
+    <script is:inline define:vars={{ entrance: ENTRANCE }}>
+      if (document.documentElement.classList.contains('motion')) {
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const height = window.innerHeight;
+        const loose = [...document.querySelectorAll('[data-enter]')].filter(
+          (element) => element.closest('[data-enter-group]') === null,
+        );
+
+        for (const unit of [...document.querySelectorAll('[data-enter-group]'), ...loose]) {
+          const box = unit.getBoundingClientRect();
+          if (box.bottom <= 0 || box.top >= height) continue;
+          unit.setAttribute('data-entering', '');
+
+          const items = unit.matches('[data-enter-group]')
+            ? [...unit.querySelectorAll('[data-enter]')]
+            : [unit];
+          (items.length > 0 ? items : [unit]).forEach((element, index) => {
+            const tilt = (index % 2 === 0 ? 1 : -1) * entrance.tilt;
+            const frames = reduced
+              ? [{ opacity: 0 }, { opacity: 1 }]
+              : [
+                  {
+                    opacity: 0,
+                    transform: `translateY(${entrance.lift}px) scale(${entrance.scale}) rotate(${tilt}deg)`,
+                  },
+                  { opacity: 1, transform: 'none' },
+                ];
+            const animation = element.animate(frames, {
+              duration: (reduced ? entrance.duration / 2 : entrance.duration) * 1000,
+              delay: reduced ? 0 : index * entrance.stagger * 1000,
+              easing: reduced ? 'linear' : `cubic-bezier(${entrance.ease.join(', ')})`,
+              fill: 'both',
+            });
+            animation.finished.then(
+              () => {
+                element.setAttribute('data-entered', '');
+                animation.cancel();
+              },
+              () => element.setAttribute('data-entered', ''),
+            );
+          });
+        }
+      }
+    </script>
     <script>
       import {
         pauseDriftOutOfSight,

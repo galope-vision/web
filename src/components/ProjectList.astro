@@ -47,7 +47,7 @@ const generalSeed = projects.map(({ slug }) => slug).join('-');
 
 <div class="stage">
   <div class="collages">
-    <Collage items={covers} seed={generalSeed} />
+    <Collage items={covers} seed={generalSeed} priority />
     {projects.map((project) => (
       <div class="swap" data-slug={project.slug}>
         <template>

@@ -55,7 +55,7 @@ src/components/      Header, LocaleSwitch, Dice, Logo, Placeholder, GoogleTagMan
                      ProjectList, ProjectPanel, VideoEmbed
 src/lib/             collage.ts (seeded layout), i18n.ts (locales, routes, dictionaries),
                      content.ts (content per locale, Spanish fallback), options.ts (option keys),
-                     tokens.ts (reads tokens.css for /estilos)
+                     tokens.ts (reads tokens.css for /estilos), entrance.ts (entrance animation values)
 src/scripts/         motion.ts
 src/pages/           index, proyectos/index, proyectos/[slug], info, contacto, estilos, 404
                      en/ mirrors them in English (index, projects, info, contact)
