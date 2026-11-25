@@ -1,10 +1,26 @@
 ---
 title: La vida era más corta
 group: La vida era más corta
-type: diseno-grafico
+type: videoclip
 categories:
-  - diseno-grafico
-description: 'Texto provisorio, cargado desde el mapa general: faltan la descripción y los créditos.'
+  - videoclip
+  - visualizer
+description:
+  Segundo disco de Milo J, en el que Galope trabajó el proyecto desde su origen. Acompañados
+  por BRBR, realizaron los 7 videoclips y los 7 visualizers que componen el disco. El imaginario visual
+  se construyó en Santiago del Estero con la participación de Violeta Capasso y Monty Kaplan desde la
+  fotografía, Adrián Romero en el diseño gráfico y Javier Unknos en la tipografía integral del proyecto.
+credits:
+  - role: Dirección audiovisual
+    name: Nacho A. Villar (BRBR)
+  - role: Fotografía
+    name: Violeta Capasso y Monty Kaplan
+  - role: Animación y diseño
+    name: Adrián Romero (Talleres La Visión)
+  - role: Tipografía
+    name: Javier Unknos
+  - role: Producción
+    name: The Movement
 cover: portada.jpg
 gallery:
   - image: foto-1.jpg
@@ -70,7 +86,22 @@ gallery:
   - image: proceso-2.jpg
     part: proceso
     alt: Exvoto de metal con iniciales grabadas
-videos: []
+videos:
+  - https://www.youtube.com/watch?v=9GCyD6HexgM
+  - https://www.youtube.com/watch?v=Lg2UXs9SDx4
+  - https://www.youtube.com/watch?v=2ezVj9wLr5U
+  - https://www.youtube.com/watch?v=dKVYuxTTmmA
+  - https://www.youtube.com/watch?v=7WBy2u9epeM
+  - https://www.youtube.com/watch?v=fK7cGwZqWaM
+  - https://www.youtube.com/watch?v=-chPyyuAMLI
+  - https://www.youtube.com/watch?v=kaX4bwL6UlM
+  - https://www.youtube.com/watch?v=k6DePaKr-7g
+  - https://www.youtube.com/watch?v=Zwggkz3z6SY
+  - https://www.youtube.com/watch?v=aRk5vAI9xHc
+  - https://www.youtube.com/watch?v=eKX1uoKDDaI
+  - https://www.youtube.com/watch?v=brrkTawr0n4
+  - https://www.youtube.com/watch?v=ObMo7H8CZRg
+  - https://www.youtube.com/watch?v=PkU5_6_KGps
 collageSeed: 0
 order: 1
 inDice: true
