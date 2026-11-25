@@ -10,6 +10,9 @@
  * view and at the end the red rises from the bottom edge. Only its `transform` changes, so the
  * scroll never leaves the compositor.
  *
+ * The glow also sways and swells on its own, on a slow loop, so the red feels alive even
+ * while the page is still.
+ *
  * The grain is SVG turbulence drawn once as a tile and jumped around with `steps()`, which reads
  * as film flicker rather than as something sliding. `prefers-reduced-motion` freezes it.
  */
@@ -31,7 +34,8 @@
 
   .red {
     position: absolute;
-    inset: 0 0 auto;
+    /* Wider than the window, so the sway below never brings the layer's side edge into view. */
+    inset: 0 -15% auto;
     height: 200%;
     /*
      * A glow rather than a band: an ellipse wider than the window, centred on the layer's foot,
@@ -42,7 +46,26 @@
       color-mix(in srgb, var(--color-accent) var(--mix-backdrop-red), transparent),
       transparent
     );
-    will-change: transform;
+    /*
+     * The glow is never quite still: it sways from side to side and swells a little, slowly
+     * enough to read as light breathing rather than as movement. It animates `translate`,
+     * `scale` and `opacity`, which compose with the `transform` the scroll writes inline.
+     */
+    animation: glow var(--dur-glow) var(--ease-in-out) infinite alternate;
+    will-change: transform, translate, scale, opacity;
+  }
+
+  @keyframes glow {
+    from {
+      translate: -4% 0;
+      scale: 1 1;
+      opacity: 0.8;
+    }
+    to {
+      translate: 4% 0;
+      scale: 1.08 1.05;
+      opacity: 1;
+    }
   }
 
   .grain {
@@ -83,6 +106,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .red,
     .grain {
       animation: none;
     }

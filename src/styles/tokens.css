@@ -80,6 +80,7 @@
 
   /* Motion */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
   --dur-swap: 200ms;
   --dur-fast: 250ms;
   --dur-base: 600ms;
@@ -87,4 +88,6 @@
   --dur-drift: 10s;
   /* One loop of the grain's jitter: eight jumps, so it flickers like film at ~10 fps. */
   --dur-grain: 0.8s;
+  /* One sway of the background's red glow, side to side; it then sways back. */
+  --dur-glow: 9s;
 }
