@@ -21,7 +21,7 @@ gallery:
     alt: ID photos in a sleeve
 collageSeed: 0
 order: 1
-inDice: true
+inDice: false
 visible: false
 date: 2025-01-01
 ---

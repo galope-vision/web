@@ -21,7 +21,7 @@ gallery:
     alt: Fotos carnet dentro de un folio
 collageSeed: 0
 order: 1
-inDice: true
+inDice: false
 visible: false
 date: 2025-01-01
 ---
