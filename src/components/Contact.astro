@@ -1,74 +1,195 @@
 ---
 /**
- * Contacto (docs/spec.md § 5.5): the email and the social links from ajustes/general.yml.
- * The design of this page is still open, so this is the plainest reading of it.
+ * Contacto (docs/spec.md § 5.5): the email and the social links from ajustes/general.yml, on the
+ * 4-column grid. A label in the first column, the content across the other three at display
+ * size; each network is one row with its name, its address and an arrow, between hairlines.
+ * Any number of networks works: editors add them in Ajustes → Redes.
  */
+import { t, type Locale } from '../lib/i18n';
 import type { getGeneral } from '../lib/content';
 
 type General = Awaited<ReturnType<typeof getGeneral>>;
 
 interface Props {
+  locale: Locale;
   email: General['email'];
   socials: General['socials'];
 }
 
-const { email, socials } = Astro.props;
+const { locale, email, socials } = Astro.props;
+const s = t(locale);
+
+/** What the row shows under the name: the link without its scheme, `www.` or trailing slash. */
+function address(url: string): string {
+  const { hostname, pathname } = new URL(url);
+  return `${hostname.replace(/^www\./, '')}${pathname.replace(/\/+$/, '')}`;
+}
 ---
 
-<div class="contact">
-  <div class="column" data-enter-group>
+<div class="contact" data-enter-group>
+  <section class="block" aria-labelledby="contact-write">
+    <h2 class="label" id="contact-write" data-enter>
+      {s('contact.write')}
+    </h2>
     <a class="email" href={`mailto:${email}`} data-enter>
       {email}
     </a>
-    {socials.length > 0 && (
+  </section>
+
+  {socials.length > 0 && (
+    <section class="block" aria-labelledby="contact-socials">
+      <h2 class="label" id="contact-socials" data-enter>
+        {s('contact.socials')}
+      </h2>
       <ul class="socials">
         {socials.map(({ label, url }) => (
           <li data-enter>
-            <a href={url} rel="me noreferrer" target="_blank">
-              {label}
+            <a class="social" href={url} rel="me noreferrer" target="_blank">
+              <span class="name">{label}</span>
+              <span class="address">{address(url)}</span>
+              <span class="arrow" aria-hidden="true">
+                ↗
+              </span>
+              <span class="visually-hidden">{s('contact.newTab')}</span>
             </a>
           </li>
         ))}
       </ul>
-    )}
-  </div>
+    </section>
+  )}
 </div>
 
 <style>
   .contact {
     display: grid;
-    grid-template-columns: repeat(var(--grid-columns), 1fr);
-    gap: var(--space-gutter);
-    padding-top: var(--space-4);
+    gap: var(--space-4);
+    /*
+     * The email and the networks run across columns 2 to 4, under the dice, so the page starts
+     * below it (the dice is pinned from the top of the page, the content below the header).
+     */
+    padding-top: calc(
+      var(--size-dice-top) + var(--size-dice-height) + var(--space-3) - var(--size-header-height)
+    );
   }
 
-  .column {
+  .block {
     display: grid;
-    gap: var(--space-2);
-    grid-column: 2;
-    align-content: start;
+    grid-template-columns: repeat(var(--grid-columns), 1fr);
+    gap: var(--space-gutter);
+    align-items: baseline;
+  }
+
+  .label {
+    grid-column: 1;
+    margin: 0;
+    font-size: var(--fs-nav);
+    font-weight: var(--fw-regular);
+    line-height: var(--lh-nav);
+    text-transform: uppercase;
+  }
+
+  .email,
+  .socials {
+    grid-column: 2 / -1;
   }
 
   .email {
+    justify-self: start;
+    font-size: var(--fs-display);
     font-weight: var(--fw-bold);
+    line-height: var(--lh-display);
+    text-decoration: none;
+    overflow-wrap: anywhere;
+  }
+
+  .email:hover,
+  .email:focus-visible {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.15em;
   }
 
   .socials {
-    display: grid;
-    gap: var(--space-1);
     margin: 0;
     padding: 0;
     list-style: none;
+    border-top: 1px solid var(--color-placeholder);
+  }
+
+  .socials li {
+    border-bottom: 1px solid var(--color-placeholder);
+  }
+
+  .social {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'name arrow'
+      'address arrow';
+    column-gap: var(--space-2);
+    row-gap: var(--space-1);
+    align-items: center;
+    padding-block: var(--space-2);
+    text-decoration: none;
+  }
+
+  .name {
+    grid-area: name;
+    font-size: var(--fs-display);
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-display);
+  }
+
+  .address {
+    grid-area: address;
+    font-size: var(--fs-nav);
+    line-height: var(--lh-nav);
+    overflow-wrap: anywhere;
+  }
+
+  .arrow {
+    grid-area: arrow;
+    font-size: var(--fs-display);
+    line-height: 1;
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+
+  .social:hover,
+  .social:focus-visible {
+    color: var(--color-accent-text);
+  }
+
+  .social:hover .arrow,
+  .social:focus-visible .arrow {
+    transform: translate(4px, -4px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .arrow {
+      transition: none;
+    }
+
+    .social:hover .arrow,
+    .social:focus-visible .arrow {
+      transform: none;
+    }
   }
 
   @media (width < 48rem) {
     .contact {
-      grid-template-columns: repeat(var(--grid-columns-narrow), 1fr);
+      gap: var(--space-3);
       padding-top: var(--space-2);
     }
 
-    .column {
-      grid-column: 1 / -1;
+    .block {
+      grid-template-columns: 1fr;
+      gap: var(--space-1);
+    }
+
+    .label,
+    .email,
+    .socials {
+      grid-column: 1;
     }
   }
 </style>

@@ -226,7 +226,7 @@ Estas son de Caro y Galope, y frenan la fase 3 (proyectos y collage):
 
 - Cómo se disponen las imágenes o el video en la home.
 - Cómo se ven las secciones Fotos, Vídeos y Proceso debajo del collage.
-- Diseño de Contacto y diseño mobile.
+- Diseño mobile.
 - Si el dado excluye el proyecto que se está viendo.
 - Si entran una página de búsqueda y un formulario de contacto.
 
