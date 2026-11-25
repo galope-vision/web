@@ -1,5 +1,5 @@
 ---
-title: 'Bizarrap Session #57 {}'
+title: 'Bizarrap Session #57'
 group: 'Bizarrap Session #57'
 type: sesion-en-vivo
 categories:
