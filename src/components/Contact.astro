@@ -16,14 +16,14 @@ const { email, socials } = Astro.props;
 ---
 
 <div class="contact">
-  <div class="column">
-    <a class="email" href={`mailto:${email}`}>
+  <div class="column" data-enter-group>
+    <a class="email" href={`mailto:${email}`} data-enter>
       {email}
     </a>
     {socials.length > 0 && (
       <ul class="socials">
         {socials.map(({ label, url }) => (
-          <li>
+          <li data-enter>
             <a href={url} rel="me noreferrer" target="_blank">
               {label}
             </a>

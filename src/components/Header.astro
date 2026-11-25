@@ -44,6 +44,35 @@ const items = [
 </header>
 
 <style>
+  /*
+   * The nav row arrives with the page: each column drops in from just above, one after another,
+   * as the content's entrances do (src/scripts/motion.ts). Pure CSS, so it never depends on the
+   * script, and `backwards` keeps each column hidden only while it waits for its turn.
+   * `prefers-reduced-motion` cuts it to nothing through the global rule in global.css.
+   */
+  .column {
+    animation: nav-in var(--dur-base) var(--ease-out) backwards;
+  }
+
+  .column:nth-child(2) {
+    animation-delay: var(--dur-stagger);
+  }
+
+  .column:nth-child(3) {
+    animation-delay: calc(var(--dur-stagger) * 2);
+  }
+
+  .column:nth-child(4) {
+    animation-delay: calc(var(--dur-stagger) * 3);
+  }
+
+  @keyframes nav-in {
+    from {
+      opacity: 0;
+      translate: 0 -8px;
+    }
+  }
+
   .header {
     padding: 6px var(--space-margin);
     font-size: var(--fs-nav);

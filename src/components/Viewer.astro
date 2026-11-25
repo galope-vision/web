@@ -101,10 +101,20 @@ const photos = await Promise.all(
       current = (index + photos.length) % photos.length;
       const photo = photos[current];
       if (!photo) return;
+      /*
+       * Each photo fades in once it is decoded, instead of the next one painting over the last
+       * row by row. `decode()` also settles for a photo already on screen, so it never stays
+       * hidden.
+       */
+      image.dataset.loading = '';
       image.srcset = photo.srcset;
       image.src = photo.src;
       image.alt = photo.alt;
       count.textContent = `${current + 1} / ${photos.length}`;
+      const shown = (): void => {
+        if (photos[current] === photo) delete image.dataset.loading;
+      };
+      image.decode().then(shown, shown);
       if (photos.length > 1) {
         warm(current + 1);
         warm(current - 1);
@@ -188,6 +198,12 @@ const photos = await Promise.all(
     height: auto;
     object-fit: contain;
     user-select: none;
+    transition: opacity var(--dur-fast) var(--ease-out);
+  }
+
+  .photo[data-loading] {
+    opacity: 0;
+    transition: none;
   }
 
   /* The same row as the nav: count on the left, Cerrar on the right. */

@@ -225,6 +225,24 @@ const s = locale ? t(locale) : undefined;
     transform: translateX(-50%);
   }
 
+  /*
+   * The nav's dice lands after the nav row: it grows in from a little smaller with a quarter of
+   * a turn undone, like a throw coming to rest. On the box, so it composes with the spin on
+   * click (the image's transform) and the centring (the link's transform). The holding page's
+   * dice is left alone: it is already rolling.
+   */
+  .nav .box {
+    animation: dice-in var(--dur-base) var(--ease-out) calc(var(--dur-stagger) * 4) backwards;
+  }
+
+  @keyframes dice-in {
+    from {
+      opacity: 0;
+      scale: 0.8;
+      rotate: -12deg;
+    }
+  }
+
   /* On a narrow screen the nav fills the row, so the dice goes under it instead of over it. */
   @media (width < 48rem) {
     .nav {
