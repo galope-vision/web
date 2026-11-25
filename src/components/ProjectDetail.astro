@@ -106,8 +106,10 @@ const parts: ProjectPart[] = [
      * over it, in the corners the collage keeps free (src/lib/collage.ts, FULL). The panel
      * lets the pointer through to the photos everywhere but on its own text.
      *
-     * Below the collage the sections keep the panel's column clear, so as the page scrolls on
-     * no photo passes under Más Info and VOLVER, which are still there to be used.
+     * The sections below follow it and take the whole width too (ProjectSections.astro puts
+     * them on four columns), so the whole page rearranges, not only the collage. Photos do pass
+     * under the title, Más Info and VOLVER as the page scrolls, so those carry a halo of the
+     * page's black to stay readable (ProjectPanel.astro).
      */
     .detail[data-info='less'] {
       grid-template-columns: minmax(0, 1fr);
@@ -125,16 +127,6 @@ const parts: ProjectPart[] = [
 
     .detail[data-info='less'] > .content {
       grid-area: 1 / 1;
-    }
-
-    .detail[data-info='less'] > .content > :global(:not(.collage)) {
-      padding-left: calc(
-        min(
-            21.25rem,
-            calc(50vw - var(--size-dice-width) / 2 - var(--space-gutter) - var(--space-margin))
-          ) +
-          var(--space-gutter)
-      );
     }
   }
 </style>
