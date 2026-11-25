@@ -227,7 +227,6 @@ Estas son de Caro y Galope, y frenan la fase 3 (proyectos y collage):
 - Cómo se disponen las imágenes o el video en la home.
 - Cómo se ven las secciones Fotos, Vídeos y Proceso debajo del collage.
 - Diseño de Contacto y diseño mobile.
-- Si las fotos reales van al 70% de opacidad, como el placeholder.
 - Si el dado excluye el proyecto que se está viendo.
 - Si entran una página de búsqueda y un formulario de contacto.
 
