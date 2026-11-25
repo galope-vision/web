@@ -192,16 +192,9 @@ function drift(index: number): string {
     /* The cell decides the shape, so the photograph is cropped to it, from `focus`. */
     object-fit: cover;
     /*
-     * The design shows images at 70% over the background, which is what the token is for. It
-     * also happens to be what makes the panel readable where it sits over the collage: the
-     * body text against the placeholder colour is 4.03:1 at full opacity, which fails AA, and
-     * 6.70:1 at 70%, which passes.
-     *
-     * Whether real photographs keep this is still an open decision (CLAUDE.md). The contrast
-     * figures above are the cost of dropping it, and a real photograph is not one flat colour,
-     * so if it goes, the panel will want a scrim behind the text instead.
+     * Real photographs are shown at full opacity (decided 2026-11-26). The 70% of the design was
+     * the placeholder's (--opacity-placeholder), not the photos'.
      */
-    opacity: var(--opacity-placeholder);
 
     /*
      * The idle drift (docs/spec.md § 8). It uses the `translate` and `rotate` properties rather

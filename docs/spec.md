@@ -355,7 +355,6 @@ Licencia web de Baskerville: **A definir**. Si no hay, queda Libre Baskerville (
 - Cómo se disponen las imágenes o el video en la home.
 - Diseño de Contacto.
 - Diseño mobile (por defecto, adaptación propia).
-- Si las fotos reales van al 70% de opacidad, como el placeholder.
 - Cómo se ven las secciones Fotos, Vídeos y Proceso debajo del collage.
 
 **De alcance**
