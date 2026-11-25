@@ -44,10 +44,12 @@ const paragraphs = info.text
 ---
 
 <div class="info">
-  <div class="text">
-    <Logo width={138} />
+  <div class="text" data-enter-group>
+    <div data-enter>
+      <Logo width={138} />
+    </div>
     {paragraphs.map((pieces) => (
-      <p>
+      <p data-enter>
         {pieces.map((piece) =>
           'index' in piece ? (
             <button type="button" class="highlight" data-highlight={piece.index}>
@@ -61,7 +63,7 @@ const paragraphs = info.text
     ))}
   </div>
 
-  <div class="images" data-images>
+  <div class="images" data-images data-enter>
     {info.highlights.map(({ image, alt }, index) => (
       <Image
         class="image"
