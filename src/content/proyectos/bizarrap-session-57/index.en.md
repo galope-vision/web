@@ -22,6 +22,6 @@ gallery:
 collageSeed: 0
 order: 1
 inDice: true
-visible: true
+visible: false
 date: 2025-01-01
 ---
