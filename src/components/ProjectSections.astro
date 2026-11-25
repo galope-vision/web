@@ -118,6 +118,11 @@ const s = t(locale);
     .grid {
       grid-template-columns: repeat(2, 1fr);
     }
+
+    /* "Menos info": the whole width, like the collage above, on the page's four columns. */
+    :global([data-info='less']) .grid {
+      grid-template-columns: repeat(var(--grid-columns), 1fr);
+    }
   }
 
   /*

@@ -61,6 +61,8 @@
   --space-2: 18px;
   --space-3: 36px;
   --space-4: 72px;
+  /* The black edge around text that floats over photos ("Menos info" on a project page). */
+  --space-halo: 6px;
 
   /* Sizes taken from the design */
   --size-header-height: 28px;

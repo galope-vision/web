@@ -113,7 +113,12 @@ const s = t(locale);
   const details = document.getElementById('project-details');
   /* The page carries the state, so the layout (ProjectDetail.astro) can follow it. */
   const page = document.querySelector<HTMLElement>('.detail');
-  const items = [...(page?.querySelectorAll<HTMLElement>('.collage .item') ?? [])];
+  /* The collage's photos and everything in the sections under it: the whole page rearranges. */
+  const items = [
+    ...(page?.querySelectorAll<HTMLElement>('.collage .item, .content .grid > *') ?? []),
+  ];
+  /* Past this many, the rest set off together, so a long gallery does not trail for seconds. */
+  const MAX_STAGGERED = 12;
 
   function reduced(): boolean {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -152,6 +157,9 @@ const s = t(locale);
         const from = first[index];
         const to = item.getBoundingClientRect();
         if (!from || to.width === 0 || to.height === 0) return undefined;
+        /* Off screen before and after: nobody would see it travel. */
+        const unseen = (rect: DOMRect): boolean => rect.bottom < 0 || rect.top > window.innerHeight;
+        if (unseen(from) && unseen(to)) return undefined;
         const dx = from.left + from.width / 2 - (to.left + to.width / 2);
         const dy = from.top + from.height / 2 - (to.top + to.height / 2);
         const sx = from.width / to.width;
@@ -164,7 +172,7 @@ const s = t(locale);
           {
             duration: TRAVEL,
             easing: EASE_CSS,
-            delay: index * TRAVEL_STAGGER,
+            delay: Math.min(index, MAX_STAGGERED) * TRAVEL_STAGGER,
             fill: 'backwards',
             composite: 'add',
           },
@@ -427,6 +435,23 @@ const s = t(locale);
     .actions {
       margin-top: auto;
       padding-top: var(--space-2);
+    }
+  }
+
+  /*
+   * "Menos info" lets the photos run under what is left of the panel, so the title and the two
+   * actions carry a halo of the page's black: readable over any photo, with nothing moving.
+   */
+  @media (width >= 48rem) {
+    :global([data-info='less']) .title,
+    :global([data-info='less']) .toggle,
+    :global([data-info='less']) .back {
+      background: var(--color-bg);
+      box-shadow: 0 0 0 var(--space-halo) var(--color-bg);
+    }
+    /* The title is a block; the halo hugs its words, not the panel's width. */
+    :global([data-info='less']) .title {
+      width: fit-content;
     }
   }
 
