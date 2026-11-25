@@ -179,7 +179,7 @@ Status: phase 0 closed (v0.1.0, 2026-11-10). Next: phase 1.
 
 ## Open decisions (do not assume — ask Caro)
 
-- Home layout of the random images/video. Contacto design. Fotos/Vídeos/Proceso section design.
+- Home layout of the random images/video. Fotos/Vídeos/Proceso section design.
 - Search page and contact form: in or out. Whether the dice excludes the current project.
 - Mobile design (default: our own adaptation).
 - Cookie consent banner for the GTM tags, and which Google account owns the container.

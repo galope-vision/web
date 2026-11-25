@@ -51,6 +51,9 @@ const ES_UI = {
   'notFound.title': 'Página no encontrada',
   'notFound.back': 'Ir al inicio',
   'placeholder.soon': 'En construcción.',
+  'contact.write': 'Escribinos',
+  'contact.socials': 'Redes',
+  'contact.newTab': '(se abre en otra pestaña)',
   /* The browser title of the holding page; the page itself shows only the launch date
      (src/components/ComingSoon.astro). */
   'soon.title': 'Próximamente',
@@ -86,6 +89,9 @@ const EN_UI: Record<UiKey, string> = {
   'notFound.title': 'Page not found',
   'notFound.back': 'Go to the home page',
   'placeholder.soon': 'Under construction.',
+  'contact.write': 'Write to us',
+  'contact.socials': 'Social',
+  'contact.newTab': '(opens in a new tab)',
   'soon.title': 'Coming soon',
 };
 
