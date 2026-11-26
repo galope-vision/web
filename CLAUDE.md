@@ -100,7 +100,8 @@ G, L and P for 3 s and rolls for 3 s. On click it spins and navigates to a rando
   Info folds the details away with an opacity/transform animation, and from 48rem up the
   collage switches to a third, full-width layout (each photo travels to its new place) that keeps the title, dice and
   actions clear.
-- Info: highlighted words swap the image on the right on hover/focus (fade + slight rotation).
+- Info: the highlight images overlap in a small stepped grid on the right; hovering/focusing a
+  highlighted word brings its image to the front (straightened, 1.03) and dims the rest to 60%.
 See `docs/spec.md` for each page.
 
 ## Collage
@@ -123,7 +124,7 @@ Seeded, constrained random layout computed at build time (`src/lib/collage.ts`),
 - Idle drift: ±6 px / ±0.6°, 8–12 s loop, deterministic per-index offset (no `Math.random` in CSS setup).
 - Parallax: depth 0.2–1, max 12 px, lerped, disabled on touch devices.
 - Image hover: target scale 1.03 on top, siblings 60% opacity, 250 ms.
-- Projects list collage swap: 200 ms fade. Info image swap: fade + slight rotation.
+- Projects list collage swap: 200 ms fade. Info grid: active image to the front, others at 60%.
 - Everything triggered by hover is also triggered by keyboard focus.
 - `prefers-reduced-motion: reduce` → no drift, no parallax, entrance = fade only.
 - Pause animations off-screen and when the tab is hidden.

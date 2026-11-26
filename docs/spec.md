@@ -161,8 +161,10 @@ El «conteo» que se muestra (imágenes + videos), si se usa, **se calcula** y n
 
 - A la izquierda, el logo chico y el texto de `ajustes/general.yml`. Algunas palabras van
   destacadas (Bold 16 subrayado).
-- A la derecha hay una imagen. Al pasar el mouse por una palabra destacada, o al llegarle con
-  el foco, la imagen cambia por la de esa palabra con un fundido y una rotación leve.
+- A la derecha, una grilla chica con las imágenes de las palabras destacadas superpuestas en
+  escalera (cada una tapa una esquina de la siguiente, con una rotación leve). Al pasar el mouse
+  por una palabra destacada, o al llegarle con el foco, su imagen pasa al frente derecha y un
+  poco más grande, y las demás bajan al 60 %. Al salir, la grilla vuelve a su reposo.
 - Texto actual: «GALOPE es una **dupla creativa** con base en **Buenos Aires.** Desde su puesta
   en activo en 2023 lleva trabajando en proyectos musicales de distinto tipo. Los encargos
   realizados han requerido de distintas búsquedas en cuanto al audiovisual y lo gráfico por lo
