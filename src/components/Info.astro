@@ -1,8 +1,9 @@
 ---
 /**
- * Info (docs/spec.md § 5.4): the text on the left with its highlighted phrases, and the image
- * on the right that changes when a phrase is hovered or focused. The first image is the one
- * shown at rest, and it stays that way without JavaScript.
+ * Info (docs/spec.md § 5.4): the text on the left with its highlighted phrases, and on the right
+ * a small grid where the images of those phrases overlap, each one stepped down and across from
+ * the one before. Hovering or focusing a phrase brings its image to the front, straightened,
+ * and dims the others. Without JavaScript the grid is simply shown at rest.
  */
 import { Image } from 'astro:assets';
 import Logo from './Logo.astro';
@@ -37,6 +38,23 @@ function parts(text: string, phrases: string[]) {
 
 const phrases = info.highlights.map(({ phrase }) => phrase);
 /** A blank line in the CMS field starts a new paragraph, as in the design. */
+/**
+ * Where each image sits on the small grid: ten columns wide, each image six columns by five rows
+ * (about the 5:4 of the photographs), three rows below the previous one. Across, they zig-zag
+ * left, right, centre, so each image covers a corner of the next one and none hides another.
+ * Any number of highlights works: the grid grows three rows per image.
+ */
+const across = [1, 5, 3];
+const rows = 3 * (info.highlights.length - 1) + 5;
+const tilt = [-1.5, 1.2, -0.8];
+function place(index: number): string {
+  return [
+    `--column: ${across[index % across.length]}`,
+    `--row: ${1 + 3 * index}`,
+    `--tilt: ${tilt[index % tilt.length]}deg`,
+  ].join('; ');
+}
+
 const paragraphs = info.text
   .split(/\n\s*\n/)
   .map((paragraph) => parts(paragraph.trim(), phrases))
@@ -63,44 +81,47 @@ const paragraphs = info.text
     ))}
   </div>
 
-  <div class="images" data-images data-enter>
+  <div class="images" data-images data-enter style={`--rows: ${rows}`}>
     {info.highlights.map(({ image, alt }, index) => (
       <Image
         class="image"
         src={image}
         alt={alt}
-        widths={[324, 648]}
-        sizes="(width < 48rem) 100vw, 324px"
+        widths={[324, 648, 960]}
+        sizes="(width < 48rem) 60vw, 30vw"
         {...(index === 0 ? { priority: true } : { loading: 'eager' as const })}
         data-image={index}
-        data-current={index === 0 ? '' : undefined}
-        aria-hidden={index === 0 ? undefined : 'true'}
+        style={place(index)}
       />
     ))}
   </div>
 </div>
 
 <script>
-  /** Shows the image of the phrase being hovered or focused; phase 4 adds the real motion. */
+  /**
+   * Brings the image of the phrase being hovered or focused to the front; leaving the phrase lets
+   * the grid settle back. Every image is on screen, so all of them keep their alt text.
+   */
   const images = document.querySelector<HTMLElement>('[data-images]');
   const highlights = document.querySelectorAll<HTMLElement>('[data-highlight]');
 
-  function show(index: string): void {
-    images?.querySelectorAll<HTMLElement>('[data-image]').forEach((image) => {
-      const current = image.dataset.image === index;
-      image.toggleAttribute('data-current', current);
-      // Only the image on screen should be read out.
-      if (current) image.removeAttribute('aria-hidden');
-      else image.setAttribute('aria-hidden', 'true');
+  function show(index: string | undefined): void {
+    if (!images) return;
+    images.toggleAttribute('data-active', index !== undefined);
+    images.querySelectorAll<HTMLElement>('[data-image]').forEach((image) => {
+      image.toggleAttribute('data-current', image.dataset.image === index);
     });
   }
 
   highlights.forEach((highlight) => {
     const index = highlight.dataset.highlight;
     if (index === undefined) return;
-    for (const event of ['pointerenter', 'focus'] as const) {
-      highlight.addEventListener(event, () => show(index));
-    }
+    highlight.addEventListener('pointerenter', () => show(index));
+    highlight.addEventListener('focus', () => show(index));
+    highlight.addEventListener('pointerleave', () => {
+      if (document.activeElement !== highlight) show(undefined);
+    });
+    highlight.addEventListener('blur', () => show(undefined));
   });
 </script>
 
@@ -119,33 +140,48 @@ const paragraphs = info.text
     align-content: start;
   }
 
+  /*
+   * The small grid. Its cells are square (the box's aspect is columns over rows), so an image
+   * six columns by five rows keeps the shape of the photographs.
+   */
   .images {
-    position: relative;
-    grid-column: 3;
-  }
-
-  .image {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    grid-template-rows: repeat(var(--rows), 1fr);
+    grid-column: 3 / -1;
+    align-self: start;
     width: 100%;
-    height: auto;
-  }
-
-  /* Every image sits in the same place; only the current one is visible. */
-  .image:not(:first-child) {
-    position: absolute;
-    inset: 0;
+    max-width: 36rem;
+    aspect-ratio: 10 / var(--rows);
   }
 
   .image {
-    opacity: 0;
+    grid-column: var(--column) / span 6;
+    grid-row: var(--row) / span 5;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: rotate(var(--tilt));
     transition:
       opacity var(--dur-fast) var(--ease-out),
       transform var(--dur-fast) var(--ease-out);
-    transform: rotate(-1deg);
   }
 
-  .image[data-current] {
+  /* A phrase is active: its image comes up straight and slightly larger, the rest step back. */
+  .images[data-active] .image {
+    opacity: 0.6;
+  }
+
+  .images[data-active] .image[data-current] {
+    z-index: 1;
     opacity: 1;
-    transform: rotate(0deg);
+    transform: rotate(0deg) scale(1.03);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .image {
+      transition: opacity var(--dur-fast) var(--ease-out);
+    }
   }
 
   .highlight {
@@ -167,6 +203,10 @@ const paragraphs = info.text
     .text,
     .images {
       grid-column: 1 / -1;
+    }
+
+    .images {
+      max-width: none;
     }
   }
 </style>
